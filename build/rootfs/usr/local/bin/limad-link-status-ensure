@@ -10,7 +10,9 @@ printf '\n[%s] LiLink integration check\n' "$(date -Is 2>/dev/null || date)"
 
 if ! /usr/local/bin/limad-link-health-check; then
     echo 'LiLink backend service is not healthy'
-    command -v notify-send >/dev/null 2>&1 && notify-send -u critical 'LiLink' 'Der LiLink-Dienst konnte nicht gestartet werden. Details: ~/.local/state/limad/lilink-health.log' || true
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -u critical 'LiLink' 'Der LiLink-Dienst konnte nicht gestartet werden. Details: ~/.local/state/limad/lilink-health.log' || true
+    fi
     exit 1
 fi
 
@@ -33,5 +35,7 @@ for attempt in $(seq 1 12); do
     sleep 3
 done
 
-command -v notify-send >/dev/null 2>&1 && notify-send -u critical 'LiLink-Statussymbol' 'Das Symbol konnte nicht aktiviert werden. Details: ~/.local/state/limad/lilink-status.log' || true
+if command -v notify-send >/dev/null 2>&1; then
+    notify-send -u critical 'LiLink-Statussymbol' 'Das Symbol konnte nicht aktiviert werden. Details: ~/.local/state/limad/lilink-status.log' || true
+fi
 exit 1

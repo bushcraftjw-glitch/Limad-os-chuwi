@@ -83,7 +83,32 @@ if [ -z "$RUN_ID" ]; then
     exit 1
 fi
 
-if ! gh run watch "$RUN_ID" --repo "$REPO" --exit-status; then
+RUN_STATUS=""
+RUN_CONCLUSION=""
+for _ in {1..240}; do
+    RUN_STATE="$(gh run view "$RUN_ID" --repo "$REPO" --json status,conclusion --jq '[.status, (.conclusion // "")] | @tsv' 2>/dev/null || true)"
+    if [ -z "$RUN_STATE" ]; then
+        echo "GitHub status API temporarily unavailable; retrying in 15 seconds..."
+        sleep 15
+        continue
+    fi
+
+    IFS=$'\t' read -r RUN_STATUS RUN_CONCLUSION <<< "$RUN_STATE"
+    if [ "$RUN_STATUS" = "completed" ]; then
+        break
+    fi
+
+    echo "GitHub Actions run $RUN_ID status: $RUN_STATUS"
+    sleep 15
+done
+
+if [ "$RUN_STATUS" != "completed" ]; then
+    echo "ERROR: GitHub Actions status could not be confirmed after retries. Run $RUN_ID may still be active." >&2
+    exit 2
+fi
+
+if [ "$RUN_CONCLUSION" != "success" ]; then
+    echo "ERROR: GitHub Actions run $RUN_ID completed with conclusion: $RUN_CONCLUSION" >&2
     gh run view "$RUN_ID" --repo "$REPO" --log-failed || true
     exit 1
 fi
@@ -96,7 +121,19 @@ PART_DIR="$DOWNLOAD_DIR/LiMaD-OS-BASE1-GITHUB-RELEASE-PARTS"
 rm -rf "$PART_DIR"
 mkdir -p "$PART_DIR"
 
-gh release download "$RELEASE_TAG" --repo "$REPO" --dir "$PART_DIR" --clobber
+RELEASE_DOWNLOADED=0
+for _ in {1..10}; do
+    if gh release download "$RELEASE_TAG" --repo "$REPO" --dir "$PART_DIR" --clobber; then
+        RELEASE_DOWNLOADED=1
+        break
+    fi
+    echo "GitHub release API temporarily unavailable; retrying in 10 seconds..."
+    sleep 10
+done
+if [ "$RELEASE_DOWNLOADED" -ne 1 ]; then
+    echo "ERROR: Release files could not be downloaded after retries." >&2
+    exit 2
+fi
 
 (
     cd "$PART_DIR"

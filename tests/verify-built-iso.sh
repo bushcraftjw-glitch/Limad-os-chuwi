@@ -48,7 +48,7 @@ grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
 grep -Fq 'smbios --type 1 --get-string 5 --set limad_system_product' "$TMP/grub.cfg"
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v14"' "$TMP/limad-release"
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v15"' "$TMP/limad-release"
 grep -Fq '[Icon Theme]' "$TMP/index.theme"
 test -s "$TMP/gtk4.css"
 grep -Fq 'windowcontrols button.close' "$TMP/gtk4.css"
@@ -79,7 +79,7 @@ for marker in \
     'LiMaD OS Installer' \
     'Willkommen bei LiMaD OS 3.0'; do
     if ! grep -aFq "$marker" "$TMP/initrd"; then
-        echo "ERROR: V14 initrd marker missing: $marker" >&2
+        echo "ERROR: V15 initrd marker missing: $marker" >&2
         exit 1
     fi
 done
