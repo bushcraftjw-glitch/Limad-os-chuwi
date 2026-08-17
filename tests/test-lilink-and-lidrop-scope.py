@@ -15,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 VENDOR = ROOT / '.cache/vendor/LiMaD-Programme-BASE1B-EXTRAKT.zip'
 STRIP = ROOT / 'tools/strip-lidrop-airdrop.py'
+REASSEMBLE = ROOT / 'tools/reassemble-vendor.sh'
 SERVICE = ROOT / 'build/rootfs/usr/lib/systemd/user/limad-link.service'
 HEALTH = ROOT / 'build/rootfs/usr/local/bin/limad-link-health-check'
 STATUS = ROOT / 'build/rootfs/usr/local/bin/limad-link-status-ensure'
@@ -88,7 +89,9 @@ def daemon_smoke(link_root: Path) -> None:
 
 def main() -> int:
     if not VENDOR.is_file():
-        raise AssertionError('Vendor programs ZIP not reassembled')
+        subprocess.run([str(REASSEMBLE)], check=True)
+    if not VENDOR.is_file():
+        raise AssertionError('Vendor programs ZIP could not be reassembled')
     service = SERVICE.read_text(encoding='utf-8')
     if 'ExecStart=/usr/bin/python3 /usr/share/limad-link/daemon.py' not in service or 'WantedBy=default.target' not in service:
         raise AssertionError('LiLink systemd user service is incomplete')

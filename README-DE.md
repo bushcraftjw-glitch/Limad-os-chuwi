@@ -1,10 +1,10 @@
-# LiMaD OS 3.0 RC1 BASE1 V15
+# LiMaD OS 3.0 RC1 BASE1 V16
 
 ## Technische Basis
 
-V15 baut auf dem bereits funktionierenden Ubuntu-26.04-FULL-Unterbau auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
+V16 baut auf dem bereits funktionierenden Ubuntu-26.04-FULL-Unterbau auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
 
-V15 ergänzt gezielt zwei Bereiche: sichtbares LiMaD-Branding und einen nur für Apple `iMac17,1` aktivierten Grafik-Kompatibilitätspfad.
+V16 ergänzt gezielt zwei Bereiche: sichtbares LiMaD-Branding und einen nur für Apple `iMac17,1` aktivierten Grafik-Kompatibilitätspfad.
 
 ## LiMaD Design
 
@@ -22,7 +22,7 @@ V15 ergänzt gezielt zwei Bereiche: sichtbares LiMaD-Branding und einen nur für
 
 ## LiMaD Installer-Branding
 
-Der Canonical-Installer-Snap wird nicht geforkt oder verändert. V15 nutzt die offizielle Whitelabel-Schnittstelle des Ubuntu Desktop Provision Installers:
+Der Canonical-Installer-Snap wird nicht geforkt oder verändert. V16 nutzt die offizielle Whitelabel-Schnittstelle des Ubuntu Desktop Provision Installers:
 
 - Fenstertitel: `LiMaD OS Installer`
 - LiMaD-Logo auf unterstützten Installer-Seiten
@@ -33,17 +33,17 @@ Die Whitelabel-Dateien werden beim Live-Boot über einen `casper-bottom`-Hook in
 
 ## Apple iMac17,1 / Radeon R9 M380 Mac Edition
 
-Der normale Ubuntu-Grafikpfad bleibt für alle anderen Geräte unverändert. Nur wenn GRUB per SMBIOS das Modell `iMac17,1` erkennt, ergänzt V15 beim Live-Boot:
+Der normale Ubuntu-Grafikpfad bleibt für alle anderen Geräte unverändert. Nur wenn GRUB per SMBIOS das Modell `iMac17,1` erkennt, ergänzt V16 beim Live-Boot:
 
 `radeon.cik_support=1 amdgpu.cik_support=0`
 
-Damit wird für dieses CIK-Gerät gezielt der ältere Radeon-Treiberpfad gewählt. Zusätzlich enthält V15 die gepinnten Radeon-Bonaire-Firmwaredateien aus `linux-firmware` Tag `20250509` sowohl früh im Live-initramfs als auch im installierten Zielsystem. Nach der Installation wird dieselbe Treiberauswahl nur auf `iMac17,1` unter `/etc/modprobe.d/` persistent gesetzt und anschließend das Ziel-initramfs aktualisiert.
+Damit wird für dieses CIK-Gerät gezielt der ältere Radeon-Treiberpfad gewählt. Zusätzlich enthält V16 die gepinnten Radeon-Bonaire-Firmwaredateien aus `linux-firmware` Tag `20250509` sowohl früh im Live-initramfs als auch im installierten Zielsystem. Nach der Installation wird dieselbe Treiberauswahl nur auf `iMac17,1` unter `/etc/modprobe.d/` persistent gesetzt und anschließend das Ziel-initramfs aktualisiert.
 
 Der ursprüngliche Canonical-initramfs-Inhalt bleibt erhalten und wird hinter einem kleinen unkomprimierten CPIO-Präfix weiterverwendet.
 
 ## Bekannte Einschränkung
 
-LiDrop bleibt für Browser-, Smartphone- und lokale Geräteübertragung erhalten. Die experimentelle AirDrop/OpenDrop/OWL/AWDL-Kompatibilität wird in V15 bewusst vollständig aus Oberfläche, API und Systemkomponenten entfernt. LiLink besitzt in V15 zusätzlich einen systemweiten User-Service, Autostart und lokalen Health-Check.
+LiDrop bleibt für Browser-, Smartphone- und lokale Geräteübertragung erhalten. Die experimentelle AirDrop/OpenDrop/OWL/AWDL-Kompatibilität wird in V16 bewusst vollständig aus Oberfläche, API und Systemkomponenten entfernt. LiLink besitzt in V16 zusätzlich einen systemweiten User-Service, Autostart und lokalen Health-Check.
 
 ## GitHub
 
@@ -51,8 +51,8 @@ Repository: `bushcraftjw-glitch/Limad-os-chuwi`
 
 Release-Tag:
 
-`base1-ubuntu2604-full-whitesur-v15`
+`base1-ubuntu2604-full-whitesur-v16`
 
 ISO:
 
-`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V15-amd64.iso`
+`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V16-amd64.iso`
