@@ -1,0 +1,136 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PAYLOAD="$ROOT/.cache/payload"
+ROOTFS="$PAYLOAD/rootfs"
+
+required=(
+    "$PAYLOAD/install-target.sh"
+    "$ROOTFS/usr/share/icons/LiMaD/index.theme"
+    "$ROOTFS/usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png"
+    "$ROOTFS/usr/share/backgrounds/limad/LiMaD-Wallpaper-02-Logo-Zentriert-4K.png"
+    "$ROOTFS/usr/share/backgrounds/limad/LiMaD-Wallpaper-03-Wellen-Emblem-4K.png"
+    "$ROOTFS/usr/share/gnome-background-properties/limad-wallpapers.xml"
+    "$ROOTFS/usr/share/limad/gtk4/gtk.css"
+    "$ROOTFS/usr/share/gnome-shell/extensions/lilink@limad.local/metadata.json"
+    "$ROOTFS/usr/share/gnome-shell/extensions/lilink@limad.local/extension.js"
+    "$ROOTFS/usr/share/gnome-shell/extensions/lilink@limad.local/lilink.svg"
+    "$ROOTFS/usr/share/gnome-shell/extensions/lidrop@limad.local/metadata.json"
+    "$ROOTFS/usr/share/gnome-shell/extensions/lidrop@limad.local/extension.js"
+    "$ROOTFS/usr/share/gnome-shell/extensions/lidrop@limad.local/lidrop.svg"
+    "$ROOTFS/usr/lib/systemd/user/limad-link.service"
+    "$ROOTFS/usr/local/bin/limad-link-health-check"
+    "$ROOTFS/usr/local/bin/limad-link-status-ensure"
+    "$ROOTFS/usr/share/limad-link/app.py"
+    "$ROOTFS/usr/share/limad-link/daemon.py"
+    "$ROOTFS/usr/share/limad-link/common.py"
+    "$ROOTFS/usr/share/limad-drop/limad_dropd.py"
+    "$ROOTFS/usr/share/limad-drop/web/app.js"
+    "$ROOTFS/usr/share/limad/branding/limad-logo-192.png"
+    "$ROOTFS/usr/share/limad/branding/limad-logo-256.png"
+    "$ROOTFS/usr/lib/firmware/radeon/BONAIRE_ce.bin"
+    "$ROOTFS/usr/lib/firmware/radeon/BONAIRE_mc.bin"
+    "$ROOTFS/usr/lib/firmware/radeon/BONAIRE_mc2.bin"
+    "$ROOTFS/usr/lib/firmware/radeon/BONAIRE_me.bin"
+    "$ROOTFS/usr/lib/firmware/radeon/BONAIRE_mec.bin"
+    "$ROOTFS/usr/lib/firmware/radeon/BONAIRE_pfp.bin"
+    "$ROOTFS/usr/lib/firmware/radeon/BONAIRE_rlc.bin"
+    "$ROOTFS/usr/lib/firmware/radeon/BONAIRE_sdma.bin"
+    "$ROOTFS/usr/lib/firmware/radeon/BONAIRE_smc.bin"
+    "$ROOTFS/usr/lib/firmware/radeon/BONAIRE_uvd.bin"
+    "$ROOTFS/usr/lib/firmware/radeon/BONAIRE_vce.bin"
+    "$ROOTFS/usr/share/doc/limad-os-base1/firmware/LICENSE.radeon"
+    "$ROOTFS/usr/local/bin/limad-base1-first-login"
+    "$ROOTFS/usr/local/bin/limad-sync-gtk4-theme"
+    "$ROOTFS/usr/local/bin/limad-design-system"
+    "$ROOTFS/etc/limad-release"
+)
+
+for path in "${required[@]}"; do
+    if [ ! -e "$path" ]; then
+        echo "ERROR: Required payload path missing: $path" >&2
+        exit 1
+    fi
+done
+
+applications=(
+    de.limad.Cut.desktop
+    de.limad.Drop.desktop
+    de.limad.Klang.desktop
+    de.limad.Link.desktop
+    de.limad.Mail.desktop
+    de.limad.Notes.desktop
+    de.limad.Recovery.desktop
+    de.limad.Save.desktop
+    de.limad.ScreenShare.desktop
+    de.limad.Study.desktop
+    de.limad.SystemInfo.desktop
+    de.limad.SystemUpdate.desktop
+    de.limad.Terminal.desktop
+    de.limad.Updater.desktop
+    de.limad.Welcome.desktop
+    de.limad.WindowsApps.desktop
+    de.limad.WindowsRun.desktop
+)
+
+for desktop in "${applications[@]}"; do
+    if [ ! -f "$ROOTFS/usr/share/applications/$desktop" ]; then
+        echo "ERROR: LiMaD desktop launcher missing: $desktop" >&2
+        exit 1
+    fi
+done
+
+if ! find "$ROOTFS/usr/share/themes" -mindepth 1 -maxdepth 1 -type d -name 'WhiteSur*' -print -quit | grep -q .; then
+    echo "ERROR: WhiteSur theme missing from payload" >&2
+    exit 1
+fi
+
+grep -Fq 'windowcontrols button.close' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'background-color: #ff5f57' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'background-color: #febc2e' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'background-color: #28c840' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
+for uuid in lilink@limad.local lidrop@limad.local; do
+    grep -Fq '"shell-version": ["50"]' "$ROOTFS/usr/share/gnome-shell/extensions/$uuid/metadata.json"
+    grep -Fq 'Main.panel.addToStatusArea(this.uuid, this._indicator);' "$ROOTFS/usr/share/gnome-shell/extensions/$uuid/extension.js"
+done
+
+for forbidden in \
+    limad-default-flatpaks.desktop \
+    limad-easyeffects-service.desktop \
+    limad-firefox-theme.desktop \
+    limad-first-login.desktop \
+    limad-lidrop-status.desktop \
+    limad-zen-deutsch.desktop; do
+    if [ -e "$ROOTFS/etc/xdg/autostart/$forbidden" ]; then
+        echo "ERROR: Forbidden BASE1B autostart remains: $forbidden" >&2
+        exit 1
+    fi
+done
+
+grep -Fq 'LiMaD-Wallpaper-01-Logo-Links-4K.png' "$ROOTFS/usr/local/bin/limad-base1-first-login"
+grep -Fq 'extend-height false' "$ROOTFS/usr/local/bin/limad-base1-first-login"
+grep -Fq 'show-apps-always-in-the-edge false' "$ROOTFS/usr/local/bin/limad-base1-first-login"
+grep -Fq 'LiMaD GTK4 titlebutton sync failed' "$ROOTFS/usr/local/bin/limad-base1-first-login"
+grep -Fq 'org/gnome/login-screen' "$ROOTFS/usr/local/bin/limad-design-system"
+grep -Fq 'themes/spinner' "$ROOTFS/usr/local/bin/limad-design-system"
+grep -Fq 'update-initramfs -u' "$ROOTFS/usr/local/bin/limad-design-system"
+
+grep -Fq 'ExecStart=/usr/bin/python3 /usr/share/limad-link/daemon.py' "$ROOTFS/usr/lib/systemd/user/limad-link.service"
+grep -Fq '/usr/local/bin/limad-link-health-check' "$ROOTFS/usr/local/bin/limad-link-status-ensure"
+if grep -Eqi 'airdrop|opendrop|awdl|owl' "$ROOTFS/usr/share/limad-drop/web/app.js" "$ROOTFS/usr/share/limad-drop/limad_dropd.py"; then
+    echo "ERROR: AirDrop compatibility code remains in active LiDrop payload" >&2
+    exit 1
+fi
+for removed in limad-airdrop-check limad-airdrop-control limad-airdrop-session limad-airdrop-wait limad-opendrop-receive; do
+    if [ -e "$ROOTFS/usr/local/bin/$removed" ]; then
+        echo "ERROR: AirDrop compatibility helper remains: $removed" >&2
+        exit 1
+    fi
+done
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v14"' "$ROOTFS/etc/limad-release"
+grep -Fq 'iMac17,1' "$PAYLOAD/install-target.sh"
+grep -Fq 'options radeon cik_support=1' "$PAYLOAD/install-target.sh"
+grep -Fq 'options amdgpu cik_support=0' "$PAYLOAD/install-target.sh"
+
+echo "PAYLOAD VALIDATION: PASS"

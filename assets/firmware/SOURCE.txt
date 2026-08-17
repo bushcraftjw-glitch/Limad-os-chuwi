@@ -1,0 +1,11 @@
+LiMaD OS V11 iMac17,1 Radeon firmware source
+
+Upstream project: linux-firmware
+Pinned release tag: 20250509
+Firmware directory: radeon/
+Files: BONAIRE_*.bin
+License: LICENSE.radeon
+
+The firmware files are redistributed unchanged. SHA256SUMS.txt is generated from
+exactly the binaries and license stored in this source tree and is validated
+before both live-initrd creation and target payload creation.

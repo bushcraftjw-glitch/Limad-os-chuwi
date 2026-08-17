@@ -1,0 +1,68 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+LOG=/var/log/limad-design-system.log
+exec >>"$LOG" 2>&1
+
+echo "LiMaD OS system branding start"
+
+BRANDING_DIR=/usr/share/limad/branding
+LOGO="$BRANDING_DIR/limad-logo-192.png"
+WALLPAPER=/usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png
+
+if [ -f "$LOGO" ] && command -v dconf >/dev/null 2>&1; then
+    if [ ! -f /etc/dconf/profile/gdm ]; then
+        mkdir -p /etc/dconf/profile
+        cat > /etc/dconf/profile/gdm <<'PROFILE'
+user-db:user
+system-db:gdm
+file-db:/usr/share/gdm/greeter-dconf-defaults
+PROFILE
+    fi
+    mkdir -p /etc/dconf/db/gdm.d
+    cat > /etc/dconf/db/gdm.d/01-limad-branding <<EOF_DCONF
+[org/gnome/login-screen]
+logo='$LOGO'
+
+[org/gnome/desktop/screensaver]
+picture-uri='file://$WALLPAPER'
+EOF_DCONF
+    dconf update
+    echo "GDM branding: configured"
+else
+    echo "GDM branding: skipped"
+fi
+
+SPINNER_DIR=/usr/share/plymouth/themes/spinner
+LIMAD_PLYMOUTH_DIR=/usr/share/plymouth/themes/limad
+if [ -d "$SPINNER_DIR" ] && [ -f "$SPINNER_DIR/spinner.plymouth" ] && [ -f "$BRANDING_DIR/limad-logo-256.png" ]; then
+    rm -rf "$LIMAD_PLYMOUTH_DIR"
+    cp -a "$SPINNER_DIR" "$LIMAD_PLYMOUTH_DIR"
+    mv "$LIMAD_PLYMOUTH_DIR/spinner.plymouth" "$LIMAD_PLYMOUTH_DIR/limad.plymouth"
+    sed -i \
+        -e 's#Name=Spinner#Name=LiMaD OS#' \
+        -e 's#/usr/share/plymouth/themes/spinner#/usr/share/plymouth/themes/limad#g' \
+        "$LIMAD_PLYMOUTH_DIR/limad.plymouth"
+    if ! grep -Fq 'ImageDir=/usr/share/plymouth/themes/limad' "$LIMAD_PLYMOUTH_DIR/limad.plymouth"; then
+        echo "Plymouth branding: descriptor layout unsupported; keeping Ubuntu default"
+        rm -rf "$LIMAD_PLYMOUTH_DIR"
+    else
+        install -m 0644 "$BRANDING_DIR/limad-logo-256.png" "$LIMAD_PLYMOUTH_DIR/watermark.png"
+        if command -v update-alternatives >/dev/null 2>&1; then
+            update-alternatives --install \
+                /usr/share/plymouth/themes/default.plymouth \
+                default.plymouth \
+                "$LIMAD_PLYMOUTH_DIR/limad.plymouth" \
+                150
+            update-alternatives --set default.plymouth "$LIMAD_PLYMOUTH_DIR/limad.plymouth"
+        fi
+        if command -v update-initramfs >/dev/null 2>&1; then
+            update-initramfs -u
+        fi
+        echo "Plymouth branding: configured from Ubuntu spinner base"
+    fi
+else
+    echo "Plymouth branding: skipped; Ubuntu spinner theme not available"
+fi
+
+echo "LiMaD OS system branding complete"

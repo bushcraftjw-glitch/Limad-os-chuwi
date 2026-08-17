@@ -1,0 +1,8 @@
+.cache/
+out/
+*.iso
+*.iso.sha256
+*.log
+__pycache__/
+*.pyc
+release/

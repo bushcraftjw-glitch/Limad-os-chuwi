@@ -1,0 +1,124 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/config/build.env"
+
+CACHE="$ROOT/.cache"
+ISO="$CACHE/$UBUNTU_ISO_NAME"
+OVERLAY="$CACHE/iso-overlay"
+OUT="$ROOT/out"
+OUTPUT="$OUT/$OUTPUT_ISO_NAME"
+
+mkdir -p "$CACHE" "$OUT"
+
+for command in cpio curl git python3 rsync sha256sum sudo unzip xorriso; do
+    if ! command -v "$command" >/dev/null 2>&1; then
+        echo "ERROR: Required command not found: $command" >&2
+        exit 1
+    fi
+done
+
+if ! sudo -n true >/dev/null 2>&1; then
+    echo "ERROR: Passwordless sudo is required for the WhiteSur staging step." >&2
+    exit 1
+fi
+
+if [ ! -f "$ISO" ] || ! printf '%s  %s\n' "$UBUNTU_ISO_SHA256" "$ISO" | sha256sum -c - >/dev/null 2>&1; then
+    rm -f "$ISO"
+    curl --fail --location --retry 5 --retry-delay 3 --output "$ISO" "$UBUNTU_ISO_URL"
+fi
+printf '%s  %s\n' "$UBUNTU_ISO_SHA256" "$ISO" | sha256sum -c -
+
+"$ROOT/build/prepare-payload.sh"
+"$ROOT/tests/validate-payload.sh"
+
+rm -rf "$OVERLAY"
+mkdir -p "$OVERLAY/casper" "$OVERLAY/limad"
+cp "$ROOT/config/autoinstall.yaml" "$OVERLAY/autoinstall.yaml"
+rsync -a "$CACHE/payload/rootfs/" "$OVERLAY/limad/rootfs/"
+cp "$CACHE/payload/install-target.sh" "$OVERLAY/limad/install-target.sh"
+
+INSTALL_SOURCES_ORIGINAL="$CACHE/install-sources.original.yaml"
+rm -f "$INSTALL_SOURCES_ORIGINAL"
+xorriso -osirrox on -indev "$ISO" -extract /casper/install-sources.yaml "$INSTALL_SOURCES_ORIGINAL" >/dev/null 2>&1
+python3 -B "$ROOT/tools/filter-install-sources.py" "$INSTALL_SOURCES_ORIGINAL" "$OVERLAY/casper/install-sources.yaml"
+python3 -B "$ROOT/tools/validate-install-sources.py" \
+    --original "$INSTALL_SOURCES_ORIGINAL" \
+    "$OVERLAY/casper/install-sources.yaml"
+
+INITRD_ORIGINAL="$CACHE/initrd.original"
+rm -f "$INITRD_ORIGINAL" "$OVERLAY/casper/initrd"
+xorriso -osirrox on -indev "$ISO" -extract /casper/initrd "$INITRD_ORIGINAL" >/dev/null 2>&1
+"$ROOT/build/prepare-imac17-initrd.sh" "$INITRD_ORIGINAL" "$OVERLAY/casper/initrd"
+
+GRUB_ORIGINAL="$CACHE/grub.original.cfg"
+GRUB_BRANDED="$OVERLAY/boot/grub/grub.cfg"
+rm -f "$GRUB_ORIGINAL" "$GRUB_BRANDED"
+mkdir -p "$OVERLAY/boot/grub"
+if xorriso -osirrox on -indev "$ISO" -extract /boot/grub/grub.cfg "$GRUB_ORIGINAL" >/dev/null 2>&1; then
+    python3 -B "$ROOT/tools/brand-grub.py" "$GRUB_ORIGINAL" "$GRUB_BRANDED"
+fi
+
+MD5_ORIGINAL="$CACHE/md5sum.original.txt"
+MD5_CURRENT="$CACHE/md5sum.current.txt"
+MD5_NEXT="$CACHE/md5sum.next.txt"
+rm -f "$MD5_ORIGINAL" "$MD5_CURRENT" "$MD5_NEXT" "$OVERLAY/md5sum.txt"
+
+update_md5_entry() {
+    local file="$1"
+    local iso_path="$2"
+    python3 -B "$ROOT/tools/update-md5.py" "$MD5_CURRENT" "$file" "$iso_path" "$MD5_NEXT"
+    mv "$MD5_NEXT" "$MD5_CURRENT"
+}
+
+if xorriso -osirrox on -indev "$ISO" -extract /md5sum.txt "$MD5_ORIGINAL" >/dev/null 2>&1; then
+    install -m 0644 "$MD5_ORIGINAL" "$MD5_CURRENT"
+    update_md5_entry "$OVERLAY/casper/install-sources.yaml" casper/install-sources.yaml
+    update_md5_entry "$OVERLAY/casper/initrd" casper/initrd
+    if [ -f "$GRUB_BRANDED" ]; then
+        update_md5_entry "$GRUB_BRANDED" boot/grub/grub.cfg
+    fi
+    install -m 0644 "$MD5_CURRENT" "$OVERLAY/md5sum.txt"
+    test -w "$OVERLAY/md5sum.txt"
+fi
+
+rm -rf "$CACHE/payload-work" "$CACHE/payload" "$CACHE/vendor"
+df -h "$ROOT"
+
+rm -f "$OUTPUT" "$OUTPUT.sha256"
+xorriso \
+    -indev "$ISO" \
+    -outdev "$OUTPUT" \
+    -map "$OVERLAY" / \
+    -boot_image any replay \
+    -volid LIMAD_OS_3_0_RC1 \
+    -compliance no_emul_toc \
+    -padding included
+
+sha256sum "$OUTPUT" | tee "$OUTPUT.sha256"
+"$ROOT/tests/verify-built-iso.sh" "$OUTPUT"
+
+cat > "$OUT/BUILD-REPORT.txt" <<EOF_REPORT
+LiMaD OS 3.0 RC1 BASE1 DESIGN V14
+Base: Ubuntu 26.04 LTS Desktop FULL
+Official Ubuntu ISO: $UBUNTU_ISO_NAME
+Official Ubuntu SHA256: $UBUNTU_ISO_SHA256
+Install source: ubuntu-desktop only
+Driver search: enabled
+OEM drivers: auto
+Third-party drivers: enabled
+WhiteSur commit: $WHITESUR_REF
+LiMaD icon theme: V3.2
+LiMaD wallpapers: 3 x 3840x2160, wallpaper 01 default
+Installer branding: Canonical whitelabel API, LiMaD OS Installer title, LiMaD images, German/English LiMaD slide
+Design V14: WhiteSur GTK, stock libadwaita with LiMaD traffic-light titlebuttons, compact centered Ubuntu Dock, LiLink/LiDrop GNOME 50 status icons, GDM logo/lockscreen, LiMaD Plymouth spinner watermark, GRUB branding
+iMac17,1: DMI-targeted Radeon CIK compatibility path; upstream Radeon Bonaire firmware embedded in live initrd and installed target
+Firmware source: linux-firmware tag 20250509; firmware hashes embedded and verified
+Install source catalog: ubuntu-desktop only, Canonical catalog metadata preserved
+LiDrop: browser/local-device transfer enabled; AirDrop/OpenDrop/OWL/AWDL compatibility removed by design
+Output: $OUTPUT_ISO_NAME
+Output SHA256: $(sha256sum "$OUTPUT" | awk '{print $1}')
+EOF_REPORT
+
+rm -rf "$CACHE"

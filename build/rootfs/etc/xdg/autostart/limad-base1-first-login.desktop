@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=LiMaD OS BASE1 First Login
+Exec=/usr/local/bin/limad-base1-first-login
+OnlyShowIn=GNOME;
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

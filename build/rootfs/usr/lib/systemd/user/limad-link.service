@@ -1,0 +1,13 @@
+[Unit]
+Description=LiLink local device integration service
+After=network-online.target avahi-daemon.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/share/limad-link/daemon.py
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target

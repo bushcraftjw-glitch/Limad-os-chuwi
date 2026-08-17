@@ -1,0 +1,6 @@
+{
+  "uuid": "lilink@limad.local",
+  "name": "LiLink Status",
+  "description": "LiMaD OS LiLink status symbol for the GNOME top panel.",
+  "shell-version": ["50"]
+}

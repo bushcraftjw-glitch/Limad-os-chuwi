@@ -1,0 +1,21 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+SOURCE="/usr/share/limad/gtk4/gtk.css"
+DEST="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0"
+
+if [ ! -s "$SOURCE" ]; then
+    echo "ERROR: LiMaD GTK4 window-control stylesheet is missing." >&2
+    exit 1
+fi
+
+mkdir -p "$DEST"
+# Remove the V9/V10 full WhiteSur libadwaita payload. It could hide titlebar controls.
+rm -rf -- "${DEST:?}/assets" "$DEST/gtk.css" "$DEST/gtk-dark.css"
+install -m 0644 "$SOURCE" "$DEST/gtk.css"
+
+test -s "$DEST/gtk.css"
+grep -Fq 'windowcontrols button.close' "$DEST/gtk.css"
+grep -Fq 'background-color: #ff5f57' "$DEST/gtk.css"
+grep -Fq 'background-color: #febc2e' "$DEST/gtk.css"
+grep -Fq 'background-color: #28c840' "$DEST/gtk.css"

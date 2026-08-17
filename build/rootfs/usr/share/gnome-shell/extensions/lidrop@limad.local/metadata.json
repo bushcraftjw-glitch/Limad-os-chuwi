@@ -1,0 +1,6 @@
+{
+  "uuid": "lidrop@limad.local",
+  "name": "LiDrop Status",
+  "description": "LiMaD OS LiDrop status symbol for the GNOME top panel.",
+  "shell-version": ["50"]
+}

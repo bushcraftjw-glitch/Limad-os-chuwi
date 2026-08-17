@@ -1,0 +1,17 @@
+mode: standard
+app-name: "LiMaD OS Installer"
+theme:
+  light:
+    accent-color: "#BB7FF0"
+  dark:
+    accent-color: "#BB7FF0"
+pages:
+  try-or-install:
+    image: limad-logo-256.png
+    image-dark: limad-logo-256.png
+  storage-icon:
+    image: limad-logo-192.png
+    image-dark: limad-logo-192.png
+  done:
+    image: limad-logo-256.png
+    image-dark: limad-logo-256.png

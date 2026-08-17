@@ -1,0 +1,41 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+PACKAGES=(
+    avahi-daemon
+    avahi-utils
+    deskflow
+    freerdp-x11
+    gnome-remote-desktop
+    openssl
+    qrencode
+    gir1.2-adw-1
+    gir1.2-gstreamer-1.0
+    gir1.2-gtk-4.0
+    gir1.2-webkit-6.0
+    gnome-shell-extension-user-theme
+    python3-cairo
+    python3-cryptography
+    python3-gi
+)
+
+missing=()
+for package in "${PACKAGES[@]}"; do
+    if ! dpkg -s "$package" >/dev/null 2>&1; then
+        missing+=("$package")
+    fi
+done
+
+if [ "${#missing[@]}" -eq 0 ]; then
+    exit 0
+fi
+
+if ! apt-get update; then
+    echo "LiMaD runtime dependency update failed; retrying on next boot." >&2
+    exit 0
+fi
+
+if ! DEBIAN_FRONTEND=noninteractive apt-get install -y "${missing[@]}"; then
+    echo "LiMaD runtime dependency installation failed; retrying on next boot." >&2
+    exit 0
+fi

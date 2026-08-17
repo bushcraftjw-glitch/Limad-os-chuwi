@@ -1,0 +1,52 @@
+/* LiMaD OS GTK4 window-control override.
+ * Keep stock libadwaita styling everywhere except the three titlebar buttons.
+ */
+windowcontrols button.close,
+windowcontrols button.minimize,
+windowcontrols button.maximize {
+  min-width: 14px;
+  min-height: 14px;
+  padding: 0;
+  margin-left: 4px;
+  margin-right: 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  box-shadow: none;
+  background-image: none;
+}
+
+windowcontrols button.close {
+  background-color: #ff5f57;
+}
+
+windowcontrols button.minimize {
+  background-color: #febc2e;
+}
+
+windowcontrols button.maximize {
+  background-color: #28c840;
+}
+
+windowcontrols button.close:hover {
+  background-color: #ff6b64;
+}
+
+windowcontrols button.minimize:hover {
+  background-color: #ffc447;
+}
+
+windowcontrols button.maximize:hover {
+  background-color: #3bd653;
+}
+
+windowcontrols button.close image,
+windowcontrols button.minimize image,
+windowcontrols button.maximize image {
+  opacity: 0;
+}
+
+windowcontrols button.close:hover image,
+windowcontrols button.minimize:hover image,
+windowcontrols button.maximize:hover image {
+  opacity: 0.70;
+}

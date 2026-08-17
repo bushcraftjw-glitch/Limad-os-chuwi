@@ -1,0 +1,63 @@
+name: Build LiMaD OS BASE1 ISO
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Free runner disk space
+        run: |
+          sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet /usr/local/share/boost /opt/hostedtoolcache || true
+          df -h
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xorriso curl unzip rsync git cpio sassc libglib2.0-dev-bin libxml2-utils python3-yaml shellcheck
+
+      - name: Validate source
+        run: |
+          chmod +x START-RC1-GITHUB-BUILD-LINUX.sh tools/*.sh tools/*.py build/*.sh tests/*.sh tests/*.py build/rootfs/usr/local/bin/*
+          shellcheck -e SC1091 START-RC1-GITHUB-BUILD-LINUX.sh tools/*.sh build/*.sh build/casper-bottom/* tests/*.sh build/rootfs/usr/local/bin/limad-base1-first-login build/rootfs/usr/local/bin/limad-first-login-setup build/rootfs/usr/local/bin/limad-runtime-deps build/rootfs/usr/local/bin/limad-sync-gtk4-theme build/rootfs/usr/local/bin/limad-design-system build/rootfs/usr/local/bin/limad-link-health-check build/rootfs/usr/local/bin/limad-link-status-ensure
+          python3 -B tests/test-filter-install-sources.py
+          python3 -B tests/test-update-md5.py
+          python3 -B tests/test-brand-grub.py
+          python3 -B tests/test-design-assets.py
+          python3 -B tests/test-status-and-titlebuttons.py
+          python3 -B tests/test-installer-branding.py
+          python3 -B tests/test-imac17-firmware.py
+          python3 -B tests/test-lilink-and-lidrop-scope.py
+          ./tests/validate-source.sh
+
+      - name: Build ISO
+        run: ./build/build-iso.sh
+
+      - name: Prepare release files
+        run: |
+          source config/build.env
+          mkdir -p release
+          cp "out/$OUTPUT_ISO_NAME.sha256" release/ISO-SHA256.txt
+          split -b 1900M -d -a 2 "out/$OUTPUT_ISO_NAME" "release/$OUTPUT_ISO_NAME.part-"
+          (cd release && sha256sum "$OUTPUT_ISO_NAME".part-* > ISO-PARTS-SHA256.txt)
+          (cd release && sha256sum -c ISO-PARTS-SHA256.txt)
+          cp out/BUILD-REPORT.txt release/BUILD-REPORT.txt
+          rm -f "out/$OUTPUT_ISO_NAME"
+          df -h
+          ls -lh release
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          source config/build.env
+          gh release delete "$RELEASE_TAG" --yes --cleanup-tag || true
+          gh release create "$RELEASE_TAG" release/* --title "LiMaD OS 3.0 RC1 BASE1" --notes-file out/BUILD-REPORT.txt

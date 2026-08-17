@@ -1,0 +1,44 @@
+#!/bin/sh
+set -u
+
+PREREQ=""
+
+prereqs() {
+    echo "$PREREQ"
+}
+
+case "${1:-}" in
+    prereqs)
+        prereqs
+        exit 0
+        ;;
+esac
+
+SOURCE="${LIMAD_INSTALLER_SOURCE:-/limad-installer}"
+TARGET_ROOT="${rootmnt:-/root}"
+DEST="$TARGET_ROOT/usr/share/desktop-provision"
+
+if [ ! -f "$SOURCE/whitelabel.yaml" ]; then
+    echo "WARNING: LiMaD live branding source missing; keeping Canonical installer branding." >&2
+    exit 0
+fi
+
+if ! mkdir -p "$DEST/images" "$DEST/slides"; then
+    echo "WARNING: LiMaD live branding destination unavailable; keeping Canonical installer branding." >&2
+    exit 0
+fi
+
+if ! cp -f "$SOURCE/whitelabel.yaml" "$DEST/whitelabel.yaml" \
+    || ! cp -f "$SOURCE/images/limad-logo-192.png" "$DEST/images/limad-logo-192.png" \
+    || ! cp -f "$SOURCE/images/limad-logo-256.png" "$DEST/images/limad-logo-256.png" \
+    || ! cp -R "$SOURCE/slides/." "$DEST/slides/"; then
+    echo "WARNING: LiMaD live branding copy failed; installer remains usable." >&2
+    exit 0
+fi
+
+chmod 0644 "$DEST/whitelabel.yaml" \
+    "$DEST/images/limad-logo-192.png" \
+    "$DEST/images/limad-logo-256.png" || true
+
+echo "LiMaD live branding: installed"
+exit 0

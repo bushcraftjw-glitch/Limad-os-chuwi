@@ -1,0 +1,13 @@
+[Unit]
+Description=LiMaD OS runtime dependencies
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=/usr/local/bin/limad-runtime-deps
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/limad-runtime-deps
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
