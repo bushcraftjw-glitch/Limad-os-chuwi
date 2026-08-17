@@ -45,7 +45,7 @@ if manifest.get("LICENSE.radeon") != license_digest:
 with tempfile.TemporaryDirectory() as temp:
     temp_path = pathlib.Path(temp)
     original = temp_path / "original.initrd"
-    output = temp_path / "v16.initrd"
+    output = temp_path / "v17.initrd"
     sentinel = b"ORIGINAL_CANONICAL_INITRD_SENTINEL\n"
     original.write_bytes(sentinel)
     subprocess.run([str(HELPER), str(original), str(output)], check=True)

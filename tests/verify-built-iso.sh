@@ -21,11 +21,16 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/etc/limad-release "$TMP
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png "$TMP/wallpaper.png" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/icons/LiMaD/index.theme "$TMP/index.theme" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/gtk4/gtk.css "$TMP/gtk4.css" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/gtk4/limad-assets/close.svg "$TMP/close.svg" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-design-system "$TMP/design-system" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-desktop-core-system "$TMP/desktop-core-system" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/lilink@limad.local/metadata.json "$TMP/lilink-metadata.json" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/lilink@limad.local/extension.js "$TMP/lilink-extension.js" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/lidrop@limad.local/metadata.json "$TMP/lidrop-metadata.json" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/lidrop@limad.local/extension.js "$TMP/lidrop-extension.js" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/limad-menu@limad.local/metadata.json "$TMP/limad-menu-metadata.json" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/limad-menu@limad.local/extension.js "$TMP/limad-menu-extension.js" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/icons/hicolor/256x256/apps/de.limad.Study.png "$TMP/hicolor-study.png" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/lib/systemd/user/limad-link.service "$TMP/limad-link.service" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-link-health-check "$TMP/limad-link-health-check" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-drop/web/app.js "$TMP/lidrop-app.js" >/dev/null 2>&1
@@ -48,17 +53,19 @@ grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
 grep -Fq 'smbios --type 1 --get-string 5 --set limad_system_product' "$TMP/grub.cfg"
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v16"' "$TMP/limad-release"
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v17"' "$TMP/limad-release"
 grep -Fq '[Icon Theme]' "$TMP/index.theme"
 test -s "$TMP/gtk4.css"
 grep -Fq 'windowcontrols button.close' "$TMP/gtk4.css"
-grep -Fq 'background-color: #ff5f57' "$TMP/gtk4.css"
-grep -Fq 'background-color: #febc2e' "$TMP/gtk4.css"
-grep -Fq 'background-color: #28c840' "$TMP/gtk4.css"
+grep -Fq 'url("limad-assets/close.svg")' "$TMP/gtk4.css"
+test -s "$TMP/close.svg"
+test -s "$TMP/hicolor-study.png"
 grep -Fq '"shell-version": ["50"]' "$TMP/lilink-metadata.json"
 grep -Fq '"shell-version": ["50"]' "$TMP/lidrop-metadata.json"
+grep -Fq '"shell-version": ["50"]' "$TMP/limad-menu-metadata.json"
 grep -Fq 'Main.panel.addToStatusArea(this.uuid, this._indicator);' "$TMP/lilink-extension.js"
 grep -Fq 'Main.panel.addToStatusArea(this.uuid, this._indicator);' "$TMP/lidrop-extension.js"
+grep -Fq "Main.panel.addToStatusArea(this.uuid, this._indicator, 0, 'left');" "$TMP/limad-menu-extension.js"
 grep -Fq 'ExecStart=/usr/bin/python3 /usr/share/limad-link/daemon.py' "$TMP/limad-link.service"
 grep -Fq 'systemctl --user enable --now limad-link.service' "$TMP/limad-link-health-check"
 if grep -Eqi 'airdrop|opendrop|awdl|owl' "$TMP/lidrop-app.js" "$TMP/lidrop-daemon.py"; then
@@ -66,6 +73,15 @@ if grep -Eqi 'airdrop|opendrop|awdl|owl' "$TMP/lidrop-app.js" "$TMP/lidrop-daemo
     exit 1
 fi
 grep -Fq 'update-initramfs -u' "$TMP/design-system"
+grep -Fq "dock-position='BOTTOM'" "$TMP/desktop-core-system"
+grep -Fq "icon-theme='LiMaD'" "$TMP/desktop-core-system"
+grep -Fq "always-center-icons=true" "$TMP/desktop-core-system"
+grep -Fq "show-apps-always-in-the-edge=false" "$TMP/desktop-core-system"
+grep -Fq "[org/gnome/shell]" "$TMP/desktop-core-system"
+grep -Fq "favorite-apps=['firefox_firefox.desktop'" "$TMP/desktop-core-system"
+grep -Fq "'de.limad.Mail.desktop'" "$TMP/desktop-core-system"
+grep -Fq "'de.limad.Drop.desktop'" "$TMP/desktop-core-system"
+grep -Fq "'de.limad.Link.desktop'" "$TMP/desktop-core-system"
 grep -Fq 'iMac17,1' "$TMP/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$TMP/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$TMP/install-target.sh"
@@ -79,7 +95,7 @@ for marker in \
     'LiMaD OS Installer' \
     'Willkommen bei LiMaD OS 3.0'; do
     if ! grep -aFq "$marker" "$TMP/initrd"; then
-        echo "ERROR: V16 initrd marker missing: $marker" >&2
+        echo "ERROR: V17 initrd marker missing: $marker" >&2
         exit 1
     fi
 done

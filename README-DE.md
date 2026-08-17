@@ -1,12 +1,19 @@
-# LiMaD OS 3.0 RC1 BASE1 V16
+# LiMaD OS 3.0 RC1 BASE1 V17
 
 ## Technische Basis
 
-V16 baut auf dem bereits funktionierenden Ubuntu-26.04-FULL-Unterbau auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
+V17 baut auf dem bereits funktionierenden Ubuntu-26.04-FULL-Unterbau auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
 
-V16 ergänzt gezielt zwei Bereiche: sichtbares LiMaD-Branding und einen nur für Apple `iMac17,1` aktivierten Grafik-Kompatibilitätspfad.
+V17 ergänzt gezielt zwei Bereiche: sichtbares LiMaD-Branding und einen nur für Apple `iMac17,1` aktivierten Grafik-Kompatibilitätspfad.
 
 ## LiMaD Design
+
+V17 ist ein gezielter Design-Repair auf Basis des V15-Desktopstands. Der Desktop-Core (dconf, Dock, Icons) ist installationskritisch und vom optionalen GDM/Plymouth-Branding getrennt. Die GNOME-Grundeinstellungen werden vor dem ersten Login als systemweite, nicht gesperrte dconf-Defaults installiert und danach in zwei Durchläufen verifiziert. LiLink/LiDrop sind vom Desktop-Core entkoppelt und können Dock, Icons oder Fensterdesign nicht mehr blockieren.
+
+- Dock unten, kompakt und mittig; dconf-Default plus First-Login-Zweitpass
+- LiMaD Icon Theme V3.2 plus hicolor-Fallback für alle 17 LiMaD-Launcher
+- GTK4/libadwaita bleibt nativ; nur 12px Traffic-Light-SVGs werden auf die nativen Fensterknöpfe gelegt
+- LiMaD-Menü als GNOME-50-Erweiterung oben links
 
 - WhiteSur GTK3 systemweit, gepinnt auf Commit `1b356fe48ad5d05fb2ca6be071efe6801df3ac72`
 - GTK4/libadwaita bleibt auf dem stabilen Ubuntu-Unterbau; LiMaD setzt nur einen kleinen rot/gelb/grünen Fensterbutton-Override, damit moderne GNOME-Apps keine Headerbar-Regressions bekommen
@@ -22,7 +29,7 @@ V16 ergänzt gezielt zwei Bereiche: sichtbares LiMaD-Branding und einen nur für
 
 ## LiMaD Installer-Branding
 
-Der Canonical-Installer-Snap wird nicht geforkt oder verändert. V16 nutzt die offizielle Whitelabel-Schnittstelle des Ubuntu Desktop Provision Installers:
+Der Canonical-Installer-Snap wird nicht geforkt oder verändert. V17 nutzt die offizielle Whitelabel-Schnittstelle des Ubuntu Desktop Provision Installers:
 
 - Fenstertitel: `LiMaD OS Installer`
 - LiMaD-Logo auf unterstützten Installer-Seiten
@@ -33,17 +40,17 @@ Die Whitelabel-Dateien werden beim Live-Boot über einen `casper-bottom`-Hook in
 
 ## Apple iMac17,1 / Radeon R9 M380 Mac Edition
 
-Der normale Ubuntu-Grafikpfad bleibt für alle anderen Geräte unverändert. Nur wenn GRUB per SMBIOS das Modell `iMac17,1` erkennt, ergänzt V16 beim Live-Boot:
+Der normale Ubuntu-Grafikpfad bleibt für alle anderen Geräte unverändert. Nur wenn GRUB per SMBIOS das Modell `iMac17,1` erkennt, ergänzt V17 beim Live-Boot:
 
 `radeon.cik_support=1 amdgpu.cik_support=0`
 
-Damit wird für dieses CIK-Gerät gezielt der ältere Radeon-Treiberpfad gewählt. Zusätzlich enthält V16 die gepinnten Radeon-Bonaire-Firmwaredateien aus `linux-firmware` Tag `20250509` sowohl früh im Live-initramfs als auch im installierten Zielsystem. Nach der Installation wird dieselbe Treiberauswahl nur auf `iMac17,1` unter `/etc/modprobe.d/` persistent gesetzt und anschließend das Ziel-initramfs aktualisiert.
+Damit wird für dieses CIK-Gerät gezielt der ältere Radeon-Treiberpfad gewählt. Zusätzlich enthält V17 die gepinnten Radeon-Bonaire-Firmwaredateien aus `linux-firmware` Tag `20250509` sowohl früh im Live-initramfs als auch im installierten Zielsystem. Nach der Installation wird dieselbe Treiberauswahl nur auf `iMac17,1` unter `/etc/modprobe.d/` persistent gesetzt und anschließend das Ziel-initramfs aktualisiert.
 
 Der ursprüngliche Canonical-initramfs-Inhalt bleibt erhalten und wird hinter einem kleinen unkomprimierten CPIO-Präfix weiterverwendet.
 
 ## Bekannte Einschränkung
 
-LiDrop bleibt für Browser-, Smartphone- und lokale Geräteübertragung erhalten. Die experimentelle AirDrop/OpenDrop/OWL/AWDL-Kompatibilität wird in V16 bewusst vollständig aus Oberfläche, API und Systemkomponenten entfernt. LiLink besitzt in V16 zusätzlich einen systemweiten User-Service, Autostart und lokalen Health-Check.
+LiDrop bleibt für Browser-, Smartphone- und lokale Geräteübertragung erhalten. Die experimentelle AirDrop/OpenDrop/OWL/AWDL-Kompatibilität wird in V17 bewusst vollständig aus Oberfläche, API und Systemkomponenten entfernt. LiLink besitzt in V17 zusätzlich einen systemweiten User-Service, Autostart und lokalen Health-Check.
 
 ## GitHub
 
@@ -51,8 +58,13 @@ Repository: `bushcraftjw-glitch/Limad-os-chuwi`
 
 Release-Tag:
 
-`base1-ubuntu2604-full-whitesur-v16`
+`base1-ubuntu2604-full-whitesur-v17`
 
 ISO:
 
-`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V16-amd64.iso`
+`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V17-amd64.iso`
+
+
+## V17 Design-Sicherungen
+
+GTK4-Benutzerkonfiguration wird nicht gelöscht. LiMaD bindet nur `limad-titlebuttons.css` ein und lässt native Button-Geometrie unangetastet. Das LiMaD-Menü ersetzt links oben den Activities-Indikator, ohne eine zusätzliche Fremderweiterung einzuführen.

@@ -6,6 +6,7 @@ chmod 0755 /usr/local/bin/limad-base1-first-login \
     /usr/local/bin/limad-runtime-deps \
     /usr/local/bin/limad-sync-gtk4-theme \
     /usr/local/bin/limad-design-system \
+    /usr/local/bin/limad-desktop-core-system \
     /usr/local/bin/limad-link-status-ensure \
     /usr/local/bin/limad-link-health-check \
     /usr/local/bin/limad-lidrop-status-ensure
@@ -14,8 +15,13 @@ if command -v update-desktop-database >/dev/null 2>&1; then
     update-desktop-database /usr/share/applications || true
 fi
 
-if command -v gtk-update-icon-cache >/dev/null 2>&1 && [ -f /usr/share/icons/LiMaD/index.theme ]; then
-    gtk-update-icon-cache -f /usr/share/icons/LiMaD || true
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    if [ -f /usr/share/icons/LiMaD/index.theme ]; then
+        gtk-update-icon-cache -f /usr/share/icons/LiMaD || true
+    fi
+    if [ -f /usr/share/icons/hicolor/index.theme ]; then
+        gtk-update-icon-cache -f /usr/share/icons/hicolor || true
+    fi
 fi
 
 IMAC_PRODUCT="$(cat /sys/class/dmi/id/product_name 2>/dev/null || true)"
@@ -43,7 +49,8 @@ if systemctl list-unit-files avahi-daemon.service >/dev/null 2>&1; then
 fi
 
 /usr/local/bin/limad-runtime-deps || true
+/usr/local/bin/limad-desktop-core-system
 /usr/local/bin/limad-design-system || true
 
 printf '%s
-' "LiMaD OS BASE1 V16 design target integration complete." > /var/log/limad-base1-install.log
+' "LiMaD OS BASE1 V17 design target integration complete." > /var/log/limad-base1-install.log

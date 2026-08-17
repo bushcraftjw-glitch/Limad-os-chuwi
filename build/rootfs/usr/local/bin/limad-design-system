@@ -4,7 +4,7 @@ set -euo pipefail
 LOG=/var/log/limad-design-system.log
 exec >>"$LOG" 2>&1
 
-echo "LiMaD OS system branding start"
+echo "LiMaD OS optional system branding start"
 
 BRANDING_DIR=/usr/share/limad/branding
 LOGO="$BRANDING_DIR/limad-logo-192.png"
@@ -65,4 +65,4 @@ else
     echo "Plymouth branding: skipped; Ubuntu spinner theme not available"
 fi
 
-echo "LiMaD OS system branding complete"
+echo "LiMaD OS optional system branding complete"

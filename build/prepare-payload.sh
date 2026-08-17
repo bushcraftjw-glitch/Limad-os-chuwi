@@ -40,6 +40,30 @@ rm -rf "$PAYLOAD/rootfs/usr/share/icons/LiMaD"
 mkdir -p "$PAYLOAD/rootfs/usr/share/icons"
 rsync -a "$ICON_ROOT/assets/system_files/usr/share/icons/LiMaD/" "$PAYLOAD/rootfs/usr/share/icons/LiMaD/"
 
+# Install LiMaD launcher icons into hicolor as a standards-based fallback.
+# The names are unique to LiMaD, so this cannot overwrite Ubuntu application icons.
+HICOLOR_ROOT="$PAYLOAD/rootfs/usr/share/icons/hicolor"
+for desktop in "$PAYLOAD/rootfs/usr/share/applications"/de.limad.*.desktop; do
+    [ -f "$desktop" ] || continue
+    icon="$(awk -F= '$1 == "Icon" {print substr($0, 6); exit}' "$desktop")"
+    case "$icon" in
+        ''|/*) continue ;;
+    esac
+    fallback_count=0
+    for size in 16x16 22x22 24x24 32x32 48x48 64x64 96x96 128x128 256x256 512x512; do
+        source_icon="$PAYLOAD/rootfs/usr/share/icons/LiMaD/$size/apps/$icon.png"
+        if [ -f "$source_icon" ]; then
+            mkdir -p "$HICOLOR_ROOT/$size/apps"
+            install -m 0644 "$source_icon" "$HICOLOR_ROOT/$size/apps/$icon.png"
+            fallback_count=$((fallback_count + 1))
+        fi
+    done
+    if [ "$fallback_count" -lt 4 ]; then
+        echo "ERROR: insufficient hicolor fallback sizes for $icon" >&2
+        exit 1
+    fi
+done
+
 WALLPAPER_DIR="$PAYLOAD/rootfs/usr/share/backgrounds/limad"
 mkdir -p "$WALLPAPER_DIR" "$PAYLOAD/rootfs/usr/share/gnome-background-properties"
 for wallpaper in \
@@ -119,7 +143,7 @@ chmod 0755 "$PAYLOAD/install-target.sh"
 
 mkdir -p "$PAYLOAD/rootfs/usr/share/doc/limad-os-base1"
 cat > "$PAYLOAD/rootfs/usr/share/doc/limad-os-base1/BUILD-INFO.txt" <<EOF
-LiMaD OS 3.0 RC1 BASE1 DESIGN V16
+LiMaD OS 3.0 RC1 BASE1 DESIGN V17
 Base: Ubuntu 26.04 LTS Desktop FULL
 Ubuntu SHA256: $UBUNTU_ISO_SHA256
 WhiteSur commit: $WHITESUR_REF
@@ -128,7 +152,7 @@ LiMaD icons SHA256: $ICONS_ZIP_SHA256
 LiMaD wallpapers SHA256: $WALLPAPERS_ZIP_SHA256
 iMac17,1 firmware source: linux-firmware tag 20250509, Radeon Bonaire firmware
 GTK4: stock libadwaita with LiMaD traffic-light titlebutton override.
-LiDrop: browser/local-device transfer enabled; AirDrop/OpenDrop/OWL/AWDL compatibility intentionally removed in V16.
+LiDrop: browser/local-device transfer enabled; AirDrop/OpenDrop/OWL/AWDL compatibility intentionally removed in V17.
 EOF
 
 for removed in \

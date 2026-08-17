@@ -7,8 +7,8 @@ source "$ROOT/config/build.env"
 [ "$UBUNTU_ISO_NAME" = "ubuntu-26.04-desktop-amd64.iso" ]
 [ "$UBUNTU_ISO_SHA256" = "487f87faaf547ea30e0aba4d5b53346292571256b25333a978db1692bcee9dd2" ]
 [ "$WHITESUR_REF" = "1b356fe48ad5d05fb2ca6be071efe6801df3ac72" ]
-[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V16-amd64.iso" ]
-[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v16" ]
+[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V17-amd64.iso" ]
+[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v17" ]
 
 grep -Fq 'id: ubuntu-desktop' "$ROOT/config/autoinstall.yaml"
 if grep -Fq 'ubuntu-desktop-minimal' "$ROOT/config/autoinstall.yaml"; then
@@ -25,11 +25,18 @@ if grep -Fq -- '--libadwaita' "$ROOT/build/prepare-payload.sh"; then
     exit 1
 fi
 grep -Fq 'windowcontrols button.close' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
-grep -Fq 'background-color: #ff5f57' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
-grep -Fq 'background-color: #febc2e' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
-grep -Fq 'background-color: #28c840' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
-grep -Fq "rm -rf -- \"\${DEST:?}/assets\"" "$ROOT/build/rootfs/usr/local/bin/limad-sync-gtk4-theme"
-for uuid in lilink@limad.local lidrop@limad.local; do
+grep -Fq 'url("limad-assets/close.svg")' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'url("limad-assets/minimize.svg")' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'url("limad-assets/maximize.svg")' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
+for asset in close.svg minimize.svg maximize.svg; do
+    test -s "$ROOT/build/rootfs/usr/share/limad/gtk4/limad-assets/$asset"
+done
+if grep -Fq 'rm -rf -- "${DEST:?}/assets"' "$ROOT/build/rootfs/usr/local/bin/limad-sync-gtk4-theme"; then
+    echo "ERROR: GTK4 sync must not delete user configuration" >&2
+    exit 1
+fi
+grep -Fq 'limad-titlebuttons.css' "$ROOT/build/rootfs/usr/local/bin/limad-sync-gtk4-theme"
+for uuid in lilink@limad.local lidrop@limad.local limad-menu@limad.local; do
     test -s "$ROOT/build/rootfs/usr/share/gnome-shell/extensions/$uuid/metadata.json"
     test -s "$ROOT/build/rootfs/usr/share/gnome-shell/extensions/$uuid/extension.js"
 done
@@ -38,6 +45,11 @@ grep -Fq '"shell-version": ["50"]' "$ROOT/build/rootfs/usr/share/gnome-shell/ext
 grep -Fq 'Main.panel.addToStatusArea(this.uuid, this._indicator);' "$ROOT/build/rootfs/usr/share/gnome-shell/extensions/lilink@limad.local/extension.js"
 grep -Fq 'Main.panel.addToStatusArea(this.uuid, this._indicator);' "$ROOT/build/rootfs/usr/share/gnome-shell/extensions/lidrop@limad.local/extension.js"
 grep -Fq 'limad-lidrop-status-ensure' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
+grep -Fq 'gnome-extensions enable limad-menu@limad.local' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
+grep -Fq 'this._activities?.hide();' "$ROOT/build/rootfs/usr/share/gnome-shell/extensions/limad-menu@limad.local/extension.js"
+grep -Fq '/usr/local/bin/limad-desktop-core-system' "$ROOT/build/install-target.sh"
+grep -Fq 'CORE_MARKER=' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
+grep -Fq 'AUX_MARKER=' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
 grep -Fq "python3 -B \"\$ROOT/tools/strip-lidrop-airdrop.py\" \"\$PAYLOAD/rootfs\"" "$ROOT/build/prepare-payload.sh"
 test -s "$ROOT/build/rootfs/usr/lib/systemd/user/limad-link.service"
 grep -Fq 'ExecStart=/usr/bin/python3 /usr/share/limad-link/daemon.py' "$ROOT/build/rootfs/usr/lib/systemd/user/limad-link.service"
@@ -49,8 +61,20 @@ done
 
 grep -Fq 'LiMaD-Wallpaper-01-Logo-Links-4K.png' "$ROOT/build/prepare-payload.sh"
 grep -Fq 'org.gnome.desktop.background picture-uri' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
-grep -Fq 'set_key_required org.gnome.shell.extensions.dash-to-dock extend-height false false' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
+grep -Fq 'set_key org.gnome.shell.extensions.dash-to-dock extend-height false' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
+grep -Fq 'verify_key org.gnome.shell.extensions.dash-to-dock always-center-icons true' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
+grep -Fq 'verify_key org.gnome.shell.extensions.dash-to-dock show-apps-always-in-the-edge false' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
+grep -Fq 'verify_favorites' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
+grep -Fq "dock-position='BOTTOM'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
+grep -Fq "icon-theme='LiMaD'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
+grep -Fq "favorite-apps=['firefox_firefox.desktop'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
+grep -Fq "'de.limad.Mail.desktop'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
+grep -Fq "'de.limad.Drop.desktop'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
+grep -Fq "'de.limad.Link.desktop'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
 grep -Fq 'update-initramfs -u' "$ROOT/build/rootfs/usr/local/bin/limad-design-system"
+grep -Fq 'limad-desktop-core-system' "$ROOT/tests/verify-built-iso.sh"
+grep -Fq 'always-center-icons=true' "$ROOT/tests/verify-built-iso.sh"
+grep -Fq 'limad-desktop-core-system' "$ROOT/.github/workflows/build-iso.yml"
 
 grep -Fq 'app-name: "LiMaD OS Installer"' "$ROOT/build/installer-whitelabel.yaml"
 grep -Fq 'accent-color: "#BB7FF0"' "$ROOT/build/installer-whitelabel.yaml"
@@ -86,7 +110,7 @@ test -x "$ROOT/build/prepare-payload.sh"
 test -x "$ROOT/build/prepare-imac17-initrd.sh"
 test -x "$ROOT/build/casper-bottom/62limad-branding"
 test -x "$ROOT/build/install-target.sh"
-test -x "$ROOT/build/rootfs/usr/local/bin/limad-design-system"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-link-health-check"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-link-status-ensure"
 

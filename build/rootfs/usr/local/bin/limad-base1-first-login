@@ -2,17 +2,17 @@
 set -euo pipefail
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/limad"
-MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v16.done"
-LOG="$STATE_DIR/design-v16.log"
+CORE_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v17-core.done"
+BUTTON_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v17-buttons.done"
+AUX_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v17-aux.done"
+LOG="$STATE_DIR/design-v17.log"
 mkdir -p "$STATE_DIR"
 exec >>"$LOG" 2>&1
 
-if [ -e "$MARKER" ]; then
-    exit 0
-fi
-
-SCHEMAS="$(gsettings list-schemas 2>/dev/null || true)"
-FAILURES=0
+SCHEMAS=""
+refresh_schemas() {
+    SCHEMAS="$(gsettings list-schemas 2>/dev/null || true)"
+}
 
 have_schema() {
     grep -Fxq "$1" <<<"$SCHEMAS"
@@ -25,7 +25,7 @@ have_key() {
     gsettings list-keys "$schema" 2>/dev/null | grep -Fxq "$key"
 }
 
-set_key_optional() {
+set_key() {
     local schema="$1"
     local key="$2"
     local value="$3"
@@ -34,129 +34,180 @@ set_key_optional() {
     gsettings set "$schema" "$key" "$value" 2>/dev/null || true
 }
 
-set_key_required() {
+verify_key() {
     local schema="$1"
     local key="$2"
-    local value="$3"
-    local expected="$4"
+    local expected="$3"
     local actual
     if ! have_key "$schema" "$key"; then
         echo "ERROR: missing required GSettings key $schema $key"
-        FAILURES=$((FAILURES + 1))
-        return
-    fi
-    if ! gsettings writable "$schema" "$key" 2>/dev/null | grep -Fxq true; then
-        echo "ERROR: required GSettings key is not writable: $schema $key"
-        FAILURES=$((FAILURES + 1))
-        return
-    fi
-    if ! gsettings set "$schema" "$key" "$value" 2>/dev/null; then
-        echo "ERROR: failed to set $schema $key"
-        FAILURES=$((FAILURES + 1))
-        return
+        return 1
     fi
     actual="$(gsettings get "$schema" "$key" 2>/dev/null || true)"
     if [ "$actual" != "$expected" ]; then
         echo "ERROR: verification failed for $schema $key: expected=$expected actual=$actual"
-        FAILURES=$((FAILURES + 1))
+        return 1
     fi
 }
 
-if ! /usr/local/bin/limad-sync-gtk4-theme; then
-    echo "ERROR: LiMaD GTK4 titlebutton sync failed"
-    FAILURES=$((FAILURES + 1))
-fi
-
-set_key_required org.gnome.desktop.interface gtk-theme "'WhiteSur-Dark'" "'WhiteSur-Dark'"
-set_key_required org.gnome.desktop.interface icon-theme "'LiMaD'" "'LiMaD'"
-set_key_optional org.gnome.desktop.interface color-scheme "'prefer-dark'"
-set_key_required org.gnome.desktop.wm.preferences button-layout "'close,minimize,maximize:'" "'close,minimize,maximize:'"
-set_key_required org.gnome.desktop.background picture-uri "'file:///usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png'" "'file:///usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png'"
-set_key_optional org.gnome.desktop.background picture-uri-dark "'file:///usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png'"
-set_key_optional org.gnome.desktop.background picture-options "'zoom'"
-set_key_optional org.gnome.desktop.screensaver picture-uri "'file:///usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png'"
-
-if command -v gnome-extensions >/dev/null 2>&1; then
-    gnome-extensions enable ubuntu-dock@ubuntu.com >/dev/null 2>&1 || true
-    gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com >/dev/null 2>&1 || true
-fi
-
-set_key_optional org.gnome.shell.extensions.user-theme name "'WhiteSur-Dark'"
-set_key_required org.gnome.shell.extensions.dash-to-dock dock-position "'BOTTOM'" "'BOTTOM'"
-set_key_required org.gnome.shell.extensions.dash-to-dock extend-height false false
-set_key_required org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 60 60
-set_key_optional org.gnome.shell.extensions.dash-to-dock icon-size-fixed true
-set_key_optional org.gnome.shell.extensions.dash-to-dock dock-fixed true
-set_key_optional org.gnome.shell.extensions.dash-to-dock autohide false
-set_key_optional org.gnome.shell.extensions.dash-to-dock intellihide false
-set_key_optional org.gnome.shell.extensions.dash-to-dock always-center-icons true
-set_key_optional org.gnome.shell.extensions.dash-to-dock show-apps-always-in-the-edge false
-set_key_optional org.gnome.shell.extensions.dash-to-dock show-trash true
-set_key_optional org.gnome.shell.extensions.dash-to-dock show-mounts false
-set_key_optional org.gnome.shell.extensions.dash-to-dock show-apps-at-top false
-set_key_optional org.gnome.shell.extensions.dash-to-dock show-show-apps-button true
-set_key_optional org.gnome.shell.extensions.dash-to-dock apply-custom-theme true
-set_key_optional org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true
-set_key_optional org.gnome.shell.extensions.dash-to-dock transparency-mode "'FIXED'"
-set_key_optional org.gnome.shell.extensions.dash-to-dock background-opacity 0.78
-
-favorites=()
-add_favorite() {
-    local desktop="$1"
-    if [ -f "/usr/share/applications/$desktop" ] || [ -f "/var/lib/snapd/desktop/applications/$desktop" ]; then
-        favorites+=("$desktop")
+verify_favorites() {
+    local actual
+    if ! have_key org.gnome.shell favorite-apps; then
+        echo "ERROR: missing required GSettings key org.gnome.shell favorite-apps"
+        return 1
     fi
-}
-
-add_favorite firefox_firefox.desktop
-add_favorite de.limad.Mail.desktop
-add_favorite de.limad.Cut.desktop
-add_favorite de.limad.Study.desktop
-add_favorite de.limad.Notes.desktop
-add_favorite de.limad.Drop.desktop
-add_favorite de.limad.Link.desktop
-add_favorite de.limad.Save.desktop
-add_favorite de.limad.WindowsApps.desktop
-add_favorite de.limad.Updater.desktop
-add_favorite de.limad.Klang.desktop
-add_favorite de.limad.Terminal.desktop
-add_favorite org.gnome.Nautilus.desktop
-add_favorite libreoffice-startcenter.desktop
-add_favorite de.limad.SystemInfo.desktop
-add_favorite de.limad.SystemUpdate.desktop
-add_favorite de.limad.Welcome.desktop
-
-if [ "${#favorites[@]}" -gt 0 ] && have_key org.gnome.shell favorite-apps; then
-    value="["
-    for desktop in "${favorites[@]}"; do
-        value+="'$desktop', "
+    actual="$(gsettings get org.gnome.shell favorite-apps 2>/dev/null || true)"
+    for desktop in \
+        de.limad.Mail.desktop \
+        de.limad.Cut.desktop \
+        de.limad.Study.desktop \
+        de.limad.Drop.desktop \
+        de.limad.Link.desktop; do
+        if [[ "$actual" != *"'$desktop'"* ]]; then
+            echo "ERROR: required favorite missing: $desktop actual=$actual"
+            return 1
+        fi
     done
-    value="${value%, }]"
-    set_key_optional org.gnome.shell favorite-apps "$value"
+}
+
+apply_core_settings() {
+    set_key org.gnome.desktop.interface gtk-theme "'WhiteSur-Dark'"
+    set_key org.gnome.desktop.interface icon-theme "'LiMaD'"
+    set_key org.gnome.desktop.interface color-scheme "'prefer-dark'"
+    set_key org.gnome.desktop.wm.preferences button-layout "'close,minimize,maximize:'"
+    set_key org.gnome.desktop.background picture-uri "'file:///usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png'"
+    set_key org.gnome.desktop.background picture-uri-dark "'file:///usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png'"
+    set_key org.gnome.desktop.background picture-options "'zoom'"
+    set_key org.gnome.desktop.screensaver picture-uri "'file:///usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png'"
+
+    set_key org.gnome.shell.extensions.user-theme name "'WhiteSur-Dark'"
+    set_key org.gnome.shell.extensions.dash-to-dock dock-position "'BOTTOM'"
+    set_key org.gnome.shell.extensions.dash-to-dock extend-height false
+    set_key org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 60
+    set_key org.gnome.shell.extensions.dash-to-dock icon-size-fixed true
+    set_key org.gnome.shell.extensions.dash-to-dock dock-fixed true
+    set_key org.gnome.shell.extensions.dash-to-dock autohide false
+    set_key org.gnome.shell.extensions.dash-to-dock intellihide false
+    set_key org.gnome.shell.extensions.dash-to-dock always-center-icons true
+    set_key org.gnome.shell.extensions.dash-to-dock show-apps-always-in-the-edge false
+    set_key org.gnome.shell.extensions.dash-to-dock show-trash true
+    set_key org.gnome.shell.extensions.dash-to-dock show-mounts false
+    set_key org.gnome.shell.extensions.dash-to-dock show-apps-at-top false
+    set_key org.gnome.shell.extensions.dash-to-dock show-show-apps-button true
+    set_key org.gnome.shell.extensions.dash-to-dock apply-custom-theme true
+    set_key org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true
+    set_key org.gnome.shell.extensions.dash-to-dock transparency-mode "'FIXED'"
+    set_key org.gnome.shell.extensions.dash-to-dock background-opacity 0.78
+}
+
+set_favorites() {
+    local favorites=()
+    local desktop value
+    for desktop in \
+        firefox_firefox.desktop \
+        de.limad.Mail.desktop \
+        de.limad.Cut.desktop \
+        de.limad.Study.desktop \
+        de.limad.Notes.desktop \
+        de.limad.Drop.desktop \
+        de.limad.Link.desktop \
+        de.limad.Save.desktop \
+        de.limad.WindowsApps.desktop \
+        de.limad.Updater.desktop \
+        de.limad.Klang.desktop \
+        de.limad.Terminal.desktop \
+        org.gnome.Nautilus.desktop \
+        libreoffice-startcenter.desktop \
+        de.limad.SystemInfo.desktop \
+        de.limad.SystemUpdate.desktop \
+        de.limad.Welcome.desktop; do
+        if [ -f "/usr/share/applications/$desktop" ] || [ -f "/var/lib/snapd/desktop/applications/$desktop" ]; then
+            favorites+=("$desktop")
+        fi
+    done
+    if [ "${#favorites[@]}" -gt 0 ] && have_key org.gnome.shell favorite-apps; then
+        value="["
+        for desktop in "${favorites[@]}"; do
+            value+="'$desktop', "
+        done
+        value="${value%, }]"
+        set_key org.gnome.shell favorite-apps "$value"
+    fi
+}
+
+if [ ! -e "$CORE_MARKER" ]; then
+    refresh_schemas
+    if command -v gnome-extensions >/dev/null 2>&1; then
+        gnome-extensions enable ubuntu-dock@ubuntu.com >/dev/null 2>&1 || true
+        gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com >/dev/null 2>&1 || true
+    fi
+
+    apply_core_settings
+    set_favorites
+
+    # A second pass after GNOME Shell extensions have initialized prevents the
+    # Ubuntu Dock session defaults from winning a first-login timing race.
+    sleep 3
+    refresh_schemas
+    apply_core_settings
+    set_favorites
+
+    CORE_FAILURES=0
+    verify_key org.gnome.desktop.interface gtk-theme "'WhiteSur-Dark'" || CORE_FAILURES=$((CORE_FAILURES + 1))
+    verify_key org.gnome.desktop.interface icon-theme "'LiMaD'" || CORE_FAILURES=$((CORE_FAILURES + 1))
+    verify_key org.gnome.desktop.wm.preferences button-layout "'close,minimize,maximize:'" || CORE_FAILURES=$((CORE_FAILURES + 1))
+    verify_key org.gnome.shell.extensions.dash-to-dock dock-position "'BOTTOM'" || CORE_FAILURES=$((CORE_FAILURES + 1))
+    verify_key org.gnome.shell.extensions.dash-to-dock extend-height false || CORE_FAILURES=$((CORE_FAILURES + 1))
+    verify_key org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 60 || CORE_FAILURES=$((CORE_FAILURES + 1))
+    verify_key org.gnome.shell.extensions.dash-to-dock always-center-icons true || CORE_FAILURES=$((CORE_FAILURES + 1))
+    verify_key org.gnome.shell.extensions.dash-to-dock dock-fixed true || CORE_FAILURES=$((CORE_FAILURES + 1))
+    verify_key org.gnome.shell.extensions.dash-to-dock show-apps-always-in-the-edge false || CORE_FAILURES=$((CORE_FAILURES + 1))
+    verify_key org.gnome.shell.extensions.dash-to-dock show-mounts false || CORE_FAILURES=$((CORE_FAILURES + 1))
+    verify_favorites || CORE_FAILURES=$((CORE_FAILURES + 1))
+
+    if [ "$CORE_FAILURES" -ne 0 ]; then
+        echo "ERROR: LiMaD core desktop setup has $CORE_FAILURES verification failure(s)"
+        exit 1
+    fi
+
+    touch "$CORE_MARKER"
+    echo "LiMaD core desktop V17: PASS"
+fi
+
+if [ ! -e "$BUTTON_MARKER" ]; then
+    if /usr/local/bin/limad-sync-gtk4-theme; then
+        touch "$BUTTON_MARKER"
+        echo "LiMaD GTK4 titlebuttons V17: PASS"
+    else
+        echo "WARN: LiMaD GTK4 titlebutton overlay failed; core desktop remains active"
+    fi
 fi
 
 if [ -x /usr/local/bin/limad-user-folders-setup ]; then
     /usr/local/bin/limad-user-folders-setup >/dev/null 2>&1 || true
 fi
 
-if [ -x /usr/local/bin/limad-link-status-ensure ]; then
-    if ! /usr/local/bin/limad-link-status-ensure; then
-        echo "ERROR: LiLink status extension could not be enabled"
-        FAILURES=$((FAILURES + 1))
+if [ ! -e "$AUX_MARKER" ]; then
+    AUX_FAILURES=0
+    if command -v gnome-extensions >/dev/null 2>&1; then
+        gnome-extensions enable limad-menu@limad.local >/dev/null 2>&1 || AUX_FAILURES=$((AUX_FAILURES + 1))
+    else
+        AUX_FAILURES=$((AUX_FAILURES + 1))
+    fi
+
+    if [ -x /usr/local/bin/limad-link-status-ensure ]; then
+        /usr/local/bin/limad-link-status-ensure || AUX_FAILURES=$((AUX_FAILURES + 1))
+    fi
+    if [ -x /usr/local/bin/limad-lidrop-status-ensure ]; then
+        /usr/local/bin/limad-lidrop-status-ensure || AUX_FAILURES=$((AUX_FAILURES + 1))
+    fi
+
+    if [ "$AUX_FAILURES" -eq 0 ]; then
+        touch "$AUX_MARKER"
+        echo "LiMaD auxiliary desktop V17: PASS"
+    else
+        echo "WARN: LiMaD auxiliary desktop setup has $AUX_FAILURES issue(s); retrying next login"
     fi
 fi
 
-if [ -x /usr/local/bin/limad-lidrop-status-ensure ]; then
-    if ! /usr/local/bin/limad-lidrop-status-ensure; then
-        echo "ERROR: LiDrop status extension could not be enabled"
-        FAILURES=$((FAILURES + 1))
-    fi
-fi
-
-if [ "$FAILURES" -ne 0 ]; then
-    echo "ERROR: LiMaD design setup has $FAILURES verification failure(s); marker not written"
-    exit 1
-fi
-
-touch "$MARKER"
-echo "LiMaD design V16: PASS"
+exit 0

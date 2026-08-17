@@ -13,12 +13,17 @@ required=(
     "$ROOTFS/usr/share/backgrounds/limad/LiMaD-Wallpaper-03-Wellen-Emblem-4K.png"
     "$ROOTFS/usr/share/gnome-background-properties/limad-wallpapers.xml"
     "$ROOTFS/usr/share/limad/gtk4/gtk.css"
+    "$ROOTFS/usr/share/limad/gtk4/limad-assets/close.svg"
+    "$ROOTFS/usr/share/limad/gtk4/limad-assets/minimize.svg"
+    "$ROOTFS/usr/share/limad/gtk4/limad-assets/maximize.svg"
     "$ROOTFS/usr/share/gnome-shell/extensions/lilink@limad.local/metadata.json"
     "$ROOTFS/usr/share/gnome-shell/extensions/lilink@limad.local/extension.js"
     "$ROOTFS/usr/share/gnome-shell/extensions/lilink@limad.local/lilink.svg"
     "$ROOTFS/usr/share/gnome-shell/extensions/lidrop@limad.local/metadata.json"
     "$ROOTFS/usr/share/gnome-shell/extensions/lidrop@limad.local/extension.js"
     "$ROOTFS/usr/share/gnome-shell/extensions/lidrop@limad.local/lidrop.svg"
+    "$ROOTFS/usr/share/gnome-shell/extensions/limad-menu@limad.local/metadata.json"
+    "$ROOTFS/usr/share/gnome-shell/extensions/limad-menu@limad.local/extension.js"
     "$ROOTFS/usr/lib/systemd/user/limad-link.service"
     "$ROOTFS/usr/local/bin/limad-link-health-check"
     "$ROOTFS/usr/local/bin/limad-link-status-ensure"
@@ -44,6 +49,7 @@ required=(
     "$ROOTFS/usr/local/bin/limad-base1-first-login"
     "$ROOTFS/usr/local/bin/limad-sync-gtk4-theme"
     "$ROOTFS/usr/local/bin/limad-design-system"
+    "$ROOTFS/usr/local/bin/limad-desktop-core-system"
     "$ROOTFS/etc/limad-release"
 )
 
@@ -87,12 +93,27 @@ if ! find "$ROOTFS/usr/share/themes" -mindepth 1 -maxdepth 1 -type d -name 'Whit
 fi
 
 grep -Fq 'windowcontrols button.close' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
-grep -Fq 'background-color: #ff5f57' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
-grep -Fq 'background-color: #febc2e' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
-grep -Fq 'background-color: #28c840' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'url("limad-assets/close.svg")' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'url("limad-assets/minimize.svg")' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'url("limad-assets/maximize.svg")' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
 for uuid in lilink@limad.local lidrop@limad.local; do
     grep -Fq '"shell-version": ["50"]' "$ROOTFS/usr/share/gnome-shell/extensions/$uuid/metadata.json"
     grep -Fq 'Main.panel.addToStatusArea(this.uuid, this._indicator);' "$ROOTFS/usr/share/gnome-shell/extensions/$uuid/extension.js"
+done
+
+grep -Fq "Main.panel.addToStatusArea(this.uuid, this._indicator, 0, 'left');" "$ROOTFS/usr/share/gnome-shell/extensions/limad-menu@limad.local/extension.js"
+
+for desktop in "${applications[@]}"; do
+    icon="$(awk -F= '$1 == "Icon" {print substr($0, 6); exit}' "$ROOTFS/usr/share/applications/$desktop")"
+    case "$icon" in
+        ''|/*) continue ;;
+    esac
+    for size in 64x64 128x128 256x256; do
+        if [ ! -s "$ROOTFS/usr/share/icons/hicolor/$size/apps/$icon.png" ]; then
+            echo "ERROR: hicolor fallback missing for $desktop ($icon, $size)" >&2
+            exit 1
+        fi
+    done
 done
 
 for forbidden in \
@@ -111,7 +132,8 @@ done
 grep -Fq 'LiMaD-Wallpaper-01-Logo-Links-4K.png' "$ROOTFS/usr/local/bin/limad-base1-first-login"
 grep -Fq 'extend-height false' "$ROOTFS/usr/local/bin/limad-base1-first-login"
 grep -Fq 'show-apps-always-in-the-edge false' "$ROOTFS/usr/local/bin/limad-base1-first-login"
-grep -Fq 'LiMaD GTK4 titlebutton sync failed' "$ROOTFS/usr/local/bin/limad-base1-first-login"
+grep -Fq 'CORE_MARKER=' "$ROOTFS/usr/local/bin/limad-base1-first-login"
+grep -Fq 'AUX_MARKER=' "$ROOTFS/usr/local/bin/limad-base1-first-login"
 grep -Fq 'org/gnome/login-screen' "$ROOTFS/usr/local/bin/limad-design-system"
 grep -Fq 'themes/spinner' "$ROOTFS/usr/local/bin/limad-design-system"
 grep -Fq 'update-initramfs -u' "$ROOTFS/usr/local/bin/limad-design-system"
@@ -128,7 +150,7 @@ for removed in limad-airdrop-check limad-airdrop-control limad-airdrop-session l
         exit 1
     fi
 done
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v16"' "$ROOTFS/etc/limad-release"
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v17"' "$ROOTFS/etc/limad-release"
 grep -Fq 'iMac17,1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$PAYLOAD/install-target.sh"

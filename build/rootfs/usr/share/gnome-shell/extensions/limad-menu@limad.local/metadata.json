@@ -1,0 +1,6 @@
+{
+  "uuid": "limad-menu@limad.local",
+  "name": "LiMaD OS Menu",
+  "description": "LiMaD OS system menu for GNOME Shell",
+  "shell-version": ["50"]
+}
