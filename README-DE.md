@@ -1,14 +1,14 @@
-# LiMaD OS 3.0 RC1 BASE1 V18
+# LiMaD OS 3.0 RC1 BASE1 V19
 
 ## Technische Basis
 
-V18 baut auf dem bereits funktionierenden Ubuntu-26.04-FULL-Unterbau auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
+V19 baut auf dem bereits funktionierenden Ubuntu-26.04-FULL-Unterbau auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
 
-V18 ergänzt gezielt zwei Bereiche: sichtbares LiMaD-Branding und einen nur für Apple `iMac17,1` aktivierten Grafik-Kompatibilitätspfad.
+V19 ergänzt gezielt zwei Bereiche: sichtbares LiMaD-Branding und einen nur für Apple `iMac17,1` aktivierten Grafik-Kompatibilitätspfad.
 
 ## LiMaD Design
 
-V18 ist ein gezielter Design-Repair auf Basis des V15-Desktopstands. Der Desktop-Core (dconf, Dock, Icons) ist installationskritisch und vom optionalen GDM/Plymouth-Branding getrennt. Die GNOME-Grundeinstellungen werden vor dem ersten Login als systemweite, nicht gesperrte dconf-Defaults installiert und danach in zwei Durchläufen verifiziert. LiLink/LiDrop sind vom Desktop-Core entkoppelt und können Dock, Icons oder Fensterdesign nicht mehr blockieren.
+V19 ist ein gezielter Design-Repair auf Basis des V15-Desktopstands. Der Desktop-Core (dconf, Dock, Icons) ist installationskritisch und vom optionalen GDM/Plymouth-Branding getrennt. Die GNOME-Grundeinstellungen werden vor dem ersten Login als systemweite, nicht gesperrte dconf-Defaults installiert und danach in zwei Durchläufen verifiziert. LiLink/LiDrop sind vom Desktop-Core entkoppelt und können Dock, Icons oder Fensterdesign nicht mehr blockieren.
 
 - Dock unten, kompakt und mittig; dconf-Default plus First-Login-Zweitpass
 - LiMaD Icon Theme V3.2 plus hicolor-Fallback für alle 17 LiMaD-Launcher
@@ -29,7 +29,7 @@ V18 ist ein gezielter Design-Repair auf Basis des V15-Desktopstands. Der Desktop
 
 ## LiMaD Installer-Branding
 
-Der Canonical-Installer-Snap wird nicht geforkt oder verändert. V18 nutzt die offizielle Whitelabel-Schnittstelle des Ubuntu Desktop Provision Installers:
+Der Canonical-Installer-Snap wird nicht geforkt oder verändert. V19 nutzt die offizielle Whitelabel-Schnittstelle des Ubuntu Desktop Provision Installers:
 
 - Fenstertitel: `LiMaD OS Installer`
 - LiMaD-Logo auf unterstützten Installer-Seiten
@@ -40,17 +40,17 @@ Die Whitelabel-Dateien werden beim Live-Boot über einen `casper-bottom`-Hook in
 
 ## Apple iMac17,1 / Radeon R9 M380 Mac Edition
 
-Der normale Ubuntu-Grafikpfad bleibt für alle anderen Geräte unverändert. Nur wenn GRUB per SMBIOS das Modell `iMac17,1` erkennt, ergänzt V18 beim Live-Boot:
+Der normale Ubuntu-Grafikpfad bleibt für alle anderen Geräte unverändert. Nur wenn GRUB per SMBIOS das Modell `iMac17,1` erkennt, ergänzt V19 beim Live-Boot:
 
 `radeon.cik_support=1 amdgpu.cik_support=0`
 
-Damit wird für dieses CIK-Gerät gezielt der ältere Radeon-Treiberpfad gewählt. Zusätzlich enthält V18 die gepinnten Radeon-Bonaire-Firmwaredateien aus `linux-firmware` Tag `20250509` sowohl früh im Live-initramfs als auch im installierten Zielsystem. Nach der Installation wird dieselbe Treiberauswahl nur auf `iMac17,1` unter `/etc/modprobe.d/` persistent gesetzt und anschließend das Ziel-initramfs aktualisiert.
+Damit wird für dieses CIK-Gerät gezielt der ältere Radeon-Treiberpfad gewählt. Zusätzlich enthält V19 die gepinnten Radeon-Bonaire-Firmwaredateien aus `linux-firmware` Tag `20250509` sowohl früh im Live-initramfs als auch im installierten Zielsystem. Nach der Installation wird dieselbe Treiberauswahl nur auf `iMac17,1` unter `/etc/modprobe.d/` persistent gesetzt und anschließend das Ziel-initramfs aktualisiert.
 
 Der ursprüngliche Canonical-initramfs-Inhalt bleibt erhalten und wird hinter einem kleinen unkomprimierten CPIO-Präfix weiterverwendet.
 
 ## Bekannte Einschränkung
 
-LiDrop bleibt für Browser-, Smartphone- und lokale Geräteübertragung erhalten. Die experimentelle AirDrop/OpenDrop/OWL/AWDL-Kompatibilität wird in V18 bewusst vollständig aus Oberfläche, API und Systemkomponenten entfernt. LiLink besitzt in V18 zusätzlich einen systemweiten User-Service, Autostart und lokalen Health-Check.
+LiDrop bleibt für Browser-, Smartphone- und lokale Geräteübertragung erhalten. Die experimentelle AirDrop/OpenDrop/OWL/AWDL-Kompatibilität wird in V19 bewusst vollständig aus Oberfläche, API und Systemkomponenten entfernt. LiLink besitzt in V19 zusätzlich einen systemweiten User-Service, Autostart und lokalen Health-Check.
 
 ## GitHub
 
@@ -58,13 +58,13 @@ Repository: `bushcraftjw-glitch/Limad-os-chuwi`
 
 Release-Tag:
 
-`base1-ubuntu2604-full-whitesur-v18`
+`base1-ubuntu2604-full-whitesur-v19`
 
 ISO:
 
-`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V18-amd64.iso`
+`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V19-amd64.iso`
 
 
-## V18 Design-Sicherungen
+## V19 Design-Sicherungen
 
 GTK4-Benutzerkonfiguration wird nicht gelöscht. LiMaD bindet nur `limad-titlebuttons.css` ein und lässt native Button-Geometrie unangetastet. Das LiMaD-Menü ersetzt links oben den Activities-Indikator, ohne eine zusätzliche Fremderweiterung einzuführen.

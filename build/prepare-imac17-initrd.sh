@@ -53,14 +53,14 @@ rsync -a "$ROOT/build/installer-slides/" "$WORK/limad-installer/slides/"
     cd "$WORK"
     find usr scripts limad-installer -print0 \
         | LC_ALL=C sort -z \
-        | cpio --null --quiet -o -H newc > "$WORK/limad-v18-early.cpio"
+        | cpio --null --quiet -o -H newc > "$WORK/limad-v19-early.cpio"
 )
 
-cat "$WORK/limad-v18-early.cpio" "$ORIGINAL_INITRD" > "$OUTPUT_INITRD"
+cat "$WORK/limad-v19-early.cpio" "$ORIGINAL_INITRD" > "$OUTPUT_INITRD"
 chmod 0644 "$OUTPUT_INITRD"
 
 if [ "$(stat -c %s "$OUTPUT_INITRD")" -le "$(stat -c %s "$ORIGINAL_INITRD")" ]; then
-    echo "ERROR: LiMaD V18 initrd prefix was not added" >&2
+    echo "ERROR: LiMaD V19 initrd prefix was not added" >&2
     exit 1
 fi
 
@@ -75,4 +75,4 @@ for marker in \
     fi
 done
 
-echo "V18 INITRD FIRMWARE + LIVE BRANDING: PASS"
+echo "V19 INITRD FIRMWARE + LIVE BRANDING: PASS"

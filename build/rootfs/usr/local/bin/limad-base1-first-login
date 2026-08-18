@@ -2,10 +2,10 @@
 set -euo pipefail
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/limad"
-CORE_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v18-core.done"
-BUTTON_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v18-buttons.done"
-AUX_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v18-aux.done"
-LOG="$STATE_DIR/design-v18.log"
+CORE_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v19-core.done"
+BUTTON_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v19-buttons.done"
+AUX_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v19-aux.done"
+LOG="$STATE_DIR/design-v19.log"
 mkdir -p "$STATE_DIR"
 exec >>"$LOG" 2>&1
 
@@ -171,13 +171,13 @@ if [ ! -e "$CORE_MARKER" ]; then
     fi
 
     touch "$CORE_MARKER"
-    echo "LiMaD core desktop V18: PASS"
+    echo "LiMaD core desktop V19: PASS"
 fi
 
 if [ ! -e "$BUTTON_MARKER" ]; then
     if /usr/local/bin/limad-sync-gtk4-theme; then
         touch "$BUTTON_MARKER"
-        echo "LiMaD GTK4 titlebuttons V18: PASS"
+        echo "LiMaD GTK4 titlebuttons V19: PASS"
     else
         echo "WARN: LiMaD GTK4 titlebutton overlay failed; core desktop remains active"
     fi
@@ -204,7 +204,7 @@ if [ ! -e "$AUX_MARKER" ]; then
 
     if [ "$AUX_FAILURES" -eq 0 ]; then
         touch "$AUX_MARKER"
-        echo "LiMaD auxiliary desktop V18: PASS"
+        echo "LiMaD auxiliary desktop V19: PASS"
     else
         echo "WARN: LiMaD auxiliary desktop setup has $AUX_FAILURES issue(s); retrying next login"
     fi
