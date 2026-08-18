@@ -150,7 +150,7 @@ for removed in limad-airdrop-check limad-airdrop-control limad-airdrop-session l
         exit 1
     fi
 done
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v17"' "$ROOTFS/etc/limad-release"
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v18"' "$ROOTFS/etc/limad-release"
 grep -Fq 'iMac17,1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$PAYLOAD/install-target.sh"

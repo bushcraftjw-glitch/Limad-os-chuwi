@@ -7,8 +7,8 @@ source "$ROOT/config/build.env"
 [ "$UBUNTU_ISO_NAME" = "ubuntu-26.04-desktop-amd64.iso" ]
 [ "$UBUNTU_ISO_SHA256" = "487f87faaf547ea30e0aba4d5b53346292571256b25333a978db1692bcee9dd2" ]
 [ "$WHITESUR_REF" = "1b356fe48ad5d05fb2ca6be071efe6801df3ac72" ]
-[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V17-amd64.iso" ]
-[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v17" ]
+[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V18-amd64.iso" ]
+[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v18" ]
 
 grep -Fq 'id: ubuntu-desktop' "$ROOT/config/autoinstall.yaml"
 if grep -Fq 'ubuntu-desktop-minimal' "$ROOT/config/autoinstall.yaml"; then
@@ -31,7 +31,7 @@ grep -Fq 'url("limad-assets/maximize.svg")' "$ROOT/build/rootfs/usr/share/limad/
 for asset in close.svg minimize.svg maximize.svg; do
     test -s "$ROOT/build/rootfs/usr/share/limad/gtk4/limad-assets/$asset"
 done
-if grep -Fq 'rm -rf -- "${DEST:?}/assets"' "$ROOT/build/rootfs/usr/local/bin/limad-sync-gtk4-theme"; then
+if grep -Fq "rm -rf -- \"\${DEST:?}/assets\"" "$ROOT/build/rootfs/usr/local/bin/limad-sync-gtk4-theme"; then
     echo "ERROR: GTK4 sync must not delete user configuration" >&2
     exit 1
 fi
@@ -129,6 +129,8 @@ python3 -B "$ROOT/tests/test-filter-install-sources.py"
 python3 -B "$ROOT/tests/test-update-md5.py"
 python3 -B "$ROOT/tests/test-brand-grub.py"
 python3 -B "$ROOT/tests/test-design-assets.py"
+python3 -B "$ROOT/tests/test-shell-regressions.py"
+python3 -B "$ROOT/tests/test-version-consistency.py"
 python3 -B "$ROOT/tests/test-status-and-titlebuttons.py"
 python3 -B "$ROOT/tests/test-installer-branding.py"
 python3 -B "$ROOT/tests/test-imac17-firmware.py"

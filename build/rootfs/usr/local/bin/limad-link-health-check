@@ -10,7 +10,7 @@ printf '\n[%s] LiLink health check\n' "$(date -Is 2>/dev/null || date)"
 systemctl --user daemon-reload
 systemctl --user enable --now limad-link.service >/dev/null
 
-for _ in $(seq 1 40); do
+for ((attempt = 1; attempt <= 40; attempt++)); do
     if /usr/bin/python3 - <<'PY' >/dev/null 2>&1
 import json
 import os

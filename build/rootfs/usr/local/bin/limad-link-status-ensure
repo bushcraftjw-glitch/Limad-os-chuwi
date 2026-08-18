@@ -21,7 +21,7 @@ command -v gnome-extensions >/dev/null 2>&1 || {
     exit 1
 }
 
-for attempt in $(seq 1 12); do
+for ((attempt = 1; attempt <= 12; attempt++)); do
     info="$(gnome-extensions info "$UUID" 2>&1 || true)"
     if [ -n "$info" ] && ! printf '%s\n' "$info" | grep -Eqi 'OUT OF DATE|INCOMPATIBLE|ERROR|FEHLER|NICHT KOMPATIBEL|VERALTET'; then
         gnome-extensions enable "$UUID" >/dev/null 2>&1 || true

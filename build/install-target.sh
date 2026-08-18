@@ -53,4 +53,4 @@ fi
 /usr/local/bin/limad-design-system || true
 
 printf '%s
-' "LiMaD OS BASE1 V17 design target integration complete." > /var/log/limad-base1-install.log
+' "LiMaD OS BASE1 V18 design target integration complete." > /var/log/limad-base1-install.log
