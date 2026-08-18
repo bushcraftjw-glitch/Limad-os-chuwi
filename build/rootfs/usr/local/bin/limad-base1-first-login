@@ -2,10 +2,10 @@
 set -euo pipefail
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/limad"
-CORE_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v19-core.done"
-BUTTON_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v19-buttons.done"
-AUX_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v19-aux.done"
-LOG="$STATE_DIR/design-v19.log"
+CORE_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v20-core.done"
+BUTTON_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v20-buttons.done"
+AUX_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v20-aux.done"
+LOG="$STATE_DIR/design-v20.log"
 mkdir -p "$STATE_DIR"
 exec >>"$LOG" 2>&1
 
@@ -68,6 +68,22 @@ verify_favorites() {
             return 1
         fi
     done
+}
+
+enable_extension_reliably() {
+    local uuid="$1"
+    local attempt
+    for ((attempt=0; attempt<10; attempt++)); do
+        if gnome-extensions info "$uuid" >/dev/null 2>&1; then
+            gnome-extensions enable "$uuid" >/dev/null 2>&1 || true
+            if gsettings get org.gnome.shell enabled-extensions 2>/dev/null | grep -Fq -- "$uuid"; then
+                return 0
+            fi
+        fi
+        sleep 1
+    done
+    gnome-extensions info "$uuid" 2>&1 || true
+    return 1
 }
 
 apply_core_settings() {
@@ -171,13 +187,13 @@ if [ ! -e "$CORE_MARKER" ]; then
     fi
 
     touch "$CORE_MARKER"
-    echo "LiMaD core desktop V19: PASS"
+    echo "LiMaD core desktop V20: PASS"
 fi
 
 if [ ! -e "$BUTTON_MARKER" ]; then
     if /usr/local/bin/limad-sync-gtk4-theme; then
         touch "$BUTTON_MARKER"
-        echo "LiMaD GTK4 titlebuttons V19: PASS"
+        echo "LiMaD GTK4 titlebuttons V20: PASS"
     else
         echo "WARN: LiMaD GTK4 titlebutton overlay failed; core desktop remains active"
     fi
@@ -190,7 +206,7 @@ fi
 if [ ! -e "$AUX_MARKER" ]; then
     AUX_FAILURES=0
     if command -v gnome-extensions >/dev/null 2>&1; then
-        gnome-extensions enable limad-menu@limad.local >/dev/null 2>&1 || AUX_FAILURES=$((AUX_FAILURES + 1))
+        enable_extension_reliably limad-menu@limad.local || AUX_FAILURES=$((AUX_FAILURES + 1))
     else
         AUX_FAILURES=$((AUX_FAILURES + 1))
     fi
@@ -204,7 +220,7 @@ if [ ! -e "$AUX_MARKER" ]; then
 
     if [ "$AUX_FAILURES" -eq 0 ]; then
         touch "$AUX_MARKER"
-        echo "LiMaD auxiliary desktop V19: PASS"
+        echo "LiMaD auxiliary desktop V20: PASS"
     else
         echo "WARN: LiMaD auxiliary desktop setup has $AUX_FAILURES issue(s); retrying next login"
     fi

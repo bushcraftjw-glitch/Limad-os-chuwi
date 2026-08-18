@@ -2,9 +2,9 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = 'V19'
-tag = 'base1-ubuntu2604-full-whitesur-v19'
-iso = 'LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V19-amd64.iso'
+VERSION = 'V20'
+tag = 'base1-ubuntu2604-full-whitesur-v20'
+iso = 'LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V20-amd64.iso'
 
 pairs = [
     (ROOT / 'VERSION', VERSION),
@@ -32,8 +32,8 @@ for path in ROOT.rglob('*'):
         text = path.read_text()
     except UnicodeDecodeError:
         continue
-    previous_upper = 'V' + '18'
-    previous_lower = 'v' + '18'
+    previous_upper = 'V' + '19'
+    previous_lower = 'v' + '19'
     if previous_upper in text or previous_lower in text:
         raise AssertionError(f'stale previous-version identifier in {path.relative_to(ROOT)}')
 

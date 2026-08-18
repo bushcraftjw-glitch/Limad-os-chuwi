@@ -1,0 +1,13 @@
+[Unit]
+Description=LiDrop local transfer backend
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/limad-dropd
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target

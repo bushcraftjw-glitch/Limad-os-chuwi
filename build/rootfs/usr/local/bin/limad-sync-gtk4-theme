@@ -10,16 +10,17 @@ done
 mkdir -p "$DEST/limad-assets"
 install -m 0644 "$SOURCE_DIR/gtk.css" "$DEST/limad-titlebuttons.css"
 install -m 0644 "$SOURCE_DIR/limad-assets/"*.svg "$DEST/limad-assets/"
-if [ -f "$DEST/gtk.css" ] && grep -Fq '/* LiMaD OS GTK4 window controls.' "$DEST/gtk.css"; then
+if [ -f "$DEST/gtk.css" ] && grep -Fq "/* LiMaD OS GTK4 window controls." "$DEST/gtk.css"; then
     mv -f "$DEST/gtk.css" "$DEST/gtk.css.limad-legacy-backup"
 fi
-if [ ! -f "$DEST/gtk.css" ]; then
-    printf '%s
-' "$IMPORT" > "$DEST/gtk.css"
-elif ! grep -Fqx "$IMPORT" "$DEST/gtk.css"; then
-    printf '
-%s
-' "$IMPORT" >> "$DEST/gtk.css"
+TMP="$(mktemp "$DEST/.gtk.css.XXXXXX")"
+trap 'rm -f "$TMP"' EXIT
+printf '%s\n' "$IMPORT" > "$TMP"
+if [ -f "$DEST/gtk.css" ]; then
+    grep -Fvx "$IMPORT" "$DEST/gtk.css" >> "$TMP" || true
 fi
+install -m 0644 "$TMP" "$DEST/gtk.css"
+rm -f "$TMP"
+trap - EXIT
 test -s "$DEST/limad-titlebuttons.css"
-grep -Fqx "$IMPORT" "$DEST/gtk.css"
+[ "$(head -n1 "$DEST/gtk.css")" = "$IMPORT" ]

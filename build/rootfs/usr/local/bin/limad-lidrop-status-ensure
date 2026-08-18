@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+set -euo pipefail
+systemctl --user daemon-reload
+systemctl --user enable --now limad-drop.service
+systemctl --user is-active --quiet limad-drop.service

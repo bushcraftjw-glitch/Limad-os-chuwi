@@ -77,7 +77,7 @@ first_login = (ROOT / 'build/rootfs/usr/local/bin/limad-base1-first-login').read
 for token in (
     'CORE_MARKER=', 'AUX_MARKER=', 'sleep 3',
     "dock-position \"'BOTTOM'\"", 'extend-height false',
-    "icon-theme \"'LiMaD'\"", 'gnome-extensions enable limad-menu@limad.local',
+    "icon-theme \"'LiMaD'\"", 'enable_extension_reliably limad-menu@limad.local',
     'always-center-icons true', 'show-apps-always-in-the-edge false', 'verify_favorites',
 ):
     if token not in first_login:

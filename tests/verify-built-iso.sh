@@ -32,6 +32,8 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/e
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/limad-menu@limad.local/extension.js "$TMP/limad-menu-extension.js" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/icons/hicolor/256x256/apps/de.limad.Study.png "$TMP/hicolor-study.png" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/lib/systemd/user/limad-link.service "$TMP/limad-link.service" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/lib/systemd/user/limad-drop.service "$TMP/limad-drop.service" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-lidrop-status-ensure "$TMP/limad-lidrop-status-ensure" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-link-health-check "$TMP/limad-link-health-check" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-drop/web/app.js "$TMP/lidrop-app.js" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-drop/limad_dropd.py "$TMP/lidrop-daemon.py" >/dev/null 2>&1
@@ -53,7 +55,7 @@ grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
 grep -Fq 'smbios --type 1 --get-string 5 --set limad_system_product' "$TMP/grub.cfg"
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v19"' "$TMP/limad-release"
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v20"' "$TMP/limad-release"
 grep -Fq '[Icon Theme]' "$TMP/index.theme"
 test -s "$TMP/gtk4.css"
 grep -Fq 'windowcontrols button.close' "$TMP/gtk4.css"
@@ -67,6 +69,9 @@ grep -Fq 'Main.panel.addToStatusArea(this.uuid, this._indicator);' "$TMP/lilink-
 grep -Fq 'Main.panel.addToStatusArea(this.uuid, this._indicator);' "$TMP/lidrop-extension.js"
 grep -Fq "Main.panel.addToStatusArea(this.uuid, this._indicator, 0, 'left');" "$TMP/limad-menu-extension.js"
 grep -Fq 'ExecStart=/usr/bin/python3 /usr/share/limad-link/daemon.py' "$TMP/limad-link.service"
+grep -Fq 'ExecStart=/usr/local/bin/limad-dropd' "$TMP/limad-drop.service"
+grep -Fq 'WantedBy=default.target' "$TMP/limad-drop.service"
+grep -Fq 'systemctl --user enable --now limad-drop.service' "$TMP/limad-lidrop-status-ensure"
 grep -Fq 'systemctl --user enable --now limad-link.service' "$TMP/limad-link-health-check"
 if grep -Eqi 'airdrop|opendrop|awdl|owl' "$TMP/lidrop-app.js" "$TMP/lidrop-daemon.py"; then
     echo 'ERROR: AirDrop compatibility remains in built ISO LiDrop UI/backend' >&2
@@ -95,7 +100,7 @@ for marker in \
     'LiMaD OS Installer' \
     'Willkommen bei LiMaD OS 3.0'; do
     if ! grep -aFq "$marker" "$TMP/initrd"; then
-        echo "ERROR: V19 initrd marker missing: $marker" >&2
+        echo "ERROR: V20 initrd marker missing: $marker" >&2
         exit 1
     fi
 done

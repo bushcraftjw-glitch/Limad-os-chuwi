@@ -14,18 +14,26 @@ export default class LiMaDMenuExtension extends Extension {
         }
     }
 
+    _createLogo() {
+        const logoPath = '/usr/share/icons/LiMaD/24x24/apps/de.limad.Logo.png';
+        if (Gio.File.new_for_path(logoPath).query_exists(null)) {
+            return new St.Icon({
+                gicon: Gio.icon_new_for_string(logoPath),
+                icon_size: 18,
+                style_class: 'system-status-icon',
+            });
+        }
+        return new St.Label({
+            text: 'L',
+            style: 'font-weight: 700; padding: 0 6px;',
+        });
+    }
+
     enable() {
         this._activities = Main.panel.statusArea.activities ?? null;
         this._activities?.hide();
-
         this._indicator = new PanelMenu.Button(0.0, this.metadata.name, false);
-        const icon = new St.Icon({
-            gicon: Gio.icon_new_for_string('/usr/share/icons/LiMaD/24x24/apps/de.limad.Logo.png'),
-            icon_size: 18,
-            style_class: 'system-status-icon',
-        });
-        this._indicator.add_child(icon);
-
+        this._indicator.add_child(this._createLogo());
         this._indicator.menu.addAction('Über LiMaD OS', () => this._spawn(['/usr/local/bin/limad-systeminfo']));
         this._indicator.menu.addAction('Willkommen bei LiMaD', () => this._spawn(['/usr/local/bin/limad-welcome']));
         this._indicator.menu.addAction('Einstellungen', () => this._spawn(['/usr/bin/gnome-control-center']));
@@ -36,7 +44,6 @@ export default class LiMaDMenuExtension extends Extension {
         this._indicator.menu.addAction('Abmelden', () => this._spawn(['/usr/bin/gnome-session-quit', '--logout', '--no-prompt']));
         this._indicator.menu.addAction('Neustart', () => this._spawn(['/usr/bin/systemctl', 'reboot']));
         this._indicator.menu.addAction('Ausschalten', () => this._spawn(['/usr/bin/systemctl', 'poweroff']));
-
         Main.panel.addToStatusArea(this.uuid, this._indicator, 0, 'left');
     }
 

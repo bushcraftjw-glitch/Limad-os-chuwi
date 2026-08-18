@@ -25,6 +25,8 @@ required=(
     "$ROOTFS/usr/share/gnome-shell/extensions/limad-menu@limad.local/metadata.json"
     "$ROOTFS/usr/share/gnome-shell/extensions/limad-menu@limad.local/extension.js"
     "$ROOTFS/usr/lib/systemd/user/limad-link.service"
+    "$ROOTFS/usr/lib/systemd/user/limad-drop.service"
+    "$ROOTFS/usr/local/bin/limad-lidrop-status-ensure"
     "$ROOTFS/usr/local/bin/limad-link-health-check"
     "$ROOTFS/usr/local/bin/limad-link-status-ensure"
     "$ROOTFS/usr/share/limad-link/app.py"
@@ -139,6 +141,9 @@ grep -Fq 'themes/spinner' "$ROOTFS/usr/local/bin/limad-design-system"
 grep -Fq 'update-initramfs -u' "$ROOTFS/usr/local/bin/limad-design-system"
 
 grep -Fq 'ExecStart=/usr/bin/python3 /usr/share/limad-link/daemon.py' "$ROOTFS/usr/lib/systemd/user/limad-link.service"
+grep -Fq 'ExecStart=/usr/local/bin/limad-dropd' "$ROOTFS/usr/lib/systemd/user/limad-drop.service"
+grep -Fq 'WantedBy=default.target' "$ROOTFS/usr/lib/systemd/user/limad-drop.service"
+grep -Fq 'systemctl --user enable --now limad-drop.service' "$ROOTFS/usr/local/bin/limad-lidrop-status-ensure"
 grep -Fq '/usr/local/bin/limad-link-health-check' "$ROOTFS/usr/local/bin/limad-link-status-ensure"
 if grep -Eqi 'airdrop|opendrop|awdl|owl' "$ROOTFS/usr/share/limad-drop/web/app.js" "$ROOTFS/usr/share/limad-drop/limad_dropd.py"; then
     echo "ERROR: AirDrop compatibility code remains in active LiDrop payload" >&2
@@ -150,7 +155,7 @@ for removed in limad-airdrop-check limad-airdrop-control limad-airdrop-session l
         exit 1
     fi
 done
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v19"' "$ROOTFS/etc/limad-release"
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v20"' "$ROOTFS/etc/limad-release"
 grep -Fq 'iMac17,1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$PAYLOAD/install-target.sh"

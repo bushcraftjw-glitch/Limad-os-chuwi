@@ -7,8 +7,8 @@ source "$ROOT/config/build.env"
 [ "$UBUNTU_ISO_NAME" = "ubuntu-26.04-desktop-amd64.iso" ]
 [ "$UBUNTU_ISO_SHA256" = "487f87faaf547ea30e0aba4d5b53346292571256b25333a978db1692bcee9dd2" ]
 [ "$WHITESUR_REF" = "1b356fe48ad5d05fb2ca6be071efe6801df3ac72" ]
-[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V19-amd64.iso" ]
-[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v19" ]
+[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V20-amd64.iso" ]
+[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v20" ]
 
 grep -Fq 'id: ubuntu-desktop' "$ROOT/config/autoinstall.yaml"
 if grep -Fq 'ubuntu-desktop-minimal' "$ROOT/config/autoinstall.yaml"; then
@@ -45,7 +45,7 @@ grep -Fq '"shell-version": ["50"]' "$ROOT/build/rootfs/usr/share/gnome-shell/ext
 grep -Fq 'Main.panel.addToStatusArea(this.uuid, this._indicator);' "$ROOT/build/rootfs/usr/share/gnome-shell/extensions/lilink@limad.local/extension.js"
 grep -Fq 'Main.panel.addToStatusArea(this.uuid, this._indicator);' "$ROOT/build/rootfs/usr/share/gnome-shell/extensions/lidrop@limad.local/extension.js"
 grep -Fq 'limad-lidrop-status-ensure' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
-grep -Fq 'gnome-extensions enable limad-menu@limad.local' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
+grep -Fq 'enable_extension_reliably limad-menu@limad.local' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
 grep -Fq 'this._activities?.hide();' "$ROOT/build/rootfs/usr/share/gnome-shell/extensions/limad-menu@limad.local/extension.js"
 grep -Fq '/usr/local/bin/limad-desktop-core-system' "$ROOT/build/install-target.sh"
 grep -Fq 'CORE_MARKER=' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
@@ -54,6 +54,11 @@ grep -Fq "python3 -B \"\$ROOT/tools/strip-lidrop-airdrop.py\" \"\$PAYLOAD/rootfs
 test -s "$ROOT/build/rootfs/usr/lib/systemd/user/limad-link.service"
 grep -Fq 'ExecStart=/usr/bin/python3 /usr/share/limad-link/daemon.py' "$ROOT/build/rootfs/usr/lib/systemd/user/limad-link.service"
 grep -Fq 'systemctl --global enable limad-link.service' "$ROOT/build/install-target.sh"
+test -s "$ROOT/build/rootfs/usr/lib/systemd/user/limad-drop.service"
+grep -Fq 'ExecStart=/usr/local/bin/limad-dropd' "$ROOT/build/rootfs/usr/lib/systemd/user/limad-drop.service"
+grep -Fq 'WantedBy=default.target' "$ROOT/build/rootfs/usr/lib/systemd/user/limad-drop.service"
+grep -Fq 'systemctl --global enable limad-drop.service' "$ROOT/build/install-target.sh"
+grep -Fq 'systemctl --user enable --now limad-drop.service' "$ROOT/build/rootfs/usr/local/bin/limad-lidrop-status-ensure"
 grep -Fq '/usr/local/bin/limad-link-health-check' "$ROOT/build/rootfs/usr/local/bin/limad-link-status-ensure"
 for package in avahi-utils deskflow freerdp-x11 gnome-remote-desktop openssl qrencode; do
     grep -Fq "    $package" "$ROOT/build/rootfs/usr/local/bin/limad-runtime-deps"
@@ -113,6 +118,7 @@ test -x "$ROOT/build/install-target.sh"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-link-health-check"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-link-status-ensure"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-lidrop-status-ensure"
 
 (
     cd "$ROOT/assets/firmware"
@@ -135,6 +141,7 @@ python3 -B "$ROOT/tests/test-status-and-titlebuttons.py"
 python3 -B "$ROOT/tests/test-installer-branding.py"
 python3 -B "$ROOT/tests/test-imac17-firmware.py"
 python3 -B "$ROOT/tests/test-lilink-and-lidrop-scope.py"
+python3 -B "$ROOT/tests/test-v20-menu-lidrop.py"
 
 grep -Fq "INSTALL_SOURCES_ORIGINAL=\"\$CACHE/install-sources.original.yaml\"" "$ROOT/build/build-iso.sh"
 grep -Fq "MD5_ORIGINAL=\"\$CACHE/md5sum.original.txt\"" "$ROOT/build/build-iso.sh"

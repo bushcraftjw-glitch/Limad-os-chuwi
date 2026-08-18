@@ -44,6 +44,10 @@ if [ -f /usr/lib/systemd/user/limad-link.service ]; then
     systemctl --global enable limad-link.service
 fi
 
+if [ -f /usr/lib/systemd/user/limad-drop.service ]; then
+    systemctl --global enable limad-drop.service
+fi
+
 if systemctl list-unit-files avahi-daemon.service >/dev/null 2>&1; then
     systemctl enable avahi-daemon.service || true
 fi
@@ -53,4 +57,4 @@ fi
 /usr/local/bin/limad-design-system || true
 
 printf '%s
-' "LiMaD OS BASE1 V19 design target integration complete." > /var/log/limad-base1-install.log
+' "LiMaD OS BASE1 V20 design target integration complete." > /var/log/limad-base1-install.log

@@ -1,14 +1,22 @@
-/* LiMaD OS GTK4 titlebutton overlay. Native geometry remains untouched. */
 windowcontrols button.close,
 windowcontrols button.minimize,
-windowcontrols button.maximize {
+windowcontrols button.maximize,
+headerbar windowcontrols button.close,
+headerbar windowcontrols button.minimize,
+headerbar windowcontrols button.maximize,
+windowcontrols > button.close,
+windowcontrols > button.minimize,
+windowcontrols > button.maximize {
   background-repeat: no-repeat;
   background-position: center;
   background-size: 12px 12px;
 }
-windowcontrols button.close { background-image: url("limad-assets/close.svg"); }
-windowcontrols button.minimize { background-image: url("limad-assets/minimize.svg"); }
-windowcontrols button.maximize { background-image: url("limad-assets/maximize.svg"); }
+windowcontrols button.close, headerbar windowcontrols button.close, windowcontrols > button.close { background-image: url("limad-assets/close.svg"); }
+windowcontrols button.minimize, headerbar windowcontrols button.minimize, windowcontrols > button.minimize { background-image: url("limad-assets/minimize.svg"); }
+windowcontrols button.maximize, headerbar windowcontrols button.maximize, windowcontrols > button.maximize { background-image: url("limad-assets/maximize.svg"); }
 windowcontrols button.close image,
 windowcontrols button.minimize image,
-windowcontrols button.maximize image { opacity: 0; }
+windowcontrols button.maximize image,
+headerbar windowcontrols button.close image,
+headerbar windowcontrols button.minimize image,
+headerbar windowcontrols button.maximize image { opacity: 0; }

@@ -143,7 +143,7 @@ chmod 0755 "$PAYLOAD/install-target.sh"
 
 mkdir -p "$PAYLOAD/rootfs/usr/share/doc/limad-os-base1"
 cat > "$PAYLOAD/rootfs/usr/share/doc/limad-os-base1/BUILD-INFO.txt" <<EOF
-LiMaD OS 3.0 RC1 BASE1 DESIGN V19
+LiMaD OS 3.0 RC1 BASE1 DESIGN V20
 Base: Ubuntu 26.04 LTS Desktop FULL
 Ubuntu SHA256: $UBUNTU_ISO_SHA256
 WhiteSur commit: $WHITESUR_REF
@@ -152,7 +152,7 @@ LiMaD icons SHA256: $ICONS_ZIP_SHA256
 LiMaD wallpapers SHA256: $WALLPAPERS_ZIP_SHA256
 iMac17,1 firmware source: linux-firmware tag 20250509, Radeon Bonaire firmware
 GTK4: stock libadwaita with LiMaD traffic-light titlebutton override.
-LiDrop: browser/local-device transfer enabled; AirDrop/OpenDrop/OWL/AWDL compatibility intentionally removed in V19.
+LiDrop: browser/local-device transfer enabled; AirDrop/OpenDrop/OWL/AWDL compatibility intentionally removed in V20.
 EOF
 
 for removed in \
