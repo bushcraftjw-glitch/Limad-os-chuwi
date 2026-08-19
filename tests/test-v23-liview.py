@@ -86,6 +86,12 @@ repo_builder = (ROOT / 'build/prepare-liview-offline-repo.sh').read_text()
 assert '< <(find' not in repo_builder, 'LiView repo builder must not use early-closing find process substitutions'
 assert 'DEB_FILES=("$DESTINATION"/*.deb)' in repo_builder
 assert 'SCAN_LOG="$(mktemp)"' in repo_builder
+assert 'resolute-updates main restricted universe multiverse' in repo_builder
+assert 'resolute-security main restricted universe multiverse' in repo_builder
+
+deps = (ROOTFS / 'usr/local/bin/limad-liview-deps').read_text()
+assert '/etc/apt/sources.list.d/limad-liview-offline.' in deps
+assert 'LiView combined package resolution failed' in deps
 
 installer = (ROOT / 'build/install-target.sh').read_text()
 assert '/usr/local/bin/limad-liview-deps' in installer

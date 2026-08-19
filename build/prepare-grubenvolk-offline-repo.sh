@@ -36,6 +36,8 @@ mkdir -p \
 
 cat > "$APT_ROOT/etc/apt/sources.list" <<EOF_SOURCES
 deb [arch=amd64 signed-by=$KEYRING] http://archive.ubuntu.com/ubuntu resolute main restricted universe multiverse
+deb [arch=amd64 signed-by=$KEYRING] http://archive.ubuntu.com/ubuntu resolute-updates main restricted universe multiverse
+deb [arch=amd64 signed-by=$KEYRING] http://security.ubuntu.com/ubuntu resolute-security main restricted universe multiverse
 EOF_SOURCES
 
 APT_OPTIONS=(

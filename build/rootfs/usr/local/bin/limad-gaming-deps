@@ -3,7 +3,7 @@ set -euo pipefail
 
 PACKAGE_FILE="/usr/share/limad/gaming/REQUIRED-PACKAGES.txt"
 OFFLINE_REPO="/usr/share/limad/offline/gaming"
-TEMP_SOURCE="$(mktemp)"
+TEMP_SOURCE="$(mktemp /etc/apt/sources.list.d/limad-gaming-offline.XXXXXX.list)"
 trap 'rm -f "$TEMP_SOURCE"' EXIT
 
 if [ ! -r "$PACKAGE_FILE" ]; then
@@ -40,13 +40,22 @@ if [ "${#missing[@]}" -gt 0 ]; then
             -o "Dir::Etc::sourceparts=-" \
             -o "Acquire::Languages=none" \
             update
-        DEBIAN_FRONTEND=noninteractive apt-get \
-            -o "Dir::Etc::sourcelist=$TEMP_SOURCE" \
-            -o "Dir::Etc::sourceparts=-" \
-            -o "Acquire::Languages=none" \
+        if ! apt-get -o "Acquire::Languages=none" update; then
+            echo "WARNING: Ubuntu package indexes unavailable; using embedded offline repository." >&2
+        fi
+        if ! DEBIAN_FRONTEND=noninteractive apt-get \
             --no-install-recommends \
             --yes \
-            install "${missing[@]}"
+            install "${missing[@]}"; then
+            echo "WARNING: LiMaD Gaming combined package resolution failed; retrying from embedded offline repository only." >&2
+            DEBIAN_FRONTEND=noninteractive apt-get \
+                -o "Dir::Etc::sourcelist=$TEMP_SOURCE" \
+                -o "Dir::Etc::sourceparts=-" \
+                -o "Acquire::Languages=none" \
+                --no-install-recommends \
+                --yes \
+                install "${missing[@]}"
+        fi
     else
         apt-get update
         DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends --yes install "${missing[@]}"

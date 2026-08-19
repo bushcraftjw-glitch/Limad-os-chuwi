@@ -44,6 +44,8 @@ for needle in [
     'libvulkan1',
     'libglx-mesa0',
     'dpkg-scanpackages --multiversion',
+    'resolute-updates main restricted universe multiverse',
+    'resolute-security main restricted universe multiverse',
 ]:
     if needle not in repo:
         raise AssertionError(f'gaming repo builder missing {needle!r}')
@@ -60,6 +62,8 @@ for needle in [
     'mangohud',
     'gamescope',
     'vulkaninfo',
+    '/etc/apt/sources.list.d/limad-gaming-offline.',
+    'LiMaD Gaming combined package resolution failed',
 ]:
     if needle not in deps:
         raise AssertionError(f'gaming dependency helper missing {needle!r}')

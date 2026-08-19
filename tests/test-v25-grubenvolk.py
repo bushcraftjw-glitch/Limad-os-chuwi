@@ -128,6 +128,8 @@ for package in ("python3", "python3-gi", "gir1.2-gtk-4.0", "gir1.2-webkit-6.0"):
 repo = (ROOT / "build/prepare-grubenvolk-offline-repo.sh").read_text()
 for needle in (
     "resolute main restricted universe multiverse",
+    "resolute-updates main restricted universe multiverse",
+    "resolute-security main restricted universe multiverse",
     "--download-only",
     "--no-install-recommends",
     "dpkg-scanpackages --multiversion",
@@ -145,6 +147,8 @@ for needle in (
     'gi.require_version("WebKit", "6.0")',
     'APP_ID == "de.limad.Grubenvolk"',
     'VERSION == "3.6.7"',
+    "/etc/apt/sources.list.d/limad-grubenvolk-offline.",
+    "GRUBENVOLK combined package resolution failed",
     "GRUBENVOLK dependencies: PASS",
 ):
     if needle not in deps:
