@@ -6,6 +6,7 @@ PACKAGES=(
     avahi-utils
     deskflow
     freerdp-x11
+    flatpak
     gnome-remote-desktop
     openssl
     qrencode
@@ -13,11 +14,33 @@ PACKAGES=(
     gir1.2-gstreamer-1.0
     gir1.2-gtk-4.0
     gir1.2-webkit-6.0
+    gstreamer1.0-gtk4
+    gstreamer1.0-libav
+    gstreamer1.0-plugins-bad
+    gstreamer1.0-plugins-base
+    gstreamer1.0-plugins-good
+    gstreamer1.0-plugins-ugly
+    gstreamer1.0-tools
     gnome-shell-extension-user-theme
     python3-cairo
     python3-cryptography
     python3-gi
 )
+
+if [ -s /usr/share/liview/dependencies.txt ]; then
+    mapfile -t LIVIEW_PACKAGES < <(grep -Ev '^[[:space:]]*(#|$)' /usr/share/liview/dependencies.txt)
+    PACKAGES+=("${LIVIEW_PACKAGES[@]}")
+fi
+
+declare -A SEEN=()
+UNIQUE_PACKAGES=()
+for package in "${PACKAGES[@]}"; do
+    if [ -z "${SEEN[$package]+x}" ]; then
+        SEEN[$package]=1
+        UNIQUE_PACKAGES+=("$package")
+    fi
+done
+PACKAGES=("${UNIQUE_PACKAGES[@]}")
 
 missing=()
 for package in "${PACKAGES[@]}"; do

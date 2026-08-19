@@ -24,6 +24,21 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/gtk4/gt
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/gtk4/limad-assets/close.svg "$TMP/close.svg" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-design-system "$TMP/design-system" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-desktop-core-system "$TMP/desktop-core-system" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-required-user-apps "$TMP/required-user-apps" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-titlebuttons-ensure "$TMP/titlebuttons-ensure" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limusic "$TMP/limusic" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limusic/VERSION "$TMP/limusic-version" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limusic/src/limusic/adblock_engine.py "$TMP/limusic-adblock-engine.py" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limusic/data/adblock-scriptlet-rules.json "$TMP/limusic-adblock-rules.json" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-updater/apps.json "$TMP/updater-apps.json" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/applications/de.limad.LiView.desktop "$TMP/liview.desktop" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/liview/VERSION "$TMP/liview-version" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/icons/hicolor/512x512/apps/de.limad.LiView.png "$TMP/liview-icon.png" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-liview-selftest "$TMP/liview-selftest" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-liview-mime-defaults "$TMP/liview-mime-defaults" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/offline-packages "$TMP/offline-packages" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-notes/app.py "$TMP/linotes-app.py" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-windows/installer.py "$TMP/windows-installer.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/lilink@limad.local/metadata.json "$TMP/lilink-metadata.json" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/lilink@limad.local/extension.js "$TMP/lilink-extension.js" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/lidrop@limad.local/metadata.json "$TMP/lidrop-metadata.json" >/dev/null 2>&1
@@ -55,7 +70,7 @@ grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
 grep -Fq 'smbios --type 1 --get-string 5 --set limad_system_product' "$TMP/grub.cfg"
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v20"' "$TMP/limad-release"
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v23"' "$TMP/limad-release"
 grep -Fq '[Icon Theme]' "$TMP/index.theme"
 test -s "$TMP/gtk4.css"
 grep -Fq 'windowcontrols button.close' "$TMP/gtk4.css"
@@ -83,7 +98,40 @@ grep -Fq "icon-theme='LiMaD'" "$TMP/desktop-core-system"
 grep -Fq "always-center-icons=true" "$TMP/desktop-core-system"
 grep -Fq "show-apps-always-in-the-edge=false" "$TMP/desktop-core-system"
 grep -Fq "[org/gnome/shell]" "$TMP/desktop-core-system"
-grep -Fq "favorite-apps=['firefox_firefox.desktop'" "$TMP/desktop-core-system"
+grep -Fq "favorite-apps=['app.zen_browser.zen.desktop'" "$TMP/desktop-core-system"
+if grep -Fq 'firefox_firefox.desktop' "$TMP/desktop-core-system"; then
+    echo 'ERROR: Firefox remains in inherited V22 Dock defaults' >&2
+    exit 1
+fi
+grep -Fq 'app.zen_browser.zen' "$TMP/required-user-apps"
+grep -Fq 'com.github.wwmm.easyeffects' "$TMP/required-user-apps"
+grep -Fq 'limad-sync-gtk4-theme' "$TMP/titlebuttons-ensure"
+grep -Fq 'de.limad.LiMusic' "$TMP/updater-apps.json"
+grep -Fq 'de.limad.LiView' "$TMP/updater-apps.json"
+[ "$(cat "$TMP/liview-version")" = "1.0.0" ]
+grep -Fq 'Exec=/usr/bin/liview %F' "$TMP/liview.desktop"
+grep -Fq 'StartupWMClass=de.limad.LiView' "$TMP/liview.desktop"
+test -s "$TMP/liview-icon.png"
+grep -Fq 'LiView system selftest: PASS' "$TMP/liview-selftest"
+grep -Fq '/etc/xdg/mimeapps.list' "$TMP/liview-mime-defaults"
+grep -Fq '/usr/local/bin/limad-install-offline-packages' "$TMP/install-target.sh"
+grep -Fq '/usr/local/bin/limad-liview-mime-defaults' "$TMP/install-target.sh"
+grep -Fq '/usr/local/bin/limad-liview-selftest' "$TMP/install-target.sh"
+grep -Fq '/cdrom/limad/offline-packages/.' "$TMP/autoinstall.yaml"
+test -s "$TMP/offline-packages/Packages"
+test -s "$TMP/offline-packages/DIRECT-PACKAGES.txt"
+test -s "$TMP/offline-packages/SHA256SUMS.txt"
+if ! find "$TMP/offline-packages" -maxdepth 1 -type f -name '*.deb' -print -quit | grep -q .; then
+    echo 'ERROR: built ISO has no LiView offline DEB packages' >&2
+    exit 1
+fi
+( cd "$TMP/offline-packages" && sha256sum -c SHA256SUMS.txt >/dev/null )
+cmp -s "$ROOT/config/liview-packages.txt" "$TMP/offline-packages/DIRECT-PACKAGES.txt"
+[ "$(cat "$TMP/limusic-version")" = "0.3.22" ]
+grep -Fq 'ENGINE_BOOTSTRAP_SCRIPT' "$TMP/limusic-adblock-engine.py"
+grep -Fq 'trusted-replace-fetch-response' "$TMP/limusic-adblock-rules.json"
+grep -Fq 'header.set_show_title_buttons(True)' "$TMP/linotes-app.py"
+grep -Fq 'header.set_show_start_title_buttons(True)' "$TMP/windows-installer.py"
 grep -Fq "'de.limad.Mail.desktop'" "$TMP/desktop-core-system"
 grep -Fq "'de.limad.Drop.desktop'" "$TMP/desktop-core-system"
 grep -Fq "'de.limad.Link.desktop'" "$TMP/desktop-core-system"
@@ -100,7 +148,7 @@ for marker in \
     'LiMaD OS Installer' \
     'Willkommen bei LiMaD OS 3.0'; do
     if ! grep -aFq "$marker" "$TMP/initrd"; then
-        echo "ERROR: V20 initrd marker missing: $marker" >&2
+        echo "ERROR: V23 initrd marker missing: $marker" >&2
         exit 1
     fi
 done

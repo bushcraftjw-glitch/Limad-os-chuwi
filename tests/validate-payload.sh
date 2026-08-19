@@ -50,6 +50,32 @@ required=(
     "$ROOTFS/usr/share/doc/limad-os-base1/firmware/LICENSE.radeon"
     "$ROOTFS/usr/local/bin/limad-base1-first-login"
     "$ROOTFS/usr/local/bin/limad-sync-gtk4-theme"
+    "$ROOTFS/usr/local/bin/limad-titlebuttons-ensure"
+    "$ROOTFS/usr/local/bin/limad-required-user-apps"
+    "$ROOTFS/usr/local/bin/limusic"
+    "$ROOTFS/etc/xdg/autostart/limad-titlebuttons-ensure.desktop"
+    "$ROOTFS/etc/xdg/autostart/limad-required-user-apps.desktop"
+    "$ROOTFS/usr/share/limusic/VERSION"
+    "$ROOTFS/usr/share/limusic/data/adblock-scriptlet-rules.json"
+    "$ROOTFS/usr/share/limusic/data/youtube-adblock-webkit.json"
+    "$ROOTFS/usr/share/limusic/src/limusic/adblock_engine.py"
+    "$ROOTFS/usr/share/limusic/src/limusic/app.py"
+    "$ROOTFS/usr/bin/liview"
+    "$ROOTFS/usr/share/applications/de.limad.LiView.desktop"
+    "$ROOTFS/usr/share/liview/VERSION"
+    "$ROOTFS/usr/share/liview/liview/app.py"
+    "$ROOTFS/usr/share/liview/liview/documents.py"
+    "$ROOTFS/usr/share/liview/liview/stl.py"
+    "$ROOTFS/usr/share/liview/liview/video.py"
+    "$ROOTFS/usr/share/mime/packages/de.limad.LiView.xml"
+    "$ROOTFS/usr/local/bin/limad-install-offline-packages"
+    "$ROOTFS/usr/local/bin/limad-liview-mime-defaults"
+    "$ROOTFS/usr/local/bin/limad-liview-selftest"
+    "$PAYLOAD/offline-packages/Packages"
+    "$PAYLOAD/offline-packages/Packages.gz"
+    "$PAYLOAD/offline-packages/DIRECT-PACKAGES.txt"
+    "$PAYLOAD/offline-packages/SHA256SUMS.txt"
+    "$ROOTFS/usr/share/limad-updater/apps.json"
     "$ROOTFS/usr/local/bin/limad-design-system"
     "$ROOTFS/usr/local/bin/limad-desktop-core-system"
     "$ROOTFS/etc/limad-release"
@@ -62,11 +88,26 @@ for path in "${required[@]}"; do
     fi
 done
 
+if ! find "$PAYLOAD/offline-packages" -maxdepth 1 -type f -name '*.deb' -print -quit | grep -q .; then
+    echo "ERROR: LiView offline DEB repository contains no packages" >&2
+    exit 1
+fi
+(
+    cd "$PAYLOAD/offline-packages"
+    sha256sum -c SHA256SUMS.txt >/dev/null
+)
+cmp -s "$PAYLOAD/offline-packages/DIRECT-PACKAGES.txt" "$ROOT/config/liview-packages.txt" || {
+    echo "ERROR: LiView offline direct package list differs from source package list" >&2
+    exit 1
+}
+
 applications=(
     de.limad.Cut.desktop
     de.limad.Drop.desktop
     de.limad.Klang.desktop
     de.limad.Link.desktop
+    de.limad.LiMusic.desktop
+    de.limad.LiView.desktop
     de.limad.Mail.desktop
     de.limad.Notes.desktop
     de.limad.Recovery.desktop
@@ -155,7 +196,22 @@ for removed in limad-airdrop-check limad-airdrop-control limad-airdrop-session l
         exit 1
     fi
 done
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v20"' "$ROOTFS/etc/limad-release"
+grep -Fq 'header.set_show_title_buttons(True)' "$ROOTFS/usr/share/limad-notes/app.py"
+grep -Fq 'header.set_decoration_layout("close,minimize,maximize:")' "$ROOTFS/usr/share/limad-notes/app.py"
+grep -Fq 'header.set_show_start_title_buttons(True)' "$ROOTFS/usr/share/limad-windows/installer.py"
+grep -Fq 'header.set_show_end_title_buttons(False)' "$ROOTFS/usr/share/limad-windows/installer.py"
+grep -Fq 'app.zen_browser.zen' "$ROOTFS/usr/local/bin/limad-required-user-apps"
+grep -Fq 'com.github.wwmm.easyeffects' "$ROOTFS/usr/local/bin/limad-required-user-apps"
+grep -Fq 'de.limad.LiMusic' "$ROOTFS/usr/share/limad-updater/apps.json"
+grep -Fq 'de.limad.LiView' "$ROOTFS/usr/share/limad-updater/apps.json"
+[ "$(cat "$ROOTFS/usr/share/liview/VERSION")" = "1.0.0" ]
+grep -Fq 'Exec=/usr/bin/liview %F' "$ROOTFS/usr/share/applications/de.limad.LiView.desktop"
+grep -Fq 'StartupWMClass=de.limad.LiView' "$ROOTFS/usr/share/applications/de.limad.LiView.desktop"
+grep -Fq '/usr/local/bin/limad-install-offline-packages' "$PAYLOAD/install-target.sh"
+grep -Fq '/usr/local/bin/limad-liview-mime-defaults' "$PAYLOAD/install-target.sh"
+grep -Fq '/usr/local/bin/limad-liview-selftest' "$PAYLOAD/install-target.sh"
+[ "$(cat "$ROOTFS/usr/share/limusic/VERSION")" = "0.3.22" ]
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v23"' "$ROOTFS/etc/limad-release"
 grep -Fq 'iMac17,1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$PAYLOAD/install-target.sh"

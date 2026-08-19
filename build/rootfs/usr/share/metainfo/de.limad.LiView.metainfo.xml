@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>de.limad.LiView</id>
+  <name>LiView</name>
+  <summary>Native Dateivorschau und Bearbeitung für Dokumente, Bilder, Videos und 3D-Modelle</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>LicenseRef-proprietary</project_license>
+  <description>
+    <p>LiView zeigt und bearbeitet PDF-Dokumente und Bilder nativ in LiMaD OS und öffnet Videos sowie 3D-Modelle. Bildbearbeitung umfasst Zuschneiden, Zeichnen, Formen und Text. PDF-Anmerkungen werden als echte PDF-Annotationen gespeichert. AcroForm-Formulare können ausgefüllt und handschriftliche Unterschriften in PDF-Dokumente oder Bilder eingesetzt werden. LiView bietet Dateiinformationen, OCR, passwortgeschützte PDFs, PDF-Optimierung, PDF-Verkleinerung und sichere Schwärzung. Unterstützt werden außerdem zahlreiche Video-Container und Codecs über GStreamer.</p>
+  </description>
+  <launchable type="desktop-id">de.limad.LiView.desktop</launchable>
+  <provides>
+    <mediatype>application/pdf</mediatype>
+    <mediatype>image/png</mediatype>
+    <mediatype>image/jpeg</mediatype>
+    <mediatype>image/webp</mediatype>
+    <mediatype>image/tiff</mediatype>
+    <mediatype>image/gif</mediatype>
+    <mediatype>image/avif</mediatype>
+    <mediatype>image/heic</mediatype>
+    <mediatype>image/heif</mediatype>
+    <mediatype>image/svg+xml</mediatype>
+    <mediatype>model/stl</mediatype>
+    <mediatype>model/obj</mediatype>
+    <mediatype>model/3mf</mediatype>
+    <mediatype>video/mp4</mediatype>
+    <mediatype>video/quicktime</mediatype>
+    <mediatype>video/x-matroska</mediatype>
+    <mediatype>video/webm</mediatype>
+    <mediatype>video/x-msvideo</mediatype>
+    <mediatype>video/mpeg</mediatype>
+    <mediatype>video/ogg</mediatype>
+  </provides>
+  <releases>
+    <release version="1.0.0" date="2026-08-19"/>
+    <release version="0.9.0" date="2026-08-19"/>
+    <release version="0.8.0" date="2026-08-19"/>
+    <release version="0.7.1" date="2026-08-19"/>
+    <release version="0.6.0" date="2026-08-19"/>
+  </releases>
+</component>

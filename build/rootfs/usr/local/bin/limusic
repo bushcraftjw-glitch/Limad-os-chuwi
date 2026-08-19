@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+SYSTEM_ROOT="/usr/share/limusic"
+USER_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/limad-updater/apps/de.limad.LiMusic/current/payload"
+APP_ROOT="$(/usr/local/libexec/limad-select-app-root "$SYSTEM_ROOT" "$USER_ROOT" "START-LIMUSIC.sh")"
+exec /usr/bin/bash "$APP_ROOT/START-LIMUSIC.sh" "$@"

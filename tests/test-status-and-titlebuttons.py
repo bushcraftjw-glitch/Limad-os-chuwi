@@ -94,7 +94,7 @@ for token in (
     "icon-theme='LiMaD'", "gtk-theme='WhiteSur-Dark'",
     "button-layout='close,minimize,maximize:'", "dock-position='BOTTOM'",
     'extend-height=false', 'dash-max-icon-size=60',
-    "[org/gnome/shell]", "favorite-apps=['firefox_firefox.desktop'",
+    "[org/gnome/shell]", "favorite-apps=['app.zen_browser.zen.desktop'",
     "'de.limad.Mail.desktop'", "'de.limad.Cut.desktop'",
     "'de.limad.Study.desktop'", "'de.limad.Drop.desktop'",
     "'de.limad.Link.desktop'", "'de.limad.Welcome.desktop'",

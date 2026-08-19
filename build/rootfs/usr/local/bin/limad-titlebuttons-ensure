@@ -1,0 +1,12 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+LAYOUT="'close,minimize,maximize:'"
+
+if command -v gsettings >/dev/null 2>&1 \
+    && gsettings list-schemas 2>/dev/null | grep -Fxq org.gnome.desktop.wm.preferences \
+    && gsettings writable org.gnome.desktop.wm.preferences button-layout 2>/dev/null | grep -qx true; then
+    gsettings set org.gnome.desktop.wm.preferences button-layout "$LAYOUT"
+fi
+
+/usr/local/bin/limad-sync-gtk4-theme

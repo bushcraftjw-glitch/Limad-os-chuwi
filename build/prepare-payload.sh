@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/config/build.env"
 
 "$ROOT/tools/reassemble-vendor.sh"
+"$ROOT/tools/prepare-offline-packages.sh"
 
 WORK="$ROOT/.cache/payload-work"
 PAYLOAD="$ROOT/.cache/payload"
@@ -13,7 +14,7 @@ ICON_ZIP="$ROOT/.cache/vendor/LiMaD-OS-MASTER-ICON-THEME-V3.2-BUILD-READY.zip"
 WALLPAPER_ZIP="$ROOT/.cache/vendor/LiMaD-4K-Hintergrundbilder-BASE1B.zip"
 
 rm -rf "$WORK" "$PAYLOAD"
-mkdir -p "$WORK/programs" "$WORK/icons" "$WORK/wallpapers" "$PAYLOAD/rootfs"
+mkdir -p "$WORK/programs" "$WORK/icons" "$WORK/wallpapers" "$PAYLOAD/rootfs" "$PAYLOAD/offline-packages"
 
 unzip -q "$PROGRAM_ZIP" -d "$WORK/programs"
 unzip -q "$ICON_ZIP" -d "$WORK/icons"
@@ -33,6 +34,7 @@ ICON_ROOT="$WORK/icons/LiMaD-OS-MASTER-ICON-THEME-V3.2-BUILD-READY"
 
 rsync -a "$PROGRAM_ROOT/filesystem/" "$PAYLOAD/rootfs/"
 python3 -B "$ROOT/tools/strip-lidrop-airdrop.py" "$PAYLOAD/rootfs"
+python3 -B "$ROOT/tools/patch-v22-titlebars.py" "$PAYLOAD/rootfs"
 
 rm -f     "$PAYLOAD/rootfs/etc/systemd/system/limad-x11-tmpfix.service"     "$PAYLOAD/rootfs/etc/xdg/autostart/limad-default-flatpaks.desktop"     "$PAYLOAD/rootfs/etc/xdg/autostart/limad-easyeffects-service.desktop"     "$PAYLOAD/rootfs/etc/xdg/autostart/limad-firefox-theme.desktop"     "$PAYLOAD/rootfs/etc/xdg/autostart/limad-first-login.desktop"     "$PAYLOAD/rootfs/etc/xdg/autostart/limad-lidrop-status.desktop"     "$PAYLOAD/rootfs/etc/xdg/autostart/limad-zen-deutsch.desktop"
 
@@ -138,12 +140,13 @@ install -m 0644 "$ROOT/build/branding/limad-logo-192.png" "$PAYLOAD/rootfs/usr/s
 install -m 0644 "$ROOT/build/branding/limad-logo-256.png" "$PAYLOAD/rootfs/usr/share/limad/branding/limad-logo-256.png"
 
 rsync -a "$ROOT/build/rootfs/" "$PAYLOAD/rootfs/"
+rsync -a "$ROOT/.cache/liview-offline-repo/" "$PAYLOAD/offline-packages/"
 cp "$ROOT/build/install-target.sh" "$PAYLOAD/install-target.sh"
 chmod 0755 "$PAYLOAD/install-target.sh"
 
 mkdir -p "$PAYLOAD/rootfs/usr/share/doc/limad-os-base1"
 cat > "$PAYLOAD/rootfs/usr/share/doc/limad-os-base1/BUILD-INFO.txt" <<EOF
-LiMaD OS 3.0 RC1 BASE1 DESIGN V20
+LiMaD OS 3.0 RC1 BASE1 DESIGN V23
 Base: Ubuntu 26.04 LTS Desktop FULL
 Ubuntu SHA256: $UBUNTU_ISO_SHA256
 WhiteSur commit: $WHITESUR_REF
@@ -152,7 +155,11 @@ LiMaD icons SHA256: $ICONS_ZIP_SHA256
 LiMaD wallpapers SHA256: $WALLPAPERS_ZIP_SHA256
 iMac17,1 firmware source: linux-firmware tag 20250509, Radeon Bonaire firmware
 GTK4: stock libadwaita with LiMaD traffic-light titlebutton override.
-LiDrop: browser/local-device transfer enabled; AirDrop/OpenDrop/OWL/AWDL compatibility intentionally removed in V20.
+LiDrop: browser/local-device transfer enabled; AirDrop/OpenDrop/OWL/AWDL compatibility intentionally removed since V22.
+LiMusic: 0.3.22; runtime dependencies include WebKitGTK 6, GTK4, GStreamer GTK4 sink and common codec plugin sets.
+LiView: 1.0.0; PDF/image/video/3D preview and editing, OCR, forms, signatures, password handling, compression and secure redaction.
+LiView dependencies: embedded Ubuntu 26.04 offline DEB repository with recursive dependency closure; target install is self-tested before completion.
+LiView defaults: system default handler for all MIME types declared by de.limad.LiView.desktop.
 EOF
 
 for removed in \

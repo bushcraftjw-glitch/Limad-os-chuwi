@@ -1,0 +1,41 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+DESKTOP_FILE="/usr/share/applications/de.limad.LiView.desktop"
+MIMEAPPS="/etc/xdg/mimeapps.list"
+
+/usr/bin/python3 - "$DESKTOP_FILE" "$MIMEAPPS" <<'PY'
+import configparser
+import pathlib
+import sys
+
+desktop_path = pathlib.Path(sys.argv[1])
+mimeapps_path = pathlib.Path(sys.argv[2])
+desktop_id = desktop_path.name
+
+desktop = configparser.ConfigParser(interpolation=None, strict=False)
+desktop.optionxform = str
+desktop.read(desktop_path, encoding="utf-8")
+mimes = [item for item in desktop["Desktop Entry"].get("MimeType", "").split(";") if item]
+if not mimes:
+    raise SystemExit("ERROR: LiView desktop file has no MIME types")
+
+config = configparser.ConfigParser(interpolation=None, strict=False)
+config.optionxform = str
+if mimeapps_path.exists():
+    config.read(mimeapps_path, encoding="utf-8")
+for section in ("Default Applications", "Added Associations"):
+    if not config.has_section(section):
+        config.add_section(section)
+
+for mime in mimes:
+    config["Default Applications"][mime] = desktop_id + ";"
+    existing = [item for item in config["Added Associations"].get(mime, "").split(";") if item and item != desktop_id]
+    config["Added Associations"][mime] = ";".join([desktop_id, *existing]) + ";"
+
+mimeapps_path.parent.mkdir(parents=True, exist_ok=True)
+with mimeapps_path.open("w", encoding="utf-8") as handle:
+    config.write(handle, space_around_delimiters=False)
+PY
+
+echo "LiView MIME defaults: PASS"

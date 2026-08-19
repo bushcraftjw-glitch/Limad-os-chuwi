@@ -1,0 +1,67 @@
+{
+  "format": "org.limad.adblock-scriptlet-rules",
+  "format_version": 1,
+  "engine_version": "1.0",
+  "domains": [
+    "youtube.com",
+    "*.youtube.com"
+  ],
+  "response_url_regex": "(?:/youtubei/v1/(?:player|next|get_watch)|/player(?:\\\\?|$)|/playlist(?:\\\\?|$)|/watch(?:\\\\?|$)|/get_watch(?:\\\\?|$))",
+  "exact_key_replacements": [
+    {
+      "from": "\"adPlacements\"",
+      "to": "\"no_ads\""
+    },
+    {
+      "from": "\"adSlots\"",
+      "to": "\"no_ads\""
+    }
+  ],
+  "prune_keys": [
+    "adPlacements",
+    "adSlots",
+    "playerAds",
+    "adBreakParams",
+    "adBreakHeartbeatParams",
+    "adTrackingParams",
+    "adSignalsInfo",
+    "adInfo",
+    "adLayoutLoggingData",
+    "playerLegacyDesktopWatchAdsRenderer",
+    "adPlacementRenderer",
+    "adSlotRenderer",
+    "linearAdSequenceRenderer",
+    "inStreamAdPlayerOverlayRenderer"
+  ],
+  "validated_regex_replacements": [
+    {
+      "url_regex": "(?:playlist\\\\?list=|/player(?:\\\\?.+)?$|watch\\\\?[tv]=)",
+      "pattern": "\"adPlacements.*?([A-Z]\"\\\\}|\"\\\\}{2,4})\\\\}\\\\],",
+      "flags": "s",
+      "replacement": ""
+    },
+    {
+      "url_regex": "/player(?:\\\\?.+)?$",
+      "pattern": "\"adPlacements.*?(\"adSlots\"|\"adBreakHeartbeatParams\")",
+      "flags": "gms",
+      "replacement": "$1"
+    }
+  ],
+  "remove_reel_ads": true,
+  "remove_script_text_contains": [
+    "window,\"fetch\""
+  ],
+  "cosmetic_selectors": [
+    ".ytp-ad-overlay-container",
+    ".ytp-ad-player-overlay",
+    ".ytp-ad-text-overlay",
+    ".ytp-ad-image-overlay",
+    ".ytp-ad-message-container",
+    ".ytp-ad-preview-container",
+    "ytd-ad-slot-renderer",
+    "ytd-promoted-sparkles-web-renderer",
+    "ytmusic-mealbar-promo-renderer",
+    "ytmusic-promo-renderer",
+    "ytmusic-premium-promo-renderer"
+  ]
+}

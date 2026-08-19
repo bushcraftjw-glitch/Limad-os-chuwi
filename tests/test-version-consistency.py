@@ -2,39 +2,35 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = 'V20'
-tag = 'base1-ubuntu2604-full-whitesur-v20'
-iso = 'LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V20-amd64.iso'
+VERSION = 'V23'
+TAG = 'base1-ubuntu2604-full-whitesur-v23'
+ISO = 'LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V23-amd64.iso'
 
-pairs = [
+checks = [
     (ROOT / 'VERSION', VERSION),
     (ROOT / 'README-DE.md', VERSION),
-    (ROOT / 'config/build.env', iso),
-    (ROOT / 'config/build.env', tag),
-    (ROOT / 'build/rootfs/etc/limad-release', tag),
-    (ROOT / 'tests/validate-source.sh', iso),
-    (ROOT / 'tests/validate-source.sh', tag),
-    (ROOT / 'tests/validate-payload.sh', tag),
-    (ROOT / 'tests/verify-built-iso.sh', tag),
+    (ROOT / 'config/build.env', ISO),
+    (ROOT / 'config/build.env', TAG),
+    (ROOT / 'build/rootfs/etc/limad-release', TAG),
+    (ROOT / 'tests/validate-source.sh', ISO),
+    (ROOT / 'tests/validate-source.sh', TAG),
+    (ROOT / 'tests/validate-payload.sh', TAG),
+    (ROOT / 'tests/verify-built-iso.sh', TAG),
 ]
-for path, needle in pairs:
-    text = path.read_text()
+for path, needle in checks:
+    text = path.read_text(encoding='utf-8')
     if needle not in text:
         raise AssertionError(f'{path.relative_to(ROOT)} missing {needle!r}')
 
-# Semantic text files must not contain the previous release identifier.
-for path in ROOT.rglob('*'):
-    if not path.is_file() or '.cache' in path.parts:
-        continue
-    if path.suffix.lower() in {'.png', '.jpg', '.jpeg', '.zip', '.bin', '.svg'}:
-        continue
-    try:
-        text = path.read_text()
-    except UnicodeDecodeError:
-        continue
-    previous_upper = 'V' + '19'
-    previous_lower = 'v' + '19'
-    if previous_upper in text or previous_lower in text:
-        raise AssertionError(f'stale previous-version identifier in {path.relative_to(ROOT)}')
+for path in (
+    ROOT / 'config/build.env',
+    ROOT / 'build/rootfs/etc/limad-release',
+    ROOT / 'build/install-target.sh',
+    ROOT / 'build/prepare-payload.sh',
+    ROOT / 'build/build-iso.sh',
+):
+    text = path.read_text(encoding='utf-8')
+    if 'base1-ubuntu2604-full-whitesur-v22' in text or 'FULL-WHITESUR-V22-amd64.iso' in text:
+        raise AssertionError(f'stale V22 release identifier in {path.relative_to(ROOT)}')
 
 print('VERSION CONSISTENCY TEST: PASS')

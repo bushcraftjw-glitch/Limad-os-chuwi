@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+set -euo pipefail
+export PYTHONPATH="/usr/share/liview${PYTHONPATH:+:$PYTHONPATH}"
+exec /usr/bin/python3 -m liview "$@"

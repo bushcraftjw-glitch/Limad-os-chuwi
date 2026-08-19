@@ -1,0 +1,41 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+REPO="/var/cache/limad-offline-packages"
+PACKAGE_FILE="$REPO/DIRECT-PACKAGES.txt"
+SOURCE_FILE="/tmp/limad-offline-packages.list"
+
+if [ ! -s "$REPO/Packages" ] || [ ! -s "$PACKAGE_FILE" ] || [ ! -s "$REPO/SHA256SUMS.txt" ]; then
+    echo "ERROR: LiView offline package repository is missing or incomplete" >&2
+    exit 1
+fi
+
+(
+    cd "$REPO"
+    sha256sum -c SHA256SUMS.txt >/dev/null
+)
+
+mapfile -t PACKAGES < <(grep -Ev '^[[:space:]]*(#|$)' "$PACKAGE_FILE")
+if [ "${#PACKAGES[@]}" -eq 0 ]; then
+    echo "ERROR: LiView offline package list is empty" >&2
+    exit 1
+fi
+
+printf 'deb [trusted=yes] file:%s ./\n' "$REPO" > "$SOURCE_FILE"
+APT_ARGS=(
+    -o "Dir::Etc::sourcelist=$SOURCE_FILE"
+    -o "Dir::Etc::sourceparts=-"
+    -o "APT::Get::List-Cleanup=0"
+    -o "Acquire::Languages=none"
+)
+
+apt-get "${APT_ARGS[@]}" update
+DEBIAN_FRONTEND=noninteractive apt-get \
+    "${APT_ARGS[@]}" \
+    --yes \
+    --no-download \
+    --no-install-recommends \
+    install "${PACKAGES[@]}"
+
+rm -f "$SOURCE_FILE"
+echo "LiView offline dependencies: PASS"

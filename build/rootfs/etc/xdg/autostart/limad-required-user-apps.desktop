@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=LiMaD Required User Apps
+Comment=Installiert Zen Browser und EasyEffects für LiMaD OS
+Exec=/usr/local/bin/limad-live-guard /usr/local/bin/limad-required-user-apps
+TryExec=/usr/local/bin/limad-required-user-apps
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=12
+OnlyShowIn=GNOME;

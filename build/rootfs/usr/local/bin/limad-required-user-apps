@@ -1,0 +1,57 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+STATE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/limad"
+STATE_FILE="$STATE_DIR/required-user-apps-v23.done"
+FLATHUB_URL="https://dl.flathub.org/repo/flathub.flatpakrepo"
+ZEN_ID="app.zen_browser.zen"
+EASYEFFECTS_ID="com.github.wwmm.easyeffects"
+ZEN_SETUP_HELPER="${LIMAD_ZEN_SETUP_HELPER:-/usr/local/bin/limad-zen-deutsch-setup}"
+KLANG_PRESET_HELPER="${LIMAD_KLANG_PRESET_HELPER:-/usr/local/bin/limad-install-klang-preset}"
+
+mkdir -p "$STATE_DIR"
+[ -f "$STATE_FILE" ] && exit 0
+
+for _ in {1..12}; do
+    if command -v flatpak >/dev/null 2>&1; then
+        break
+    fi
+    sleep 5
+done
+if ! command -v flatpak >/dev/null 2>&1; then
+    echo "LiMaD required apps: flatpak is not ready yet; retrying next login." >&2
+    exit 1
+fi
+
+if ! flatpak remotes --user --columns=name 2>/dev/null | grep -Fxq flathub; then
+    flatpak remote-add --user --if-not-exists flathub "$FLATHUB_URL"
+fi
+
+installed_any_scope() {
+    flatpak info --user "$1" >/dev/null 2>&1 || flatpak info --system "$1" >/dev/null 2>&1
+}
+
+install_user_app() {
+    local app_id="$1"
+    if installed_any_scope "$app_id"; then
+        return 0
+    fi
+    flatpak install --user --noninteractive -y flathub "$app_id"
+}
+
+install_user_app "$ZEN_ID"
+"$ZEN_SETUP_HELPER"
+install_user_app "$EASYEFFECTS_ID"
+"$KLANG_PRESET_HELPER"
+
+if command -v gsettings >/dev/null 2>&1 \
+    && gsettings list-schemas 2>/dev/null | grep -Fxq org.gnome.shell \
+    && gsettings writable org.gnome.shell favorite-apps 2>/dev/null | grep -qx true; then
+    gsettings set org.gnome.shell favorite-apps \
+        "['app.zen_browser.zen.desktop', 'de.limad.Mail.desktop', 'de.limad.Cut.desktop', 'de.limad.Study.desktop', 'de.limad.Notes.desktop', 'de.limad.Drop.desktop', 'de.limad.Link.desktop', 'de.limad.Save.desktop', 'de.limad.WindowsApps.desktop', 'de.limad.Updater.desktop', 'de.limad.Klang.desktop', 'de.limad.Terminal.desktop', 'org.gnome.Nautilus.desktop', 'libreoffice-startcenter.desktop', 'de.limad.SystemInfo.desktop', 'de.limad.SystemUpdate.desktop', 'de.limad.Welcome.desktop']"
+fi
+
+touch "$STATE_FILE"
+if command -v notify-send >/dev/null 2>&1; then
+    notify-send -u low "LiMaD Apps bereit" "Zen Browser und EasyEffects sind eingerichtet." || true
+fi

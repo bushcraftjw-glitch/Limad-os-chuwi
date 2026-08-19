@@ -1,0 +1,20 @@
+[Desktop Entry]
+Type=Application
+Name=LiMusic
+GenericName=Musik- und Videoplayer
+Comment=Musik, Video, YouTube und YouTube Music in LiMaD OS
+Exec=/usr/local/bin/limusic
+TryExec=/usr/local/bin/limusic
+Icon=de.limad.LiMusic
+Terminal=false
+Categories=AudioVideo;Audio;Video;Player;
+Keywords=Musik;Music;Player;YouTube;
+StartupNotify=true
+StartupWMClass=de.limad.LiMusic
+X-LiMaD-Version=0.3.22
+Actions=Update;
+
+[Desktop Action Update]
+Name=Nach Updates suchen
+Exec=/usr/local/bin/limad-updater --app de.limad.LiMusic
+Icon=system-software-update

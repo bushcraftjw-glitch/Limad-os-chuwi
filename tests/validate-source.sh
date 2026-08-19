@@ -7,8 +7,8 @@ source "$ROOT/config/build.env"
 [ "$UBUNTU_ISO_NAME" = "ubuntu-26.04-desktop-amd64.iso" ]
 [ "$UBUNTU_ISO_SHA256" = "487f87faaf547ea30e0aba4d5b53346292571256b25333a978db1692bcee9dd2" ]
 [ "$WHITESUR_REF" = "1b356fe48ad5d05fb2ca6be071efe6801df3ac72" ]
-[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V20-amd64.iso" ]
-[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v20" ]
+[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V23-amd64.iso" ]
+[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v23" ]
 
 grep -Fq 'id: ubuntu-desktop' "$ROOT/config/autoinstall.yaml"
 if grep -Fq 'ubuntu-desktop-minimal' "$ROOT/config/autoinstall.yaml"; then
@@ -51,6 +51,7 @@ grep -Fq '/usr/local/bin/limad-desktop-core-system' "$ROOT/build/install-target.
 grep -Fq 'CORE_MARKER=' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
 grep -Fq 'AUX_MARKER=' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
 grep -Fq "python3 -B \"\$ROOT/tools/strip-lidrop-airdrop.py\" \"\$PAYLOAD/rootfs\"" "$ROOT/build/prepare-payload.sh"
+grep -Fq "python3 -B \"\$ROOT/tools/patch-v22-titlebars.py\" \"\$PAYLOAD/rootfs\"" "$ROOT/build/prepare-payload.sh"
 test -s "$ROOT/build/rootfs/usr/lib/systemd/user/limad-link.service"
 grep -Fq 'ExecStart=/usr/bin/python3 /usr/share/limad-link/daemon.py' "$ROOT/build/rootfs/usr/lib/systemd/user/limad-link.service"
 grep -Fq 'systemctl --global enable limad-link.service' "$ROOT/build/install-target.sh"
@@ -60,7 +61,7 @@ grep -Fq 'WantedBy=default.target' "$ROOT/build/rootfs/usr/lib/systemd/user/lima
 grep -Fq 'systemctl --global enable limad-drop.service' "$ROOT/build/install-target.sh"
 grep -Fq 'systemctl --user enable --now limad-drop.service' "$ROOT/build/rootfs/usr/local/bin/limad-lidrop-status-ensure"
 grep -Fq '/usr/local/bin/limad-link-health-check' "$ROOT/build/rootfs/usr/local/bin/limad-link-status-ensure"
-for package in avahi-utils deskflow freerdp-x11 gnome-remote-desktop openssl qrencode; do
+for package in avahi-utils deskflow flatpak freerdp-x11 gnome-remote-desktop gstreamer1.0-gtk4 openssl qrencode; do
     grep -Fq "    $package" "$ROOT/build/rootfs/usr/local/bin/limad-runtime-deps"
 done
 
@@ -72,7 +73,7 @@ grep -Fq 'verify_key org.gnome.shell.extensions.dash-to-dock show-apps-always-in
 grep -Fq 'verify_favorites' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
 grep -Fq "dock-position='BOTTOM'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
 grep -Fq "icon-theme='LiMaD'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
-grep -Fq "favorite-apps=['firefox_firefox.desktop'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
+grep -Fq "favorite-apps=['app.zen_browser.zen.desktop'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
 grep -Fq "'de.limad.Mail.desktop'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
 grep -Fq "'de.limad.Drop.desktop'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
 grep -Fq "'de.limad.Link.desktop'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
@@ -110,6 +111,10 @@ test -x "$ROOT/tools/github-starter.sh"
 test -x "$ROOT/tools/reassemble-vendor.sh"
 test -x "$ROOT/tools/brand-grub.py"
 test -x "$ROOT/tools/strip-lidrop-airdrop.py"
+test -x "$ROOT/tools/patch-v22-titlebars.py"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-titlebuttons-ensure"
+test -x "$ROOT/build/rootfs/usr/local/bin/limusic"
 test -x "$ROOT/build/build-iso.sh"
 test -x "$ROOT/build/prepare-payload.sh"
 test -x "$ROOT/build/prepare-imac17-initrd.sh"
@@ -119,6 +124,42 @@ test -x "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-link-health-check"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-link-status-ensure"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-lidrop-status-ensure"
+
+test -s "$ROOT/build/rootfs/etc/xdg/autostart/limad-required-user-apps.desktop"
+test -s "$ROOT/build/rootfs/etc/xdg/autostart/limad-titlebuttons-ensure.desktop"
+test -s "$ROOT/build/rootfs/usr/share/applications/de.limad.LiView.desktop"
+test -x "$ROOT/build/rootfs/usr/bin/liview"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-install-offline-packages"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-liview-mime-defaults"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-liview-selftest"
+test -x "$ROOT/tools/prepare-offline-packages.sh"
+test -s "$ROOT/config/liview-packages.txt"
+test -s "$ROOT/config/liview-mime-types.txt"
+test -s "$ROOT/build/rootfs/usr/share/liview/VERSION"
+[ "$(cat "$ROOT/build/rootfs/usr/share/liview/VERSION")" = "1.0.0" ]
+grep -Fq 'Exec=/usr/bin/liview %F' "$ROOT/build/rootfs/usr/share/applications/de.limad.LiView.desktop"
+grep -Fq 'Icon=de.limad.LiView' "$ROOT/build/rootfs/usr/share/applications/de.limad.LiView.desktop"
+grep -Fq '/usr/local/bin/limad-install-offline-packages' "$ROOT/build/install-target.sh"
+grep -Fq '/usr/local/bin/limad-liview-selftest' "$ROOT/build/install-target.sh"
+grep -Fq '/usr/local/bin/limad-liview-mime-defaults' "$ROOT/build/install-target.sh"
+grep -Fq '/cdrom/limad/offline-packages/.' "$ROOT/config/autoinstall.yaml"
+grep -Fq 'prepare-offline-packages.sh' "$ROOT/build/prepare-payload.sh"
+grep -Fq 'payload/offline-packages/' "$ROOT/build/build-iso.sh"
+test -s "$ROOT/build/rootfs/usr/share/applications/de.limad.LiMusic.desktop"
+test -s "$ROOT/build/rootfs/usr/share/limad-updater/apps.json"
+test -s "$ROOT/build/rootfs/usr/share/limusic/VERSION"
+[ "$(cat "$ROOT/build/rootfs/usr/share/limusic/VERSION")" = "0.3.22" ]
+test -s "$ROOT/build/rootfs/usr/share/limusic/src/limusic/adblock_engine.py"
+test -s "$ROOT/build/rootfs/usr/share/limusic/data/adblock-scriptlet-rules.json"
+for package in gstreamer1.0-gtk4 gstreamer1.0-libav gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-tools gir1.2-webkit-6.0; do
+    grep -Fq "    $package" "$ROOT/build/rootfs/usr/local/bin/limad-runtime-deps"
+done
+grep -Fq 'app.zen_browser.zen' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
+grep -Fq 'com.github.wwmm.easyeffects' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
+if grep -Fq 'firefox_firefox.desktop' "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"; then
+    echo "ERROR: Firefox must not remain in inherited V22 Dock defaults" >&2
+    exit 1
+fi
 
 (
     cd "$ROOT/assets/firmware"
@@ -141,7 +182,9 @@ python3 -B "$ROOT/tests/test-status-and-titlebuttons.py"
 python3 -B "$ROOT/tests/test-installer-branding.py"
 python3 -B "$ROOT/tests/test-imac17-firmware.py"
 python3 -B "$ROOT/tests/test-lilink-and-lidrop-scope.py"
-python3 -B "$ROOT/tests/test-v20-menu-lidrop.py"
+python3 -B "$ROOT/tests/test-v22-menu-lidrop.py"
+python3 -B "$ROOT/tests/test-v22-apps-titlebuttons.py"
+python3 -B "$ROOT/tests/test-v23-liview.py"
 
 grep -Fq "INSTALL_SOURCES_ORIGINAL=\"\$CACHE/install-sources.original.yaml\"" "$ROOT/build/build-iso.sh"
 grep -Fq "MD5_ORIGINAL=\"\$CACHE/md5sum.original.txt\"" "$ROOT/build/build-iso.sh"

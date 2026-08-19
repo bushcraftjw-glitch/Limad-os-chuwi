@@ -13,6 +13,8 @@ autoinstall:
     install: true
   late-commands:
     - cp -a /cdrom/limad/rootfs/. /target/
+    - mkdir -p /target/var/cache/limad-offline-packages
+    - cp -a /cdrom/limad/offline-packages/. /target/var/cache/limad-offline-packages/
     - if [ "$(cat /sys/class/dmi/id/product_name 2>/dev/null || true)" = "iMac17,1" ]; then touch /target/tmp/limad-imac17-1; fi
     - cp /cdrom/limad/install-target.sh /target/tmp/limad-install-target.sh
     - curtin in-target --target=/target -- /usr/bin/bash /tmp/limad-install-target.sh

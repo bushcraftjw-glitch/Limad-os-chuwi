@@ -1,0 +1,559 @@
+@define-color limusic_bg #090b0f;
+@define-color limusic_panel #11141a;
+@define-color limusic_panel_2 #171b22;
+@define-color limusic_border rgba(255,255,255,0.085);
+@define-color limusic_text #f7f8fa;
+@define-color limusic_muted #8f98a8;
+@define-color limusic_accent #8b35f6;
+@define-color limusic_accent_soft rgba(139,53,246,0.18);
+
+window,
+.app-root {
+    background: #090b0f;
+    color: #f7f8fa;
+}
+
+.brand-icon {
+    color: #8b35f6;
+}
+
+.brand-app-icon {
+    margin: 0;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+.brand-title {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: -0.05px;
+}
+
+.sidebar {
+    background: linear-gradient(to bottom, #101319, #0d1015);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 18px;
+    padding: 14px 10px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.34);
+}
+
+.sidebar-section {
+    color: #6f7887;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+    padding: 6px 12px 8px;
+}
+
+.nav-button {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 11px 12px;
+    color: #b9c0ca;
+    box-shadow: none;
+}
+
+.nav-button:hover {
+    background: rgba(255,255,255,0.055);
+    color: #ffffff;
+}
+
+.nav-button.active {
+    background: linear-gradient(to right, rgba(139,53,246,0.22), rgba(255,255,255,0.055));
+    color: #ffffff;
+    border-color: rgba(139,53,246,0.3);
+    box-shadow: inset 3px 0 #8b35f6, 0 8px 24px rgba(0,0,0,0.18);
+}
+
+.engine-card {
+    background: #151922;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 13px;
+    padding: 12px;
+}
+
+.topbar {
+    background: transparent;
+}
+
+searchentry {
+    background: #151920;
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 13px;
+    min-height: 42px;
+    box-shadow: inset 0 1px rgba(255,255,255,0.035), 0 8px 22px rgba(0,0,0,0.16);
+}
+
+button {
+    background: #181c24;
+    color: #e8ebef;
+    border: 1px solid rgba(255,255,255,0.085);
+    border-radius: 11px;
+    padding: 8px 13px;
+    box-shadow: 0 7px 18px rgba(0,0,0,0.18);
+}
+
+button:hover {
+    background: #202631;
+    color: #ffffff;
+    border-color: rgba(255,255,255,0.14);
+}
+
+button:active {
+    background: #272d38;
+}
+
+button.primary-action,
+button.accent-action {
+    background: linear-gradient(to bottom, #a344ff, #7026d4);
+    color: #ffffff;
+    border-color: rgba(187,99,255,0.45);
+    font-weight: 700;
+    box-shadow: 0 8px 22px rgba(139,53,246,0.22);
+}
+
+button.primary-action:hover,
+button.accent-action:hover {
+    background: linear-gradient(to bottom, #b75cff, #7f30df);
+}
+
+.hero-card {
+    background: linear-gradient(135deg, #191a28, #11121c 55%, #171020);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 22px;
+    padding: 28px;
+    box-shadow: 0 22px 56px rgba(0,0,0,0.32), inset 0 1px rgba(255,255,255,0.04);
+}
+
+.kicker {
+    color: #b24cff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.9px;
+}
+
+.hero-title {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: -0.9px;
+    color: #ffffff;
+}
+
+.hero-copy {
+    color: #aab2bf;
+    font-size: 15px;
+}
+
+.feature-card {
+    background: linear-gradient(to bottom, #151922, #11141a);
+    border: 1px solid rgba(255,255,255,0.075);
+    border-radius: 17px;
+    padding: 18px;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.24), inset 0 1px rgba(255,255,255,0.025);
+}
+
+.feature-icon {
+    color: #8b35f6;
+    background: rgba(139,53,246,0.13);
+    border-radius: 12px;
+    padding: 9px;
+}
+
+.feature-title,
+.panel-title,
+.section-title {
+    font-weight: 800;
+    color: #f7f8fa;
+}
+
+.feature-title {
+    font-size: 17px;
+}
+
+.section-title,
+.page-title {
+    font-size: 20px;
+    font-weight: 850;
+}
+
+.page-title {
+    font-size: 25px;
+}
+
+.surface-card {
+    background: #12161d;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+
+.media-card {
+    background: #06080b;
+    border: 1px solid rgba(255,255,255,0.085);
+    border-radius: 18px;
+    padding: 10px;
+    box-shadow: 0 18px 48px rgba(0,0,0,0.34), inset 0 1px rgba(255,255,255,0.025);
+}
+
+.media-card picture {
+    background: #020305;
+    border-radius: 13px;
+}
+
+.media-hint {
+    color: #929baa;
+    font-size: 12px;
+}
+
+.library-panel,
+.queue-panel {
+    background: linear-gradient(to bottom, #12161d, #0f1217);
+    border: 1px solid rgba(255,255,255,0.075);
+    border-radius: 17px;
+    padding: 14px;
+    box-shadow: 0 16px 38px rgba(0,0,0,0.26);
+}
+
+.media-list row,
+.queue-list row {
+    background: transparent;
+    border-radius: 11px;
+    margin: 2px 0;
+}
+
+.media-list row:hover,
+.media-list row:selected {
+    background: rgba(255,255,255,0.06);
+}
+
+.queue-number {
+    color: #68717f;
+    min-width: 24px;
+}
+
+.web-toolbar {
+    background: #13171e;
+    border: 1px solid rgba(255,255,255,0.075);
+    border-radius: 14px;
+    padding: 8px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.21);
+}
+
+.web-title {
+    font-weight: 700;
+    color: #e9ecf1;
+}
+
+.web-card {
+    background: #050608;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 17px;
+    padding: 1px;
+    box-shadow: 0 18px 48px rgba(0,0,0,0.34);
+}
+
+.player-bar {
+    background: linear-gradient(to bottom, #1a1f27, #14181f);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 18px;
+    padding: 12px 14px;
+    box-shadow: 0 18px 42px rgba(0,0,0,0.34), inset 0 1px rgba(255,255,255,0.035);
+}
+
+.now-title {
+    font-weight: 800;
+    color: #ffffff;
+}
+
+button.icon-button {
+    padding: 8px;
+    min-width: 34px;
+    min-height: 34px;
+}
+
+button.transport-main {
+    background: #8b35f6;
+    color: white;
+    border-color: #bb63ff;
+    border-radius: 999px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px;
+    box-shadow: 0 8px 22px rgba(139,53,246,0.26);
+}
+
+button.detach-button {
+    color: #b24cff;
+    background: rgba(139,53,246,0.11);
+    border-color: rgba(139,53,246,0.28);
+}
+
+scale trough {
+    min-height: 4px;
+    border-radius: 999px;
+    background: #343a45;
+}
+
+scale highlight {
+    min-height: 4px;
+    border-radius: 999px;
+    background: #8b35f6;
+}
+
+scale slider {
+    min-width: 14px;
+    min-height: 14px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 2px solid #8b35f6;
+}
+
+.detached-root {
+    background: #0b0e12;
+}
+
+.detached-media {
+    background: #030406;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.detached-title,
+.detached-track-title {
+    font-weight: 850;
+    color: white;
+}
+
+.detached-title {
+    font-size: 12px;
+}
+
+.detached-track-title {
+    font-size: 18px;
+}
+
+button.active-tool {
+    color: #b24cff;
+    background: rgba(139,53,246,0.13);
+    border-color: rgba(139,53,246,0.3);
+}
+
+.detached-message {
+    padding: 30px;
+    color: #aab2bf;
+}
+
+.muted {
+    color: #8f98a8;
+    font-size: 12px;
+}
+
+.youtube-surface {
+    background: #050608;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    box-shadow: 0 18px 48px rgba(0,0,0,0.30);
+    overflow: hidden;
+}
+
+.sidebar-brand-card {
+    background: radial-gradient(circle at 50% 12%, rgba(139,53,246,0.22), rgba(18,18,30,0.97) 58%, #10121b 100%);
+    border: 1px solid rgba(255,255,255,0.085);
+    border-radius: 16px;
+    padding: 16px 12px 14px;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.28), inset 0 1px rgba(255,255,255,0.035);
+}
+
+.sidebar-logo {
+    filter: drop-shadow(0 8px 18px rgba(139,53,246,0.18));
+}
+
+.sidebar-brand-name {
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 900;
+    letter-spacing: -0.3px;
+}
+
+.sidebar-brand-subtitle {
+    color: #7f8998;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+
+.sidebar-brand-card {
+    padding: 4px 6px;
+    border-radius: 12px;
+    min-height: 70px;
+}
+
+.sidebar-logo {
+    min-width: 70px;
+    min-height: 70px;
+    margin: 0;
+}
+
+.sidebar-brand-name {
+    font-size: 15px;
+}
+
+.sidebar-brand-subtitle {
+    font-size: 8px;
+    letter-spacing: 1.0px;
+}
+
+.detached-media {
+    background: #000;
+    border: 0;
+}
+
+.detached-controls-overlay {
+    background: linear-gradient(to top, rgba(5,7,10,0.94), rgba(5,7,10,0.76) 58%, rgba(5,7,10,0.20));
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 14px;
+    padding: 8px 10px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.38);
+}
+
+.detached-track-title {
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.detached-time {
+    color: #d4d8df;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+button.detached-control,
+button.detached-control-main {
+    padding: 4px;
+    min-width: 28px;
+    min-height: 28px;
+    border-radius: 9px;
+    background: rgba(22,26,33,0.82);
+    border-color: rgba(255,255,255,0.10);
+    box-shadow: none;
+}
+
+button.detached-control-main {
+    min-width: 34px;
+    min-height: 34px;
+    border-radius: 999px;
+    background: rgba(139,53,246,0.92);
+    border-color: rgba(190,112,255,0.48);
+}
+
+.detached-scale trough,
+.detached-volume trough {
+    min-height: 3px;
+    background: rgba(255,255,255,0.18);
+}
+
+.detached-scale slider,
+.detached-volume slider {
+    min-width: 11px;
+    min-height: 11px;
+    border-width: 1px;
+}
+
+.detached-volume-icon {
+    color: #eef1f5;
+}
+
+/* Detached player pin state: inactive = neutral, active = clearly purple.
+ * Gtk.ToggleButton exposes the checked state and remains keyboard/accessibility friendly. */
+button.pin-toggle {
+    padding: 5px 8px;
+    min-height: 30px;
+    min-width: 54px;
+    border-radius: 10px;
+    background: rgba(22,26,33,0.82);
+    border-color: rgba(255,255,255,0.10);
+    box-shadow: none;
+}
+
+button.pin-toggle.pinned {
+    color: #ffffff;
+    background: linear-gradient(to bottom, rgba(163,68,255,0.96), rgba(112,38,212,0.96));
+    border-color: rgba(190,112,255,0.62);
+    box-shadow: 0 0 0 1px rgba(178,76,255,0.18), 0 0 18px rgba(139,53,246,0.44);
+}
+
+.pin-state-label {
+    color: #7f8998;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.7px;
+}
+
+.pin-state-label.active {
+    color: #ffffff;
+}
+
+/* Resizable LiMusic navigation. The handle is deliberately visible but subtle. */
+paned.main-paned > separator {
+    min-width: 6px;
+    background: rgba(255,255,255,0.025);
+    border-left: 1px solid rgba(255,255,255,0.035);
+    border-right: 1px solid rgba(255,255,255,0.025);
+}
+
+paned.main-paned > separator:hover {
+    background: rgba(139,53,246,0.16);
+    border-color: rgba(178,76,255,0.28);
+    box-shadow: 0 0 12px rgba(139,53,246,0.20);
+}
+
+/* LiMusic YouTube in-player ad blocker */
+button.adblock-toggle {
+    min-width: 34px;
+    min-height: 28px;
+    padding: 5px 8px;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: #7f8998;
+    background: #181c24;
+    border-color: rgba(255,255,255,0.085);
+}
+
+button.adblock-toggle:checked {
+    color: #ffffff;
+    background: linear-gradient(to bottom, #a344ff, #7026d4);
+    border-color: rgba(187,99,255,0.45);
+    box-shadow: 0 0 14px rgba(139,53,246,0.30);
+}
+
+/* Detached player tools. The operating-system titlebar is untouched. */
+.detached-top-tools {
+    padding: 2px;
+    border-radius: 9px;
+    background: rgba(9,11,15,0.56);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+}
+
+.detached-top-tools button {
+    min-width: 24px;
+    min-height: 22px;
+    padding: 2px 5px;
+    margin: 0;
+    border-radius: 7px;
+    background: rgba(24,28,36,0.72);
+    box-shadow: none;
+}
+
+.detached-top-tools button:hover {
+    background: rgba(139,53,246,0.24);
+}
+
+.detached-top-tools button.pin-toggle {
+    min-width: 48px;
+}
+

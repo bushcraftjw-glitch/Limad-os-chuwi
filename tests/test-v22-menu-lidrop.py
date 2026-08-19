@@ -26,7 +26,7 @@ for token in ("grep -Fvx", "head -n1", "limad-titlebuttons.css"):
     if token not in sync:
         raise SystemExit(f"ERROR: GTK4 import-order token missing: {token}")
 workflow = (ROOT / ".github/workflows/build-iso.yml").read_text(encoding="utf-8")
-for token in ("dconf-cli", "dconf help compile", "tests/test-v20-menu-lidrop.py"):
+for token in ("dconf-cli", "dconf help compile", "tests/test-v22-menu-lidrop.py"):
     if token not in workflow:
-        raise SystemExit(f"ERROR: V20 workflow token missing: {token}")
-print("V20 MENU + LIDROP + GTK4 TEST: PASS")
+        raise SystemExit(f"ERROR: V22 workflow token missing: {token}")
+print("V22 MENU + LIDROP + GTK4 TEST: PASS")

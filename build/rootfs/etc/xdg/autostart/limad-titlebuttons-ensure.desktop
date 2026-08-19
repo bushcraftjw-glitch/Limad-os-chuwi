@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=LiMaD Titlebuttons Ensure
+Exec=/usr/local/bin/limad-live-guard /usr/local/bin/limad-titlebuttons-ensure
+TryExec=/usr/local/bin/limad-titlebuttons-ensure
+OnlyShowIn=GNOME;
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=2

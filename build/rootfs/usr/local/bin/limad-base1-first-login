@@ -2,10 +2,10 @@
 set -euo pipefail
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/limad"
-CORE_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v20-core.done"
-BUTTON_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v20-buttons.done"
-AUX_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v20-aux.done"
-LOG="$STATE_DIR/design-v20.log"
+CORE_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v23-core.done"
+BUTTON_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v23-buttons.done"
+AUX_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v23-aux.done"
+LOG="$STATE_DIR/design-v23.log"
 mkdir -p "$STATE_DIR"
 exec >>"$LOG" 2>&1
 
@@ -120,7 +120,7 @@ set_favorites() {
     local favorites=()
     local desktop value
     for desktop in \
-        firefox_firefox.desktop \
+        app.zen_browser.zen.desktop \
         de.limad.Mail.desktop \
         de.limad.Cut.desktop \
         de.limad.Study.desktop \
@@ -187,13 +187,13 @@ if [ ! -e "$CORE_MARKER" ]; then
     fi
 
     touch "$CORE_MARKER"
-    echo "LiMaD core desktop V20: PASS"
+    echo "LiMaD core desktop V23: PASS"
 fi
 
 if [ ! -e "$BUTTON_MARKER" ]; then
     if /usr/local/bin/limad-sync-gtk4-theme; then
         touch "$BUTTON_MARKER"
-        echo "LiMaD GTK4 titlebuttons V20: PASS"
+        echo "LiMaD GTK4 titlebuttons V23: PASS"
     else
         echo "WARN: LiMaD GTK4 titlebutton overlay failed; core desktop remains active"
     fi
@@ -220,7 +220,7 @@ if [ ! -e "$AUX_MARKER" ]; then
 
     if [ "$AUX_FAILURES" -eq 0 ]; then
         touch "$AUX_MARKER"
-        echo "LiMaD auxiliary desktop V20: PASS"
+        echo "LiMaD auxiliary desktop V23: PASS"
     else
         echo "WARN: LiMaD auxiliary desktop setup has $AUX_FAILURES issue(s); retrying next login"
     fi

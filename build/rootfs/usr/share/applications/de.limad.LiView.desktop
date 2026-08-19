@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=LiView
+GenericName=Vorschau
+Comment=PDFs und Bilder anzeigen und bearbeiten, Videos und 3D-Modelle öffnen
+Exec=/usr/bin/liview %F
+TryExec=/usr/bin/liview
+Icon=de.limad.LiView
+Terminal=false
+Categories=Graphics;Viewer;Office;AudioVideo;Video;
+MimeType=application/mxf;application/pdf;application/vnd.ms-asf;application/vnd.rn-realmedia;application/vnd.rn-realmedia-vbr;image/avif;image/bmp;image/gif;image/heic;image/heif;image/jpeg;image/png;image/svg+xml;image/svg+xml-compressed;image/tiff;image/vnd.microsoft.icon;image/webp;image/x-bmp;image/x-icon;model/3mf;model/obj;model/stl;video/3gpp;video/3gpp2;video/dv;video/mp2t;video/mp4;video/mpeg;video/ogg;video/quicktime;video/vnd.avi;video/webm;video/x-flv;video/x-limad-av1;video/x-limad-h264;video/x-limad-h265;video/x-limad-nut;video/x-limad-vp8;video/x-limad-vp9;video/x-limad-yuv4mpeg;video/x-matroska;video/x-matroska-3d;video/x-ms-asf;video/x-ms-wmv;video/x-msvideo;video/x-ogm+ogg;
+StartupNotify=true
+StartupWMClass=de.limad.LiView
+DBusActivatable=false
+Keywords=PDF;Bild;Video;Vorschau;Dokument;Bearbeiten;Markup;Zeichnen;STL;OBJ;3MF;3D;
+X-LiMaD-Version=1.0.0
