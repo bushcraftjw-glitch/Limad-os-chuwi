@@ -1,0 +1,77 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+PACKAGE_FILE="/usr/share/limad/gaming/REQUIRED-PACKAGES.txt"
+OFFLINE_REPO="/usr/share/limad/offline/gaming"
+TEMP_SOURCE="$(mktemp)"
+trap 'rm -f "$TEMP_SOURCE"' EXIT
+
+if [ ! -r "$PACKAGE_FILE" ]; then
+    echo "ERROR: Gaming package list missing: $PACKAGE_FILE" >&2
+    exit 1
+fi
+
+if ! dpkg --print-foreign-architectures | grep -Fxq i386; then
+    dpkg --add-architecture i386
+fi
+
+mapfile -t PACKAGES < <(grep -Ev '^[[:space:]]*(#|$)' "$PACKAGE_FILE")
+if [ "${#PACKAGES[@]}" -eq 0 ]; then
+    echo "ERROR: Gaming package list is empty." >&2
+    exit 1
+fi
+
+missing=()
+for package in "${PACKAGES[@]}"; do
+    if ! dpkg-query -W -f='${db:Status-Abbrev}\n' "$package" 2>/dev/null | grep -q '^ii '; then
+        missing+=("$package")
+    fi
+done
+
+if [ "${#missing[@]}" -gt 0 ]; then
+    if [ -d "$OFFLINE_REPO" ] && [ -s "$OFFLINE_REPO/Packages.gz" ] && [ -s "$OFFLINE_REPO/SHA256SUMS.txt" ]; then
+        (
+            cd "$OFFLINE_REPO"
+            sha256sum -c SHA256SUMS.txt >/dev/null
+        )
+        printf 'deb [trusted=yes] file:%s ./\n' "$OFFLINE_REPO" > "$TEMP_SOURCE"
+        apt-get \
+            -o "Dir::Etc::sourcelist=$TEMP_SOURCE" \
+            -o "Dir::Etc::sourceparts=-" \
+            -o "Acquire::Languages=none" \
+            update
+        DEBIAN_FRONTEND=noninteractive apt-get \
+            -o "Dir::Etc::sourcelist=$TEMP_SOURCE" \
+            -o "Dir::Etc::sourceparts=-" \
+            -o "Acquire::Languages=none" \
+            --no-install-recommends \
+            --yes \
+            install "${missing[@]}"
+    else
+        apt-get update
+        DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends --yes install "${missing[@]}"
+    fi
+fi
+
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games"
+
+for command in lutris protontricks wine winetricks gamemoderun mangohud gamescope vulkaninfo glxinfo goverlay; do
+    if ! command -v "$command" >/dev/null 2>&1; then
+        echo "ERROR: Gaming runtime command missing: $command" >&2
+        exit 1
+    fi
+done
+
+if ! command -v steam >/dev/null 2>&1 && [ ! -x /usr/games/steam ]; then
+    echo "ERROR: Steam launcher missing after package installation." >&2
+    exit 1
+fi
+
+for package in steam-installer steam-devices steam-libs steam-libs-i386:i386 mesa-vulkan-drivers:i386 libvulkan1:i386 libglx-mesa0:i386; do
+    if ! dpkg-query -W -f='${db:Status-Abbrev}\n' "$package" 2>/dev/null | grep -q '^ii '; then
+        echo "ERROR: Required gaming package is not installed: $package" >&2
+        exit 1
+    fi
+done
+
+echo "LiMaD Gaming dependencies: PASS"

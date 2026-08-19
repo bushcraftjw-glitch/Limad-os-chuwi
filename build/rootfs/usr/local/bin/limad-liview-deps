@@ -1,0 +1,97 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+PACKAGE_FILE="/usr/share/liview/REQUIRED-PACKAGES.txt"
+OFFLINE_REPO="/usr/share/limad/offline/liview"
+TEMP_SOURCE="$(mktemp)"
+trap 'rm -f "$TEMP_SOURCE"' EXIT
+
+if [ ! -r "$PACKAGE_FILE" ]; then
+    echo "ERROR: LiView package list missing: $PACKAGE_FILE" >&2
+    exit 1
+fi
+
+mapfile -t PACKAGES < <(grep -Ev '^[[:space:]]*(#|$)' "$PACKAGE_FILE")
+if [ "${#PACKAGES[@]}" -eq 0 ]; then
+    echo "ERROR: LiView package list is empty." >&2
+    exit 1
+fi
+
+missing=()
+for package in "${PACKAGES[@]}"; do
+    if ! dpkg-query -W -f='${db:Status-Abbrev}\n' "$package" 2>/dev/null | grep -q '^ii '; then
+        missing+=("$package")
+    fi
+done
+
+if [ "${#missing[@]}" -gt 0 ]; then
+    if [ -d "$OFFLINE_REPO" ] && [ -s "$OFFLINE_REPO/Packages.gz" ] && [ -s "$OFFLINE_REPO/SHA256SUMS.txt" ]; then
+        (
+            cd "$OFFLINE_REPO"
+            sha256sum -c SHA256SUMS.txt >/dev/null
+        )
+        printf 'deb [trusted=yes] file:%s ./\n' "$OFFLINE_REPO" > "$TEMP_SOURCE"
+        apt-get \
+            -o "Dir::Etc::sourcelist=$TEMP_SOURCE" \
+            -o "Dir::Etc::sourceparts=-" \
+            -o "Acquire::Languages=none" \
+            update
+        DEBIAN_FRONTEND=noninteractive apt-get \
+            -o "Dir::Etc::sourcelist=$TEMP_SOURCE" \
+            -o "Dir::Etc::sourceparts=-" \
+            -o "Acquire::Languages=none" \
+            --no-install-recommends \
+            --yes \
+            install "${missing[@]}"
+    else
+        apt-get update
+        DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends --yes install "${missing[@]}"
+    fi
+fi
+
+PYTHONPATH=/usr/share/liview /usr/bin/python3 - <<'PY'
+import cairo
+import gi
+import pikepdf
+from PIL import Image
+
+gi.require_version("Gtk", "4.0")
+gi.require_version("Poppler", "0.18")
+from gi.repository import Gtk, Poppler
+
+from liview.app import LiViewApplication
+from liview.documents import ImageDocument, PdfDocument
+from liview.inspector import document_info
+from liview.ocr import recognize_text
+from liview.stl import StlDocument
+from liview.video import VideoDocument
+
+assert Gtk.Video is not None
+assert Poppler.Document is not None
+assert Image is not None
+assert pikepdf.Pdf is not None
+assert LiViewApplication is not None
+assert ImageDocument is not None
+assert PdfDocument is not None
+assert StlDocument is not None
+assert VideoDocument is not None
+assert document_info is not None
+assert recognize_text is not None
+print("LiView Python-Laufzeit: PASS")
+PY
+
+for command in rsvg-convert heif-convert tesseract ffprobe gs gst-inspect-1.0; do
+    if ! command -v "$command" >/dev/null 2>&1; then
+        echo "ERROR: LiView runtime command missing: $command" >&2
+        exit 1
+    fi
+done
+
+gst-inspect-1.0 playbin >/dev/null
+gst-inspect-1.0 matroskademux >/dev/null
+gst-inspect-1.0 qtdemux >/dev/null
+
+tesseract --list-langs 2>/dev/null | grep -Fxq 'deu'
+tesseract --list-langs 2>/dev/null | grep -Fxq 'eng'
+
+echo "LiView dependencies: PASS"

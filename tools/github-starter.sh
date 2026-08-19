@@ -56,9 +56,25 @@ else
     git -C "$PUSH_REPO" push -u origin main
 fi
 
+REMOTE_SHA=""
+for _ in {1..30}; do
+    REMOTE_SHA="$(gh api "repos/$REPO/commits/main" --jq '.sha' 2>/dev/null || true)"
+    if [ "$REMOTE_SHA" = "$COMMIT" ]; then
+        break
+    fi
+    sleep 2
+done
+if [ "$REMOTE_SHA" != "$COMMIT" ]; then
+    echo "ERROR: GitHub main is $REMOTE_SHA but local source commit is $COMMIT" >&2
+    exit 1
+fi
+
+BASELINE_RUNS="$PUSH_WORK/baseline-runs.txt"
+gh run list --repo "$REPO" --workflow build-iso.yml --branch main --limit 50 --json databaseId --jq '.[].databaseId' > "$BASELINE_RUNS" 2>/dev/null || :
+
 DISPATCHED=0
 for _ in {1..10}; do
-    if gh workflow run build-iso.yml --repo "$REPO" --ref main; then
+    if gh workflow run build-iso.yml --repo "$REPO" --ref main -f expected_sha="$COMMIT"; then
         DISPATCHED=1
         break
     fi
@@ -71,7 +87,16 @@ fi
 
 RUN_ID=""
 for _ in {1..30}; do
-    RUN_ID="$(gh run list --repo "$REPO" --workflow build-iso.yml --branch main --limit 20 --json databaseId,headSha --jq ".[] | select(.headSha == \"$COMMIT\") | .databaseId" 2>/dev/null | head -n1 || true)"
+    while IFS=$'\t' read -r CANDIDATE_ID CANDIDATE_SHA; do
+        [ -n "$CANDIDATE_ID" ] || continue
+        if grep -Fxq "$CANDIDATE_ID" "$BASELINE_RUNS"; then
+            continue
+        fi
+        RUN_ID="$CANDIDATE_ID"
+        RUN_HEAD_SHA="$CANDIDATE_SHA"
+        break
+    done < <(gh run list --repo "$REPO" --workflow build-iso.yml --branch main --limit 50 --json databaseId,headSha,event --jq '.[] | select(.event == "workflow_dispatch") | [.databaseId, .headSha] | @tsv' 2>/dev/null || true)
+
     if [ -n "$RUN_ID" ]; then
         break
     fi
@@ -79,9 +104,14 @@ for _ in {1..30}; do
 done
 
 if [ -z "$RUN_ID" ]; then
-    echo "ERROR: GitHub Actions run was not found for commit $COMMIT" >&2
+    echo "ERROR: Newly dispatched GitHub Actions run was not found." >&2
     exit 1
 fi
+if [ "$RUN_HEAD_SHA" != "$COMMIT" ]; then
+    echo "ERROR: Dispatched run $RUN_ID targets $RUN_HEAD_SHA, expected $COMMIT" >&2
+    exit 1
+fi
+echo "GitHub Actions run $RUN_ID verified for commit $COMMIT"
 
 RUN_STATUS=""
 RUN_CONCLUSION=""

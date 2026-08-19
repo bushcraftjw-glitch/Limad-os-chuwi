@@ -37,7 +37,6 @@ rm -rf "$OVERLAY"
 mkdir -p "$OVERLAY/casper" "$OVERLAY/limad"
 cp "$ROOT/config/autoinstall.yaml" "$OVERLAY/autoinstall.yaml"
 rsync -a "$CACHE/payload/rootfs/" "$OVERLAY/limad/rootfs/"
-rsync -a "$CACHE/payload/offline-packages/" "$OVERLAY/limad/offline-packages/"
 cp "$CACHE/payload/install-target.sh" "$OVERLAY/limad/install-target.sh"
 
 INSTALL_SOURCES_ORIGINAL="$CACHE/install-sources.original.yaml"
@@ -101,7 +100,7 @@ sha256sum "$OUTPUT" | tee "$OUTPUT.sha256"
 "$ROOT/tests/verify-built-iso.sh" "$OUTPUT"
 
 cat > "$OUT/BUILD-REPORT.txt" <<EOF_REPORT
-LiMaD OS 3.0 RC1 BASE1 DESIGN V23
+LiMaD OS 3.0 RC1 BASE1 DESIGN V24
 Base: Ubuntu 26.04 LTS Desktop FULL
 Official Ubuntu ISO: $UBUNTU_ISO_NAME
 Official Ubuntu SHA256: $UBUNTU_ISO_SHA256
@@ -113,15 +112,14 @@ WhiteSur commit: $WHITESUR_REF
 LiMaD icon theme: V3.2
 LiMaD wallpapers: 3 x 3840x2160, wallpaper 01 default
 Installer branding: Canonical whitelabel API, LiMaD OS Installer title, LiMaD images, German/English LiMaD slide
-Design V23: V22 desktop design retained; LiView 1.0.0 added as native default preview application with embedded offline dependencies
+Design V24: V23 desktop and LiView core unchanged; complete Steam/Lutris gaming stack added with amd64+i386 offline dependencies
 iMac17,1: DMI-targeted Radeon CIK compatibility path; upstream Radeon Bonaire firmware embedded in live initrd and installed target
 Firmware source: linux-firmware tag 20250509; firmware hashes embedded and verified
 Install source catalog: ubuntu-desktop only, Canonical catalog metadata preserved
 LiDrop: browser/local-device transfer enabled; AirDrop/OpenDrop/OWL/AWDL compatibility removed by design
 LiMusic: 0.3.22; GTK4/WebKitGTK 6/GStreamer runtime and common codec sets installed by LiMaD runtime dependency service
-LiView: 1.0.0; native PDF/image/video/3D preview and editing, OCR, forms, signatures, password handling, compression and secure redaction
-LiView runtime: Ubuntu 26.04 dependency closure embedded as offline DEB repository and validated in target install
-LiView MIME defaults: all supported MIME types assigned to de.limad.LiView.desktop
+LiView: 1.0.0; PDF/image/video/3D preview and editing; all declared MIME types default to LiView; Ubuntu 26.04 dependency closure embedded for offline installation; LiMaD Updater registered
+Gaming: Steam, Lutris, Protontricks, Wine/Winetricks, GameMode, MangoHud, Gamescope, Vulkan tools, vkBasalt and GOverlay; amd64+i386 Ubuntu 26.04 dependency closure embedded; ProtonUp-Qt provisioned through Flathub
 Output: $OUTPUT_ISO_NAME
 Output SHA256: $(sha256sum "$OUTPUT" | awk '{print $1}')
 EOF_REPORT

@@ -31,12 +31,20 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limusic/VERSI
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limusic/src/limusic/adblock_engine.py "$TMP/limusic-adblock-engine.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limusic/data/adblock-scriptlet-rules.json "$TMP/limusic-adblock-rules.json" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-updater/apps.json "$TMP/updater-apps.json" >/dev/null 2>&1
-xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/applications/de.limad.LiView.desktop "$TMP/liview.desktop" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/libexec/limad-select-app-root "$TMP/select-app-root" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/liview "$TMP/liview" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-liview-deps "$TMP/limad-liview-deps" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/liview/VERSION "$TMP/liview-version" >/dev/null 2>&1
-xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/icons/hicolor/512x512/apps/de.limad.LiView.png "$TMP/liview-icon.png" >/dev/null 2>&1
-xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-liview-selftest "$TMP/liview-selftest" >/dev/null 2>&1
-xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-liview-mime-defaults "$TMP/liview-mime-defaults" >/dev/null 2>&1
-xorriso -osirrox on -indev "$ISO" -extract /limad/offline-packages "$TMP/offline-packages" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/applications/de.limad.LiView.desktop "$TMP/liview.desktop" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/etc/xdg/mimeapps.list "$TMP/mimeapps.list" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/mime/packages/de.limad.LiView.xml "$TMP/liview-mime.xml" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/icons/hicolor/256x256/apps/de.limad.LiView.png "$TMP/liview-icon.png" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/liview/Packages.gz "$TMP/liview-Packages.gz" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/liview/SHA256SUMS.txt "$TMP/liview-SHA256SUMS.txt" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-gaming-deps "$TMP/limad-gaming-deps" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/gaming/REQUIRED-PACKAGES.txt "$TMP/gaming-packages.txt" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/gaming/Packages.gz "$TMP/gaming-Packages.gz" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/gaming/SHA256SUMS.txt "$TMP/gaming-SHA256SUMS.txt" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-notes/app.py "$TMP/linotes-app.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-windows/installer.py "$TMP/windows-installer.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/lilink@limad.local/metadata.json "$TMP/lilink-metadata.json" >/dev/null 2>&1
@@ -70,7 +78,14 @@ grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
 grep -Fq 'smbios --type 1 --get-string 5 --set limad_system_product' "$TMP/grub.cfg"
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v23"' "$TMP/limad-release"
+EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v24"'
+if ! grep -Fxq "$EXPECTED_BUILD_MARKER" "$TMP/limad-release"; then
+    echo "ERROR: Built ISO release marker mismatch." >&2
+    echo "Expected: $EXPECTED_BUILD_MARKER" >&2
+    echo "Found:" >&2
+    cat "$TMP/limad-release" >&2
+    exit 1
+fi
 grep -Fq '[Icon Theme]' "$TMP/index.theme"
 test -s "$TMP/gtk4.css"
 grep -Fq 'windowcontrols button.close' "$TMP/gtk4.css"
@@ -100,33 +115,37 @@ grep -Fq "show-apps-always-in-the-edge=false" "$TMP/desktop-core-system"
 grep -Fq "[org/gnome/shell]" "$TMP/desktop-core-system"
 grep -Fq "favorite-apps=['app.zen_browser.zen.desktop'" "$TMP/desktop-core-system"
 if grep -Fq 'firefox_firefox.desktop' "$TMP/desktop-core-system"; then
-    echo 'ERROR: Firefox remains in inherited V22 Dock defaults' >&2
+    echo 'ERROR: Firefox remains in V22 Dock defaults' >&2
     exit 1
 fi
 grep -Fq 'app.zen_browser.zen' "$TMP/required-user-apps"
 grep -Fq 'com.github.wwmm.easyeffects' "$TMP/required-user-apps"
+grep -Fq 'net.davidotek.pupgui2' "$TMP/required-user-apps"
 grep -Fq 'limad-sync-gtk4-theme' "$TMP/titlebuttons-ensure"
 grep -Fq 'de.limad.LiMusic' "$TMP/updater-apps.json"
 grep -Fq 'de.limad.LiView' "$TMP/updater-apps.json"
 [ "$(cat "$TMP/liview-version")" = "1.0.0" ]
-grep -Fq 'Exec=/usr/bin/liview %F' "$TMP/liview.desktop"
-grep -Fq 'StartupWMClass=de.limad.LiView' "$TMP/liview.desktop"
+grep -Fq '/usr/local/libexec/limad-select-app-root' "$TMP/liview"
+grep -Fq 'Exec=/usr/local/bin/liview %F' "$TMP/liview.desktop"
+grep -Fq 'application/pdf=de.limad.LiView.desktop' "$TMP/mimeapps.list"
+grep -Fq 'video/x-liview-raw=de.limad.LiView.desktop' "$TMP/mimeapps.list"
+grep -Fq 'video/x-liview-mpeg=de.limad.LiView.desktop' "$TMP/mimeapps.list"
+grep -Fq 'image/svg+xml-compressed=de.limad.LiView.desktop' "$TMP/mimeapps.list"
+test -s "$TMP/select-app-root"
+test -s "$TMP/liview-mime.xml"
 test -s "$TMP/liview-icon.png"
-grep -Fq 'LiView system selftest: PASS' "$TMP/liview-selftest"
-grep -Fq '/etc/xdg/mimeapps.list' "$TMP/liview-mime-defaults"
-grep -Fq '/usr/local/bin/limad-install-offline-packages' "$TMP/install-target.sh"
-grep -Fq '/usr/local/bin/limad-liview-mime-defaults' "$TMP/install-target.sh"
-grep -Fq '/usr/local/bin/limad-liview-selftest' "$TMP/install-target.sh"
-grep -Fq '/cdrom/limad/offline-packages/.' "$TMP/autoinstall.yaml"
-test -s "$TMP/offline-packages/Packages"
-test -s "$TMP/offline-packages/DIRECT-PACKAGES.txt"
-test -s "$TMP/offline-packages/SHA256SUMS.txt"
-if ! find "$TMP/offline-packages" -maxdepth 1 -type f -name '*.deb' -print -quit | grep -q .; then
-    echo 'ERROR: built ISO has no LiView offline DEB packages' >&2
-    exit 1
-fi
-( cd "$TMP/offline-packages" && sha256sum -c SHA256SUMS.txt >/dev/null )
-cmp -s "$ROOT/config/liview-packages.txt" "$TMP/offline-packages/DIRECT-PACKAGES.txt"
+test -s "$TMP/liview-Packages.gz"
+test -s "$TMP/liview-SHA256SUMS.txt"
+grep -Fq '/usr/share/limad/offline/liview' "$TMP/limad-liview-deps"
+test -s "$TMP/limad-gaming-deps"
+test -s "$TMP/gaming-packages.txt"
+test -s "$TMP/gaming-Packages.gz"
+test -s "$TMP/gaming-SHA256SUMS.txt"
+grep -Fq '/usr/share/limad/offline/gaming' "$TMP/limad-gaming-deps"
+grep -Fq 'dpkg --add-architecture i386' "$TMP/limad-gaming-deps"
+for package in steam-installer steam-devices lutris protontricks wine wine32:i386 winetricks gamemode mangohud gamescope vulkan-tools mesa-vulkan-drivers:i386 libvulkan1:i386 libglx-mesa0:i386; do
+    grep -Fxq "$package" "$TMP/gaming-packages.txt"
+done
 [ "$(cat "$TMP/limusic-version")" = "0.3.22" ]
 grep -Fq 'ENGINE_BOOTSTRAP_SCRIPT' "$TMP/limusic-adblock-engine.py"
 grep -Fq 'trusted-replace-fetch-response' "$TMP/limusic-adblock-rules.json"
@@ -148,7 +167,7 @@ for marker in \
     'LiMaD OS Installer' \
     'Willkommen bei LiMaD OS 3.0'; do
     if ! grep -aFq "$marker" "$TMP/initrd"; then
-        echo "ERROR: V23 initrd marker missing: $marker" >&2
+        echo "ERROR: V22 initrd marker missing: $marker" >&2
         exit 1
     fi
 done

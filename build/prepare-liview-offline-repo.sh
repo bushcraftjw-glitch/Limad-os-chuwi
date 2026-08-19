@@ -1,0 +1,93 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DESTINATION="${1:-$ROOT/.cache/liview-offline-repo}"
+PACKAGE_FILE="$ROOT/build/liview-packages.txt"
+APT_ROOT="$ROOT/.cache/liview-apt"
+KEYRING="/usr/share/keyrings/ubuntu-archive-keyring.gpg"
+
+for command in apt-get dpkg-deb dpkg-scanpackages gzip sha256sum; do
+    if ! command -v "$command" >/dev/null 2>&1; then
+        echo "ERROR: Required LiView offline-repo command missing: $command" >&2
+        exit 1
+    fi
+done
+
+if [ ! -r "$KEYRING" ]; then
+    echo "ERROR: Ubuntu archive keyring missing: $KEYRING" >&2
+    exit 1
+fi
+
+mapfile -t PACKAGES < <(grep -Ev '^[[:space:]]*(#|$)' "$PACKAGE_FILE")
+if [ "${#PACKAGES[@]}" -eq 0 ]; then
+    echo "ERROR: LiView package list is empty." >&2
+    exit 1
+fi
+
+rm -rf "$APT_ROOT" "$DESTINATION"
+mkdir -p \
+    "$APT_ROOT/etc/apt" \
+    "$APT_ROOT/var/lib/apt/lists/partial" \
+    "$APT_ROOT/var/lib/dpkg" \
+    "$APT_ROOT/var/cache/apt/archives/partial" \
+    "$DESTINATION"
+: > "$APT_ROOT/var/lib/dpkg/status"
+
+cat > "$APT_ROOT/etc/apt/sources.list" <<EOF_SOURCES
+deb [arch=amd64 signed-by=$KEYRING] http://archive.ubuntu.com/ubuntu resolute main restricted universe multiverse
+EOF_SOURCES
+
+APT_OPTIONS=(
+    -o "Dir::Etc::sourcelist=$APT_ROOT/etc/apt/sources.list"
+    -o "Dir::Etc::sourceparts=-"
+    -o "Dir::State=$APT_ROOT/var/lib/apt"
+    -o "Dir::State::status=$APT_ROOT/var/lib/dpkg/status"
+    -o "Dir::State::lists=$APT_ROOT/var/lib/apt/lists"
+    -o "Dir::Cache=$APT_ROOT/var/cache/apt"
+    -o "Dir::Cache::archives=$APT_ROOT/var/cache/apt/archives"
+    -o "APT::Architecture=amd64"
+    -o "APT::Architectures=amd64"
+    -o "Acquire::Languages=none"
+    -o "APT::Get::AllowUnauthenticated=false"
+)
+
+apt-get "${APT_OPTIONS[@]}" update
+DEBIAN_FRONTEND=noninteractive apt-get \
+    "${APT_OPTIONS[@]}" \
+    --download-only \
+    --no-install-recommends \
+    --yes \
+    install "${PACKAGES[@]}"
+
+find "$APT_ROOT/var/cache/apt/archives" -maxdepth 1 -type f -name '*.deb' -exec cp -a {} "$DESTINATION/" \;
+if ! find "$DESTINATION" -maxdepth 1 -type f -name '*.deb' -print -quit | grep -q .; then
+    echo "ERROR: LiView offline repository contains no DEB packages." >&2
+    exit 1
+fi
+
+for package in "${PACKAGES[@]}"; do
+    found=0
+    while IFS= read -r deb; do
+        if [ "$(dpkg-deb -f "$deb" Package)" = "$package" ]; then
+            found=1
+            break
+        fi
+    done < <(find "$DESTINATION" -maxdepth 1 -type f -name '*.deb' -print)
+    if [ "$found" -ne 1 ]; then
+        echo "ERROR: Requested LiView package missing from offline repository: $package" >&2
+        exit 1
+    fi
+done
+
+(
+    cd "$DESTINATION"
+    dpkg-scanpackages --multiversion . /dev/null > Packages
+    gzip -9c Packages > Packages.gz
+    printf '%s\n' "${PACKAGES[@]}" > REQUESTED-PACKAGES.txt
+    sha256sum ./*.deb Packages Packages.gz REQUESTED-PACKAGES.txt > SHA256SUMS.txt
+    sha256sum -c SHA256SUMS.txt >/dev/null
+)
+
+rm -rf "$APT_ROOT"
+echo "LiView offline repository: PASS"

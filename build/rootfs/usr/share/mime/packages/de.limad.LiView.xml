@@ -1,49 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
-  <mime-type type="application/pdf"><glob pattern="*.pdf" weight="80"/></mime-type>
-
-  <mime-type type="image/png"><glob pattern="*.png" weight="80"/></mime-type>
-  <mime-type type="image/jpeg"><glob pattern="*.jpg" weight="80"/><glob pattern="*.jpeg" weight="80"/></mime-type>
-  <mime-type type="image/webp"><glob pattern="*.webp" weight="80"/></mime-type>
-  <mime-type type="image/tiff"><glob pattern="*.tif" weight="80"/><glob pattern="*.tiff" weight="80"/></mime-type>
-  <mime-type type="image/bmp"><glob pattern="*.bmp" weight="80"/></mime-type>
-  <mime-type type="image/gif"><glob pattern="*.gif" weight="80"/></mime-type>
-  <mime-type type="image/vnd.microsoft.icon"><glob pattern="*.ico" weight="80"/></mime-type>
-  <mime-type type="image/avif"><glob pattern="*.avif" weight="80"/></mime-type>
-  <mime-type type="image/heic"><glob pattern="*.heic" weight="80"/></mime-type>
-  <mime-type type="image/heif"><glob pattern="*.heif" weight="80"/></mime-type>
-  <mime-type type="image/svg+xml"><glob pattern="*.svg" weight="80"/></mime-type>
-  <mime-type type="image/svg+xml-compressed"><glob pattern="*.svgz" weight="80"/></mime-type>
-
-  <mime-type type="model/stl"><glob pattern="*.stl" weight="80"/></mime-type>
-  <mime-type type="model/obj"><glob pattern="*.obj" weight="80"/></mime-type>
-  <mime-type type="model/3mf"><glob pattern="*.3mf" weight="80"/></mime-type>
-
-  <mime-type type="video/mp4"><glob pattern="*.mp4" weight="80"/><glob pattern="*.m4v" weight="80"/><glob pattern="*.f4v" weight="80"/></mime-type>
-  <mime-type type="video/quicktime"><glob pattern="*.mov" weight="80"/><glob pattern="*.qt" weight="80"/></mime-type>
-  <mime-type type="video/x-matroska"><glob pattern="*.mkv" weight="80"/></mime-type>
-  <mime-type type="video/x-matroska-3d"><glob pattern="*.mk3d" weight="80"/></mime-type>
-  <mime-type type="video/webm"><glob pattern="*.webm" weight="80"/></mime-type>
-  <mime-type type="video/x-msvideo"><glob pattern="*.avi" weight="80"/><glob pattern="*.divx" weight="80"/></mime-type>
-  <mime-type type="video/x-ms-wmv"><glob pattern="*.wmv" weight="80"/></mime-type>
-  <mime-type type="video/x-ms-asf"><glob pattern="*.asf" weight="80"/></mime-type>
-  <mime-type type="video/x-flv"><glob pattern="*.flv" weight="80"/></mime-type>
-  <mime-type type="video/mpeg"><glob pattern="*.mpg" weight="80"/><glob pattern="*.mpeg" weight="80"/><glob pattern="*.mpe" weight="80"/><glob pattern="*.m1v" weight="80"/><glob pattern="*.m2v" weight="80"/><glob pattern="*.m2p" weight="80"/><glob pattern="*.vob" weight="80"/></mime-type>
-  <mime-type type="video/mp2t"><glob pattern="*.m2t" weight="80"/><glob pattern="*.ts" weight="80"/><glob pattern="*.mts" weight="80"/><glob pattern="*.m2ts" weight="80"/></mime-type>
-  <mime-type type="video/ogg"><glob pattern="*.ogv" weight="80"/></mime-type>
-  <mime-type type="video/x-ogm+ogg"><glob pattern="*.ogm" weight="80"/></mime-type>
-  <mime-type type="video/3gpp"><glob pattern="*.3gp" weight="80"/></mime-type>
-  <mime-type type="video/3gpp2"><glob pattern="*.3g2" weight="80"/></mime-type>
-  <mime-type type="application/vnd.rn-realmedia"><glob pattern="*.rm" weight="80"/></mime-type>
-  <mime-type type="application/vnd.rn-realmedia-vbr"><glob pattern="*.rmvb" weight="80"/></mime-type>
-  <mime-type type="video/dv"><glob pattern="*.dv" weight="80"/></mime-type>
-  <mime-type type="application/mxf"><glob pattern="*.mxf" weight="80"/></mime-type>
-
-  <mime-type type="video/x-limad-nut"><comment>NUT video</comment><glob pattern="*.nut" weight="80"/></mime-type>
-  <mime-type type="video/x-limad-yuv4mpeg"><comment>YUV4MPEG video</comment><glob pattern="*.y4m" weight="80"/></mime-type>
-  <mime-type type="video/x-limad-h264"><comment>H.264 video elementary stream</comment><glob pattern="*.h264" weight="80"/><glob pattern="*.264" weight="80"/></mime-type>
-  <mime-type type="video/x-limad-h265"><comment>H.265/HEVC video elementary stream</comment><glob pattern="*.h265" weight="80"/><glob pattern="*.265" weight="80"/><glob pattern="*.hevc" weight="80"/></mime-type>
-  <mime-type type="video/x-limad-vp8"><comment>VP8 video elementary stream</comment><glob pattern="*.vp8" weight="80"/></mime-type>
-  <mime-type type="video/x-limad-vp9"><comment>VP9 video elementary stream</comment><glob pattern="*.vp9" weight="80"/></mime-type>
-  <mime-type type="video/x-limad-av1"><comment>AV1 video elementary stream</comment><glob pattern="*.av1" weight="80"/></mime-type>
+  <mime-type type="video/x-liview-raw">
+    <comment>Rohvideostream für LiView</comment>
+    <glob weight="100" pattern="*.h264"/>
+    <glob weight="100" pattern="*.264"/>
+    <glob weight="100" pattern="*.h265"/>
+    <glob weight="100" pattern="*.265"/>
+    <glob weight="100" pattern="*.hevc"/>
+    <glob weight="100" pattern="*.vp8"/>
+    <glob weight="100" pattern="*.vp9"/>
+    <glob weight="100" pattern="*.av1"/>
+  </mime-type>
+  <mime-type type="video/x-liview-nut">
+    <comment>NUT-Video für LiView</comment>
+    <glob weight="100" pattern="*.nut"/>
+  </mime-type>
+  <mime-type type="video/x-liview-y4m">
+    <comment>YUV4MPEG-Video für LiView</comment>
+    <glob weight="100" pattern="*.y4m"/>
+  </mime-type>
+  <mime-type type="video/x-liview-mpeg">
+    <comment>LiView MPEG video stream</comment>
+    <glob weight="80" pattern="*.m1v"/>
+    <glob weight="80" pattern="*.m2v"/>
+    <glob weight="80" pattern="*.m2p"/>
+  </mime-type>
 </mime-info>

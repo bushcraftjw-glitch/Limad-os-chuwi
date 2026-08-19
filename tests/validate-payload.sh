@@ -60,24 +60,25 @@ required=(
     "$ROOTFS/usr/share/limusic/data/youtube-adblock-webkit.json"
     "$ROOTFS/usr/share/limusic/src/limusic/adblock_engine.py"
     "$ROOTFS/usr/share/limusic/src/limusic/app.py"
-    "$ROOTFS/usr/bin/liview"
-    "$ROOTFS/usr/share/applications/de.limad.LiView.desktop"
-    "$ROOTFS/usr/share/liview/VERSION"
-    "$ROOTFS/usr/share/liview/liview/app.py"
-    "$ROOTFS/usr/share/liview/liview/documents.py"
-    "$ROOTFS/usr/share/liview/liview/stl.py"
-    "$ROOTFS/usr/share/liview/liview/video.py"
-    "$ROOTFS/usr/share/mime/packages/de.limad.LiView.xml"
-    "$ROOTFS/usr/local/bin/limad-install-offline-packages"
-    "$ROOTFS/usr/local/bin/limad-liview-mime-defaults"
-    "$ROOTFS/usr/local/bin/limad-liview-selftest"
-    "$PAYLOAD/offline-packages/Packages"
-    "$PAYLOAD/offline-packages/Packages.gz"
-    "$PAYLOAD/offline-packages/DIRECT-PACKAGES.txt"
-    "$PAYLOAD/offline-packages/SHA256SUMS.txt"
     "$ROOTFS/usr/share/limad-updater/apps.json"
     "$ROOTFS/usr/local/bin/limad-design-system"
     "$ROOTFS/usr/local/bin/limad-desktop-core-system"
+    "$ROOTFS/usr/local/libexec/limad-select-app-root"
+    "$ROOTFS/usr/local/bin/liview"
+    "$ROOTFS/usr/local/bin/limad-liview-deps"
+    "$ROOTFS/usr/share/liview/VERSION"
+    "$ROOTFS/usr/share/liview/liview/__main__.py"
+    "$ROOTFS/usr/share/liview/liview/app.py"
+    "$ROOTFS/usr/share/liview/liview/documents.py"
+    "$ROOTFS/usr/share/applications/de.limad.LiView.desktop"
+    "$ROOTFS/usr/share/mime/packages/de.limad.LiView.xml"
+    "$ROOTFS/etc/xdg/mimeapps.list"
+    "$ROOTFS/usr/share/limad/offline/liview/Packages.gz"
+    "$ROOTFS/usr/share/limad/offline/liview/SHA256SUMS.txt"
+    "$ROOTFS/usr/local/bin/limad-gaming-deps"
+    "$ROOTFS/usr/share/limad/gaming/REQUIRED-PACKAGES.txt"
+    "$ROOTFS/usr/share/limad/offline/gaming/Packages.gz"
+    "$ROOTFS/usr/share/limad/offline/gaming/SHA256SUMS.txt"
     "$ROOTFS/etc/limad-release"
 )
 
@@ -87,19 +88,6 @@ for path in "${required[@]}"; do
         exit 1
     fi
 done
-
-if ! find "$PAYLOAD/offline-packages" -maxdepth 1 -type f -name '*.deb' -print -quit | grep -q .; then
-    echo "ERROR: LiView offline DEB repository contains no packages" >&2
-    exit 1
-fi
-(
-    cd "$PAYLOAD/offline-packages"
-    sha256sum -c SHA256SUMS.txt >/dev/null
-)
-cmp -s "$PAYLOAD/offline-packages/DIRECT-PACKAGES.txt" "$ROOT/config/liview-packages.txt" || {
-    echo "ERROR: LiView offline direct package list differs from source package list" >&2
-    exit 1
-}
 
 applications=(
     de.limad.Cut.desktop
@@ -202,18 +190,38 @@ grep -Fq 'header.set_show_start_title_buttons(True)' "$ROOTFS/usr/share/limad-wi
 grep -Fq 'header.set_show_end_title_buttons(False)' "$ROOTFS/usr/share/limad-windows/installer.py"
 grep -Fq 'app.zen_browser.zen' "$ROOTFS/usr/local/bin/limad-required-user-apps"
 grep -Fq 'com.github.wwmm.easyeffects' "$ROOTFS/usr/local/bin/limad-required-user-apps"
+grep -Fq 'net.davidotek.pupgui2' "$ROOTFS/usr/local/bin/limad-required-user-apps"
 grep -Fq 'de.limad.LiMusic' "$ROOTFS/usr/share/limad-updater/apps.json"
-grep -Fq 'de.limad.LiView' "$ROOTFS/usr/share/limad-updater/apps.json"
-[ "$(cat "$ROOTFS/usr/share/liview/VERSION")" = "1.0.0" ]
-grep -Fq 'Exec=/usr/bin/liview %F' "$ROOTFS/usr/share/applications/de.limad.LiView.desktop"
-grep -Fq 'StartupWMClass=de.limad.LiView' "$ROOTFS/usr/share/applications/de.limad.LiView.desktop"
-grep -Fq '/usr/local/bin/limad-install-offline-packages' "$PAYLOAD/install-target.sh"
-grep -Fq '/usr/local/bin/limad-liview-mime-defaults' "$PAYLOAD/install-target.sh"
-grep -Fq '/usr/local/bin/limad-liview-selftest' "$PAYLOAD/install-target.sh"
 [ "$(cat "$ROOTFS/usr/share/limusic/VERSION")" = "0.3.22" ]
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v23"' "$ROOTFS/etc/limad-release"
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v24"' "$ROOTFS/etc/limad-release"
 grep -Fq 'iMac17,1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$PAYLOAD/install-target.sh"
+
+
+[ "$(cat "$ROOTFS/usr/share/liview/VERSION")" = "1.0.0" ]
+grep -Fq '/usr/local/libexec/limad-select-app-root' "$ROOTFS/usr/local/bin/liview"
+grep -Fq 'de.limad.LiView' "$ROOTFS/usr/share/limad-updater/apps.json"
+grep -Fq 'Exec=/usr/local/bin/liview %F' "$ROOTFS/usr/share/applications/de.limad.LiView.desktop"
+grep -Fq 'application/pdf=de.limad.LiView.desktop' "$ROOTFS/etc/xdg/mimeapps.list"
+grep -Fq 'video/x-liview-raw=de.limad.LiView.desktop' "$ROOTFS/etc/xdg/mimeapps.list"
+grep -Fq 'video/x-liview-mpeg=de.limad.LiView.desktop' "$ROOTFS/etc/xdg/mimeapps.list"
+grep -Fq 'image/svg+xml-compressed=de.limad.LiView.desktop' "$ROOTFS/etc/xdg/mimeapps.list"
+find "$ROOTFS/usr/share/limad/offline/liview" -maxdepth 1 -type f -name '*.deb' -print -quit | grep -q .
+(
+    cd "$ROOTFS/usr/share/limad/offline/liview"
+    sha256sum -c SHA256SUMS.txt >/dev/null
+)
+
+for package in steam-installer steam-devices lutris protontricks wine wine32:i386 winetricks gamemode mangohud gamescope vulkan-tools mesa-vulkan-drivers:i386 libvulkan1:i386 libglx-mesa0:i386; do
+    grep -Fxq "$package" "$ROOTFS/usr/share/limad/gaming/REQUIRED-PACKAGES.txt"
+done
+find "$ROOTFS/usr/share/limad/offline/gaming" -maxdepth 1 -type f -name '*.deb' -print -quit | grep -q .
+(
+    cd "$ROOTFS/usr/share/limad/offline/gaming"
+    sha256sum -c SHA256SUMS.txt >/dev/null
+)
+grep -Fq '/usr/share/limad/offline/gaming' "$ROOTFS/usr/local/bin/limad-gaming-deps"
+grep -Fq 'dpkg --add-architecture i386' "$ROOTFS/usr/local/bin/limad-gaming-deps"
 
 echo "PAYLOAD VALIDATION: PASS"

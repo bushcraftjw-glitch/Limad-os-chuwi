@@ -7,8 +7,8 @@ source "$ROOT/config/build.env"
 [ "$UBUNTU_ISO_NAME" = "ubuntu-26.04-desktop-amd64.iso" ]
 [ "$UBUNTU_ISO_SHA256" = "487f87faaf547ea30e0aba4d5b53346292571256b25333a978db1692bcee9dd2" ]
 [ "$WHITESUR_REF" = "1b356fe48ad5d05fb2ca6be071efe6801df3ac72" ]
-[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V23-amd64.iso" ]
-[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v23" ]
+[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V24-amd64.iso" ]
+[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v24" ]
 
 grep -Fq 'id: ubuntu-desktop' "$ROOT/config/autoinstall.yaml"
 if grep -Fq 'ubuntu-desktop-minimal' "$ROOT/config/autoinstall.yaml"; then
@@ -99,6 +99,12 @@ grep -Fq "GRUB_ORIGINAL=\"\$CACHE/grub.original.cfg\"" "$ROOT/build/build-iso.sh
 grep -Fq "python3 -B \"\$ROOT/tools/brand-grub.py\"" "$ROOT/build/build-iso.sh"
 grep -Fq -- '-volid LIMAD_OS_3_0_RC1' "$ROOT/build/build-iso.sh"
 grep -Fq "REPO=\"\${LIMAD_GITHUB_REPO:-bushcraftjw-glitch/Limad-os-chuwi}\"" "$ROOT/tools/github-starter.sh"
+grep -Fq 'expected_sha:' "$ROOT/.github/workflows/build-iso.yml"
+grep -Fq 'EXPECTED_SHA: ${{ inputs.expected_sha }}' "$ROOT/.github/workflows/build-iso.yml"
+grep -Fq "gh api \"repos/\$REPO/commits/main\"" "$ROOT/tools/github-starter.sh"
+grep -Fq "expected_sha=\"\$COMMIT\"" "$ROOT/tools/github-starter.sh"
+grep -Fq 'baseline-runs.txt' "$ROOT/tools/github-starter.sh"
+grep -Fq 'Built ISO release marker mismatch.' "$ROOT/tests/verify-built-iso.sh"
 if grep -Fq 'git push --force' "$ROOT/tools/github-starter.sh"; then
     echo "ERROR: Force-push must not be used for Limad-os-chuwi build history" >&2
     exit 1
@@ -127,24 +133,6 @@ test -x "$ROOT/build/rootfs/usr/local/bin/limad-lidrop-status-ensure"
 
 test -s "$ROOT/build/rootfs/etc/xdg/autostart/limad-required-user-apps.desktop"
 test -s "$ROOT/build/rootfs/etc/xdg/autostart/limad-titlebuttons-ensure.desktop"
-test -s "$ROOT/build/rootfs/usr/share/applications/de.limad.LiView.desktop"
-test -x "$ROOT/build/rootfs/usr/bin/liview"
-test -x "$ROOT/build/rootfs/usr/local/bin/limad-install-offline-packages"
-test -x "$ROOT/build/rootfs/usr/local/bin/limad-liview-mime-defaults"
-test -x "$ROOT/build/rootfs/usr/local/bin/limad-liview-selftest"
-test -x "$ROOT/tools/prepare-offline-packages.sh"
-test -s "$ROOT/config/liview-packages.txt"
-test -s "$ROOT/config/liview-mime-types.txt"
-test -s "$ROOT/build/rootfs/usr/share/liview/VERSION"
-[ "$(cat "$ROOT/build/rootfs/usr/share/liview/VERSION")" = "1.0.0" ]
-grep -Fq 'Exec=/usr/bin/liview %F' "$ROOT/build/rootfs/usr/share/applications/de.limad.LiView.desktop"
-grep -Fq 'Icon=de.limad.LiView' "$ROOT/build/rootfs/usr/share/applications/de.limad.LiView.desktop"
-grep -Fq '/usr/local/bin/limad-install-offline-packages' "$ROOT/build/install-target.sh"
-grep -Fq '/usr/local/bin/limad-liview-selftest' "$ROOT/build/install-target.sh"
-grep -Fq '/usr/local/bin/limad-liview-mime-defaults' "$ROOT/build/install-target.sh"
-grep -Fq '/cdrom/limad/offline-packages/.' "$ROOT/config/autoinstall.yaml"
-grep -Fq 'prepare-offline-packages.sh' "$ROOT/build/prepare-payload.sh"
-grep -Fq 'payload/offline-packages/' "$ROOT/build/build-iso.sh"
 test -s "$ROOT/build/rootfs/usr/share/applications/de.limad.LiMusic.desktop"
 test -s "$ROOT/build/rootfs/usr/share/limad-updater/apps.json"
 test -s "$ROOT/build/rootfs/usr/share/limusic/VERSION"
@@ -157,7 +145,7 @@ done
 grep -Fq 'app.zen_browser.zen' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
 grep -Fq 'com.github.wwmm.easyeffects' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
 if grep -Fq 'firefox_firefox.desktop' "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"; then
-    echo "ERROR: Firefox must not remain in inherited V22 Dock defaults" >&2
+    echo "ERROR: Firefox must not remain in V22 Dock defaults" >&2
     exit 1
 fi
 
@@ -184,7 +172,6 @@ python3 -B "$ROOT/tests/test-imac17-firmware.py"
 python3 -B "$ROOT/tests/test-lilink-and-lidrop-scope.py"
 python3 -B "$ROOT/tests/test-v22-menu-lidrop.py"
 python3 -B "$ROOT/tests/test-v22-apps-titlebuttons.py"
-python3 -B "$ROOT/tests/test-v23-liview.py"
 
 grep -Fq "INSTALL_SOURCES_ORIGINAL=\"\$CACHE/install-sources.original.yaml\"" "$ROOT/build/build-iso.sh"
 grep -Fq "MD5_ORIGINAL=\"\$CACHE/md5sum.original.txt\"" "$ROOT/build/build-iso.sh"
@@ -196,4 +183,80 @@ grep -Fq 'GRUB_MD5=' "$ROOT/tests/verify-built-iso.sh"
 
 grep -Fq ' dconf-cli ' "$ROOT/.github/workflows/build-iso.yml"
 grep -Fq 'dconf help compile' "$ROOT/.github/workflows/build-iso.yml"
+
+
+# V23 LiView integration retained in V24: native app, updater registration, offline runtime closure and defaults.
+for path in \
+    "$ROOT/build/liview-packages.txt" \
+    "$ROOT/build/prepare-liview-offline-repo.sh" \
+    "$ROOT/build/rootfs/usr/local/bin/liview" \
+    "$ROOT/build/rootfs/usr/local/bin/limad-liview-deps" \
+    "$ROOT/build/rootfs/usr/share/liview/VERSION" \
+    "$ROOT/build/rootfs/usr/share/liview/liview/__main__.py" \
+    "$ROOT/build/rootfs/usr/share/liview/liview/app.py" \
+    "$ROOT/build/rootfs/usr/share/liview/liview/documents.py" \
+    "$ROOT/build/rootfs/usr/share/applications/de.limad.LiView.desktop" \
+    "$ROOT/build/rootfs/usr/share/mime/packages/de.limad.LiView.xml" \
+    "$ROOT/build/rootfs/etc/xdg/mimeapps.list"; do
+    test -s "$path"
+done
+[ "$(cat "$ROOT/build/rootfs/usr/share/liview/VERSION")" = "1.0.0" ]
+test -x "$ROOT/build/prepare-liview-offline-repo.sh"
+test -x "$ROOT/build/rootfs/usr/local/bin/liview"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-liview-deps"
+[ ! -e "$ROOT/build/rootfs/usr/bin/liview" ]
+grep -Fq '/usr/local/libexec/limad-select-app-root' "$ROOT/build/rootfs/usr/local/bin/liview"
+grep -Fq 'de.limad.LiView' "$ROOT/build/rootfs/usr/share/limad-updater/apps.json"
+grep -Fq '"launcher": "/usr/local/bin/liview"' "$ROOT/build/rootfs/usr/share/limad-updater/apps.json"
+grep -Fq 'Exec=/usr/local/bin/liview %F' "$ROOT/build/rootfs/usr/share/applications/de.limad.LiView.desktop"
+grep -Fq 'Exec=/usr/local/bin/limad-updater --app de.limad.LiView' "$ROOT/build/rootfs/usr/share/applications/de.limad.LiView.desktop"
+grep -Fq 'application/pdf=de.limad.LiView.desktop' "$ROOT/build/rootfs/etc/xdg/mimeapps.list"
+grep -Fq 'video/x-liview-raw=de.limad.LiView.desktop' "$ROOT/build/rootfs/etc/xdg/mimeapps.list"
+grep -Fq 'prepare-liview-offline-repo.sh' "$ROOT/build/prepare-payload.sh"
+grep -Fq '/usr/local/bin/limad-liview-deps' "$ROOT/build/install-target.sh"
+if grep -F '/usr/local/bin/limad-liview-deps' "$ROOT/build/install-target.sh" | grep -Fq '|| true'; then
+    echo 'ERROR: LiView dependency installation must be install-critical' >&2
+    exit 1
+fi
+for package in \
+    gir1.2-gtk-4.0 gir1.2-poppler-0.18 python3-pikepdf python3-pil \
+    librsvg2-bin libheif-examples gstreamer1.0-gtk4 gstreamer1.0-libav \
+    gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-ugly tesseract-ocr tesseract-ocr-deu ffmpeg ghostscript \
+    desktop-file-utils shared-mime-info; do
+    grep -Fxq "$package" "$ROOT/build/liview-packages.txt"
+done
+for size in 64 128 256 512; do
+    test -s "$ROOT/build/rootfs/usr/share/icons/LiMaD/${size}x${size}/apps/de.limad.LiView.png"
+    test -s "$ROOT/build/rootfs/usr/share/icons/hicolor/${size}x${size}/apps/de.limad.LiView.png"
+done
+python3 -B "$ROOT/tests/test-v23-liview.py"
+
+# V24 gaming integration: native Ubuntu stack, amd64+i386 offline closure and ProtonUp-Qt.
+for path in \
+    "$ROOT/build/gaming-packages.txt" \
+    "$ROOT/build/prepare-gaming-offline-repo.sh" \
+    "$ROOT/build/rootfs/usr/local/bin/limad-gaming-deps" \
+    "$ROOT/build/rootfs/usr/share/limad/gaming/REQUIRED-PACKAGES.txt"; do
+    test -s "$path"
+done
+test -x "$ROOT/build/prepare-gaming-offline-repo.sh"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-gaming-deps"
+grep -Fq 'prepare-gaming-offline-repo.sh' "$ROOT/build/prepare-payload.sh"
+grep -Fq '/usr/local/bin/limad-gaming-deps' "$ROOT/build/install-target.sh"
+if grep -F '/usr/local/bin/limad-gaming-deps' "$ROOT/build/install-target.sh" | grep -Fq '|| true'; then
+    echo 'ERROR: Gaming dependency installation must be install-critical' >&2
+    exit 1
+fi
+for package in \
+    steam-installer steam-devices lutris protontricks wine wine32:i386 winetricks \
+    gamemode mangohud gamescope vulkan-tools mesa-vulkan-drivers:amd64 \
+    mesa-vulkan-drivers:i386 libvulkan1:amd64 libvulkan1:i386 libglx-mesa0:i386 \
+    mesa-utils vkbasalt goverlay; do
+    grep -Fxq "$package" "$ROOT/build/gaming-packages.txt"
+done
+grep -Fq 'net.davidotek.pupgui2' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
+grep -Fq 'required-user-apps-v24.done' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
+python3 -B "$ROOT/tests/test-v24-gaming.py"
+
 echo "SOURCE VALIDATION: PASS"

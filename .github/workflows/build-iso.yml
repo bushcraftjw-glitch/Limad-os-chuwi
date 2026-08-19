@@ -2,6 +2,11 @@ name: Build LiMaD OS BASE1 ISO
 
 on:
   workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact source commit expected by the local LiMaD build starter
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -13,6 +18,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      - name: Verify dispatched commit
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          if [ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]; then
+            echo "ERROR: Workflow checked out $ACTUAL_SHA but local starter requested $EXPECTED_SHA" >&2
+            exit 1
+          fi
+          echo "Verified build commit: $ACTUAL_SHA"
 
       - name: Free runner disk space
         run: |
@@ -30,12 +46,15 @@ jobs:
             command -v "$command"
           done
           dconf help compile >/dev/null
+          test -r /usr/share/keyrings/ubuntu-archive-keyring.gpg
       - name: Validate source
         run: |
           chmod +x START-RC1-GITHUB-BUILD-LINUX.sh tools/*.sh tools/*.py build/*.sh tests/*.sh tests/*.py build/rootfs/usr/local/bin/*
           python3 -B tests/test-shell-regressions.py
           python3 -B tests/test-version-consistency.py
-          shellcheck -e SC1091 START-RC1-GITHUB-BUILD-LINUX.sh tools/*.sh build/*.sh build/casper-bottom/* tests/*.sh build/rootfs/usr/local/bin/limad-base1-first-login build/rootfs/usr/local/bin/limad-first-login-setup build/rootfs/usr/local/bin/limad-runtime-deps build/rootfs/usr/local/bin/limad-sync-gtk4-theme build/rootfs/usr/local/bin/limad-design-system build/rootfs/usr/local/bin/limad-desktop-core-system build/rootfs/usr/local/bin/limad-link-health-check build/rootfs/usr/local/bin/limad-link-status-ensure build/rootfs/usr/local/bin/limad-lidrop-status-ensure build/rootfs/usr/local/bin/limad-required-user-apps build/rootfs/usr/local/bin/limad-titlebuttons-ensure build/rootfs/usr/local/bin/limad-install-offline-packages build/rootfs/usr/local/bin/limad-liview-mime-defaults build/rootfs/usr/local/bin/limad-liview-selftest build/rootfs/usr/local/bin/limusic tools/prepare-offline-packages.sh
+          python3 -B tests/test-v23-liview.py
+          python3 -B tests/test-v24-gaming.py
+          shellcheck -e SC1091 START-RC1-GITHUB-BUILD-LINUX.sh tools/*.sh build/*.sh build/casper-bottom/* tests/*.sh build/rootfs/usr/local/bin/limad-base1-first-login build/rootfs/usr/local/bin/limad-first-login-setup build/rootfs/usr/local/bin/limad-runtime-deps build/rootfs/usr/local/bin/limad-sync-gtk4-theme build/rootfs/usr/local/bin/limad-design-system build/rootfs/usr/local/bin/limad-desktop-core-system build/rootfs/usr/local/bin/limad-link-health-check build/rootfs/usr/local/bin/limad-link-status-ensure build/rootfs/usr/local/bin/limad-lidrop-status-ensure build/rootfs/usr/local/bin/limad-required-user-apps build/rootfs/usr/local/bin/limad-titlebuttons-ensure build/rootfs/usr/local/bin/limusic build/rootfs/usr/local/bin/limad-liview-deps build/rootfs/usr/local/bin/limad-gaming-deps build/rootfs/usr/local/bin/liview
           ./tools/reassemble-vendor.sh
           python3 -B tests/test-filter-install-sources.py
           python3 -B tests/test-update-md5.py
@@ -48,7 +67,6 @@ jobs:
           python3 -B tests/test-lilink-and-lidrop-scope.py
           python3 -B tests/test-v22-menu-lidrop.py
           python3 -B tests/test-v22-apps-titlebuttons.py
-          python3 -B tests/test-v23-liview.py
           ./tests/validate-source.sh
 
       - name: Build ISO

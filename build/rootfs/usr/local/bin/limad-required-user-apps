@@ -2,10 +2,11 @@
 set -euo pipefail
 
 STATE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/limad"
-STATE_FILE="$STATE_DIR/required-user-apps-v23.done"
+STATE_FILE="$STATE_DIR/required-user-apps-v24.done"
 FLATHUB_URL="https://dl.flathub.org/repo/flathub.flatpakrepo"
 ZEN_ID="app.zen_browser.zen"
 EASYEFFECTS_ID="com.github.wwmm.easyeffects"
+PROTONUP_ID="net.davidotek.pupgui2"
 ZEN_SETUP_HELPER="${LIMAD_ZEN_SETUP_HELPER:-/usr/local/bin/limad-zen-deutsch-setup}"
 KLANG_PRESET_HELPER="${LIMAD_KLANG_PRESET_HELPER:-/usr/local/bin/limad-install-klang-preset}"
 
@@ -27,13 +28,13 @@ if ! flatpak remotes --user --columns=name 2>/dev/null | grep -Fxq flathub; then
     flatpak remote-add --user --if-not-exists flathub "$FLATHUB_URL"
 fi
 
-installed_any_scope() {
-    flatpak info --user "$1" >/dev/null 2>&1 || flatpak info --system "$1" >/dev/null 2>&1
-}
-
 install_user_app() {
     local app_id="$1"
-    if installed_any_scope "$app_id"; then
+    if flatpak info --user "$app_id" >/dev/null 2>&1; then
+        flatpak update --user --noninteractive -y "$app_id" || true
+        return 0
+    fi
+    if flatpak info --system "$app_id" >/dev/null 2>&1; then
         return 0
     fi
     flatpak install --user --noninteractive -y flathub "$app_id"
@@ -43,6 +44,7 @@ install_user_app "$ZEN_ID"
 "$ZEN_SETUP_HELPER"
 install_user_app "$EASYEFFECTS_ID"
 "$KLANG_PRESET_HELPER"
+install_user_app "$PROTONUP_ID"
 
 if command -v gsettings >/dev/null 2>&1 \
     && gsettings list-schemas 2>/dev/null | grep -Fxq org.gnome.shell \
@@ -53,5 +55,5 @@ fi
 
 touch "$STATE_FILE"
 if command -v notify-send >/dev/null 2>&1; then
-    notify-send -u low "LiMaD Apps bereit" "Zen Browser und EasyEffects sind eingerichtet." || true
+    notify-send -u low "LiMaD Apps bereit" "Zen Browser, EasyEffects und ProtonUp-Qt sind eingerichtet." || true
 fi

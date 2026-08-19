@@ -215,18 +215,19 @@
     {
       "app_id": "de.limad.LiView",
       "name": "LiView",
-      "launcher": "/usr/bin/liview",
+      "launcher": "/usr/local/bin/liview",
       "system_root": "/usr/share/liview",
       "system_version_file": "/usr/share/liview/VERSION",
       "required": [
-        "VERSION",
         "liview/__main__.py",
         "liview/app.py",
         "liview/documents.py",
         "liview/inspector.py",
         "liview/ocr.py",
         "liview/stl.py",
-        "liview/video.py"
+        "liview/video.py",
+        "liview/style.css",
+        "VERSION"
       ],
       "restart_user_services": []
     }

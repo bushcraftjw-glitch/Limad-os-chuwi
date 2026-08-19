@@ -27,21 +27,6 @@ PACKAGES=(
     python3-gi
 )
 
-if [ -s /usr/share/liview/dependencies.txt ]; then
-    mapfile -t LIVIEW_PACKAGES < <(grep -Ev '^[[:space:]]*(#|$)' /usr/share/liview/dependencies.txt)
-    PACKAGES+=("${LIVIEW_PACKAGES[@]}")
-fi
-
-declare -A SEEN=()
-UNIQUE_PACKAGES=()
-for package in "${PACKAGES[@]}"; do
-    if [ -z "${SEEN[$package]+x}" ]; then
-        SEEN[$package]=1
-        UNIQUE_PACKAGES+=("$package")
-    fi
-done
-PACKAGES=("${UNIQUE_PACKAGES[@]}")
-
 missing=()
 for package in "${PACKAGES[@]}"; do
     if ! dpkg -s "$package" >/dev/null 2>&1; then
