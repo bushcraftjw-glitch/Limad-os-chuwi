@@ -6,8 +6,9 @@ DESTINATION="${1:-$ROOT/.cache/gaming-offline-repo}"
 PACKAGE_FILE="$ROOT/build/gaming-packages.txt"
 APT_ROOT="$ROOT/.cache/gaming-apt"
 KEYRING="/usr/share/keyrings/ubuntu-archive-keyring.gpg"
+TARGET_STATUS="${LIMAD_TARGET_DPKG_STATUS:-$ROOT/.cache/ubuntu-target-state/dpkg-status}"
 
-for command in apt-get dpkg-deb dpkg-scanpackages gzip sha256sum; do
+for command in apt-get dpkg-deb dpkg-query dpkg-scanpackages gzip sha256sum; do
     if ! command -v "$command" >/dev/null 2>&1; then
         echo "ERROR: Required gaming offline-repo command missing: $command" >&2
         exit 1
@@ -16,6 +17,11 @@ done
 
 if [ ! -r "$KEYRING" ]; then
     echo "ERROR: Ubuntu archive keyring missing: $KEYRING" >&2
+    exit 1
+fi
+
+if [ ! -r "$TARGET_STATUS" ]; then
+    echo "ERROR: Ubuntu desktop target dpkg status missing: $TARGET_STATUS" >&2
     exit 1
 fi
 
@@ -32,7 +38,30 @@ mkdir -p \
     "$APT_ROOT/var/lib/dpkg" \
     "$APT_ROOT/var/cache/apt/archives/partial" \
     "$DESTINATION"
-: > "$APT_ROOT/var/lib/dpkg/status"
+install -m 0644 "$TARGET_STATUS" "$APT_ROOT/var/lib/dpkg/status"
+
+target_package_installed() {
+    local requested="$1"
+    local base="${requested%%:*}"
+    local requested_arch=""
+    local package
+    local architecture
+    local status
+
+    if [[ "$requested" == *:* ]]; then
+        requested_arch="${requested##*:}"
+    fi
+
+    while IFS=$'\t' read -r package architecture status; do
+        [ "$package" = "$base" ] || continue
+        [ "$status" = "install ok installed" ] || continue
+        if [ -z "$requested_arch" ] || [ "$architecture" = "$requested_arch" ] || [ "$architecture" = "all" ]; then
+            return 0
+        fi
+    done < <(dpkg-query --admindir="$APT_ROOT/var/lib/dpkg" -W -f="\${Package}\t\${Architecture}\t\${Status}\n" "$base" 2>/dev/null || true)
+
+    return 1
+}
 
 cat > "$APT_ROOT/etc/apt/sources.list" <<EOF_SOURCES
 deb [arch=amd64,i386 signed-by=$KEYRING] http://archive.ubuntu.com/ubuntu resolute main restricted universe multiverse
@@ -67,11 +96,6 @@ find "$APT_ROOT/var/cache/apt/archives" -maxdepth 1 -type f -name '*.deb' -exec 
 shopt -s nullglob
 DEB_FILES=("$DESTINATION"/*.deb)
 shopt -u nullglob
-if [ "${#DEB_FILES[@]}" -eq 0 ]; then
-    echo "ERROR: Gaming offline repository contains no DEB packages." >&2
-    exit 1
-fi
-
 package_present() {
     local requested="$1"
     local base="${requested%%:*}"
@@ -99,8 +123,8 @@ package_present() {
 }
 
 for package in "${PACKAGES[@]}"; do
-    if ! package_present "$package"; then
-        echo "ERROR: Requested gaming package missing from offline repository: $package" >&2
+    if ! package_present "$package" && ! target_package_installed "$package"; then
+        echo "ERROR: Requested gaming package is neither installed in the Ubuntu target nor present in the offline repository: $package" >&2
         exit 1
     fi
 done
@@ -131,7 +155,10 @@ done
     rm -f "$SCAN_LOG"
     gzip -9c Packages > Packages.gz
     printf '%s\n' "${PACKAGES[@]}" > REQUESTED-PACKAGES.txt
-    sha256sum ./*.deb Packages Packages.gz REQUESTED-PACKAGES.txt > SHA256SUMS.txt
+    shopt -s nullglob
+    CHECKSUM_FILES=(./*.deb Packages Packages.gz REQUESTED-PACKAGES.txt)
+    shopt -u nullglob
+    sha256sum "${CHECKSUM_FILES[@]}" > SHA256SUMS.txt
     sha256sum -c SHA256SUMS.txt >/dev/null
 )
 

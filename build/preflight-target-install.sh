@@ -3,101 +3,130 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PAYLOAD="$ROOT/.cache/payload"
-BASE_IMAGE="${LIMAD_PREFLIGHT_IMAGE:-ubuntu:26.04}"
-IMAGE_TAG="limad-v25-target-preflight:${GITHUB_SHA:-local}"
-FULL_CONTAINER="limad-v25-target-preflight-full-$$"
-CONTAINER_SCRIPT="$ROOT/build/preflight-target-container.sh"
+STATE_ROOT="$ROOT/.cache/ubuntu-target-state"
+CATALOG="$STATE_ROOT/install-sources.yaml"
+LAYER_DIR="$STATE_ROOT/layers"
+PREFLIGHT_ROOT="$ROOT/.cache/target-preflight"
+MOUNT_DIR="$PREFLIGHT_ROOT/mounts"
+TARGET="$PREFLIGHT_ROOT/target"
+UPPER="$PREFLIGHT_ROOT/upper"
+WORK="$PREFLIGHT_ROOT/work"
 
-cleanup() {
-    docker rm -f "$FULL_CONTAINER" >/dev/null 2>&1 || true
-    docker image rm -f "$IMAGE_TAG" >/dev/null 2>&1 || true
-}
-trap cleanup EXIT
-
-if ! command -v docker >/dev/null 2>&1; then
-    echo "ERROR: Target preflight requires Docker." >&2
-    exit 1
-fi
-
-if [ ! -d "$PAYLOAD/rootfs" ] || [ ! -x "$PAYLOAD/install-target.sh" ] || [ ! -x "$CONTAINER_SCRIPT" ]; then
-    echo "ERROR: Prepared LiMaD payload or target preflight helper is missing." >&2
-    exit 1
-fi
-
-for path in \
-    "$PAYLOAD/rootfs/usr/local/bin/limad-liview-deps" \
-    "$PAYLOAD/rootfs/usr/local/bin/limad-gaming-deps" \
-    "$PAYLOAD/rootfs/usr/local/bin/limad-grubenvolk-deps" \
-    "$PAYLOAD/rootfs/usr/local/bin/limad-grubenvolk" \
-    "$PAYLOAD/rootfs/usr/local/libexec/limad-select-app-root" \
-    "$PAYLOAD/rootfs/usr/share/liview" \
-    "$PAYLOAD/rootfs/usr/share/limad/gaming" \
-    "$PAYLOAD/rootfs/usr/share/limad-grubenvolk" \
-    "$PAYLOAD/rootfs/usr/share/limad/offline/liview" \
-    "$PAYLOAD/rootfs/usr/share/limad/offline/gaming" \
-    "$PAYLOAD/rootfs/usr/share/limad/offline/grubenvolk"; do
-    if [ ! -e "$path" ]; then
-        echo "ERROR: Target preflight payload component missing: $path" >&2
+for command in chroot mount mountpoint python3 sudo umount; do
+    if ! command -v "$command" >/dev/null 2>&1; then
+        echo "ERROR: Required target-preflight command missing: $command" >&2
         exit 1
     fi
 done
 
-echo "TARGET PREFLIGHT: preparing Ubuntu 26.04 target image"
-docker pull "$BASE_IMAGE" >/dev/null
+if [ ! -d "$PAYLOAD/rootfs" ] || [ ! -x "$PAYLOAD/install-target.sh" ]; then
+    echo "ERROR: Prepared LiMaD payload is missing." >&2
+    exit 1
+fi
+if [ ! -r "$CATALOG" ] || [ ! -s "$STATE_ROOT/dpkg-status" ]; then
+    echo "ERROR: Prepared Ubuntu desktop target state is missing." >&2
+    exit 1
+fi
 
-docker build --tag "$IMAGE_TAG" - <<EOF_DOCKER
-FROM $BASE_IMAGE
-ENV DEBIAN_FRONTEND=noninteractive
-RUN printf '#!/bin/sh\nexit 101\n' > /usr/sbin/policy-rc.d \
-    && chmod 0755 /usr/sbin/policy-rc.d \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends systemd dconf-cli ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-EOF_DOCKER
+mapfile -t LAYERS < <(python3 -B "$ROOT/tools/install-source-stack.py" "$CATALOG" --source-id ubuntu-desktop)
+if [ "${#LAYERS[@]}" -eq 0 ]; then
+    echo "ERROR: Ubuntu desktop target source has no filesystem layers." >&2
+    exit 1
+fi
 
-run_dependency_stage() {
+rm -rf "$PREFLIGHT_ROOT"
+mkdir -p "$MOUNT_DIR" "$TARGET" "$UPPER" "$WORK"
+
+LAYER_MOUNTS=()
+BIND_MOUNTS=()
+cleanup() {
+    local index
+    for ((index=${#BIND_MOUNTS[@]}-1; index>=0; index--)); do
+        if mountpoint -q "${BIND_MOUNTS[$index]}"; then
+            sudo umount "${BIND_MOUNTS[$index]}"
+        fi
+    done
+    if mountpoint -q "$TARGET"; then
+        sudo umount "$TARGET"
+    fi
+    for ((index=${#LAYER_MOUNTS[@]}-1; index>=0; index--)); do
+        if mountpoint -q "${LAYER_MOUNTS[$index]}"; then
+            sudo umount "${LAYER_MOUNTS[$index]}"
+        fi
+    done
+    sudo rm -rf "$PREFLIGHT_ROOT"
+}
+trap cleanup EXIT
+
+for index in "${!LAYERS[@]}"; do
+    image="$LAYER_DIR/$(basename "${LAYERS[$index]}")"
+    mount_dir="$MOUNT_DIR/$index"
+    if [ ! -s "$image" ]; then
+        echo "ERROR: Prepared Ubuntu target layer is missing: $image" >&2
+        exit 1
+    fi
+    mkdir -p "$mount_dir"
+    sudo mount -t squashfs -o loop,ro "$image" "$mount_dir"
+    LAYER_MOUNTS+=("$mount_dir")
+done
+
+LOWERDIR=""
+for ((index=${#LAYER_MOUNTS[@]}-1; index>=0; index--)); do
+    if [ -n "$LOWERDIR" ]; then
+        LOWERDIR+=":"
+    fi
+    LOWERDIR+="${LAYER_MOUNTS[$index]}"
+done
+sudo mount -t overlay overlay -o "lowerdir=$LOWERDIR,upperdir=$UPPER,workdir=$WORK" "$TARGET"
+
+sudo cp -a "$PAYLOAD/rootfs/." "$TARGET/"
+sudo install -m 0755 "$PAYLOAD/install-target.sh" "$TARGET/tmp/limad-install-target.sh"
+
+sudo mkdir -p "$TARGET/dev" "$TARGET/proc" "$TARGET/sys" "$TARGET/run"
+sudo mount --bind /dev "$TARGET/dev"
+BIND_MOUNTS+=("$TARGET/dev")
+sudo mount -t proc proc "$TARGET/proc"
+BIND_MOUNTS+=("$TARGET/proc")
+sudo mount --bind /sys "$TARGET/sys"
+BIND_MOUNTS+=("$TARGET/sys")
+sudo mount --bind /run "$TARGET/run"
+BIND_MOUNTS+=("$TARGET/run")
+
+if [ -f "$TARGET/etc/apt/sources.list" ]; then
+    sudo mv "$TARGET/etc/apt/sources.list" "$TARGET/etc/apt/sources.list.limad-preflight-disabled"
+fi
+sudo install -m 0644 /dev/null "$TARGET/etc/apt/sources.list"
+if [ -d "$TARGET/etc/apt/sources.list.d" ]; then
+    while IFS= read -r source_file; do
+        sudo mv "$source_file" "$source_file.limad-preflight-disabled"
+    done < <(find "$TARGET/etc/apt/sources.list.d" -maxdepth 1 -type f \( -name '*.list' -o -name '*.sources' \) -print)
+fi
+
+sudo tee "$TARGET/usr/sbin/policy-rc.d" >/dev/null <<'POLICY'
+#!/bin/sh
+exit 101
+POLICY
+sudo chmod 0755 "$TARGET/usr/sbin/policy-rc.d"
+
+run_stage() {
     local stage="$1"
-    local mode="$2"
+    local command="$2"
 
     echo "TARGET PREFLIGHT: $stage START"
-    if ! docker run --rm --network none \
-        --mount "type=bind,src=$PAYLOAD/rootfs,dst=/limad-payload,readonly" \
-        --mount "type=bind,src=$CONTAINER_SCRIPT,dst=/usr/local/bin/limad-preflight-container,readonly" \
-        "$IMAGE_TAG" \
-        /usr/bin/bash /usr/local/bin/limad-preflight-container "$mode"; then
+    if ! sudo chroot "$TARGET" /usr/bin/bash -c "$command"; then
         echo "ERROR: TARGET PREFLIGHT failed in $stage" >&2
+        return 1
+    fi
+    if ! sudo chroot "$TARGET" /usr/bin/apt-get check; then
+        echo "ERROR: TARGET PREFLIGHT dependency check failed after $stage" >&2
         return 1
     fi
     echo "TARGET PREFLIGHT: $stage PASS"
 }
 
-FAILURES=0
-if ! run_dependency_stage LiView liview; then
-    FAILURES=$((FAILURES + 1))
-fi
-if ! run_dependency_stage Gaming gaming; then
-    FAILURES=$((FAILURES + 1))
-fi
-if ! run_dependency_stage GRUBENVOLK grubenvolk; then
-    FAILURES=$((FAILURES + 1))
-fi
+run_stage LiView /usr/local/bin/limad-liview-deps
+run_stage Gaming /usr/local/bin/limad-gaming-deps
+run_stage GRUBENVOLK /usr/local/bin/limad-grubenvolk-deps
+run_stage full-install-target '/usr/bin/bash /tmp/limad-install-target.sh'
 
-if [ "$FAILURES" -ne 0 ]; then
-    echo "ERROR: TARGET PREFLIGHT found $FAILURES failing dependency stage(s). ISO build stopped before xorriso." >&2
-    exit 1
-fi
-
-echo "TARGET PREFLIGHT: full install-target START"
-docker create --name "$FULL_CONTAINER" --network none "$IMAGE_TAG" /usr/bin/sleep infinity >/dev/null
-docker cp "$PAYLOAD/rootfs/." "$FULL_CONTAINER:/"
-docker cp "$PAYLOAD/install-target.sh" "$FULL_CONTAINER:/tmp/limad-install-target.sh"
-docker cp "$CONTAINER_SCRIPT" "$FULL_CONTAINER:/usr/local/bin/limad-preflight-container"
-docker start "$FULL_CONTAINER" >/dev/null
-
-if ! docker exec "$FULL_CONTAINER" /usr/bin/bash /usr/local/bin/limad-preflight-container full; then
-    echo "ERROR: TARGET PREFLIGHT failed in full install-target" >&2
-    exit 1
-fi
-
-echo "TARGET PREFLIGHT: full install-target PASS"
 echo "TARGET PREFLIGHT: PASS"

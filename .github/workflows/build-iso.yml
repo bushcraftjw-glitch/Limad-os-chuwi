@@ -42,11 +42,10 @@ jobs:
 
       - name: Verify build dependencies
         run: |
-          for command in cpio curl dconf docker dpkg-scanpackages git gh python3 rsync sassc shellcheck unzip xorriso; do
+          for command in cpio curl dconf dpkg-scanpackages git gh mount mountpoint python3 rsync sassc shellcheck umount unzip xorriso; do
             command -v "$command"
           done
           dconf help compile >/dev/null
-          docker info >/dev/null
           test -r /usr/share/keyrings/ubuntu-archive-keyring.gpg
       - name: Validate source
         run: |

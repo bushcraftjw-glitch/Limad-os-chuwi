@@ -1,4 +1,4 @@
-ad672bc6846d7620057dfca8e6731844c6a37c4005e3d12fce0fb478c78112e3  ./.github/workflows/build-iso.yml
+03f9e9b14ca45a6afcc78a0b16efd62aaa03cdf6a16ffbeb0a9f7ef8258aabb8  ./.github/workflows/build-iso.yml
 73d14d8a95f2f8af9f07897babfdc2d35d79d643d821cb926fd1a041cca4e963  ./.gitignore
 455055cf6febc074c82312c9b819a6d4744d6b4c233a78065480beb69bac2429  ./README-DE.md
 1f9584482f2333f8732df2712d35fd7a5a33f388bca69d0f852853b501dfe2b6  ./START-RC1-GITHUB-BUILD-LINUX.sh
@@ -28,7 +28,7 @@ f14b6c3f5c0b9ee60c172fa40ff3dcb1419080c6d1ef786607a4add4aae9fcff  ./assets/vendo
 df388f3f2f98bde93015d840ab7aa6ca83f59425cd2f8244ec6bf05c624ea25b  ./assets/vendor/SOURCE-SHA256SUMS.txt
 a2a6af05f9fc38ffd6b229f30d8776da33600442581a6071b383e1315cc305d6  ./build/branding/limad-logo-192.png
 eff142c6cdfd11ac28e6b99e8270d3cecb35930340974f96d10af95ea54bf1a5  ./build/branding/limad-logo-256.png
-6fa9d11c0a4d766d0170789c837ea0e37c9e8b2ef60cbaac9537168737ec1c5b  ./build/build-iso.sh
+a5a9977006c4ab7855ee9a378bf5c5b79e165cc8fa0ababba475df46978a94ac  ./build/build-iso.sh
 9373713eaf4cec9bb91188e07ccbb77473ea56d33e9d476163c6aad54c2e317c  ./build/casper-bottom/62limad-branding
 fce5a564ad89fb44238113b3f7f985ae10297430b8b42309812db0f85bec9aac  ./build/gaming-packages.txt
 6c74c5fc873fad051f0eb1e6d3e590e6f75116c0555b5b301d75a2f17ba01697  ./build/grubenvolk-packages.txt
@@ -37,13 +37,13 @@ b69d41a9973b27233a2f340be5991f274d2d8b7f6ff39329feb11c0ea7467ab9  ./build/instal
 27a6041347ed0460cbeee742271307c6a6eaf76e746cc02c7a49e0920bb6f868  ./build/installer-slides/1/slide_en_US.html
 d8f59549d81f2daf697349f33a8d1569cbef31185db157c83f5b47b3480d0008  ./build/installer-whitelabel.yaml
 e445b3077c8242a02239811ca0c74f7b1403437ab1f1422b2f28824669fa5b3b  ./build/liview-packages.txt
-8869e5f78089cd323f218310f9b8eb736749862793d5b7a7cb0daee1be57c2ab  ./build/preflight-target-container.sh
-ac38c296e51cc1252e4812b40d84434326ecb6cd9e3c2f12be0ada788ef49152  ./build/preflight-target-install.sh
-e64ac055ba017ef87797c650f1c19e69a4ddb37da9fe7f38c52eaa3b2c843fd6  ./build/prepare-gaming-offline-repo.sh
-c6fabab6c145b092ae9da5d16a0c31d6cc5ece1b32beac15820e3a924e0ecee7  ./build/prepare-grubenvolk-offline-repo.sh
+48c83e71719e0762712313633e55f6dfffe9e46043b2fdd378478e7ae5282ea2  ./build/preflight-target-install.sh
+db948ee9a9267e4e78c5944722afd3ee01d1ea6f05cba9294a51fdef269d7b98  ./build/prepare-gaming-offline-repo.sh
+e135485623613b5ecf2c4c0d9fb08bc5a9d6d2deac5896b6ccc976d03bb0a627  ./build/prepare-grubenvolk-offline-repo.sh
 8094b9cb4131b7823d5111488a94e65db53c1ae966ced35b3b8d134e444e6ead  ./build/prepare-imac17-initrd.sh
-eb26885cd9cee9e1491d43356a94f70bb3ec16e7d138890cc759335e27f13ddf  ./build/prepare-liview-offline-repo.sh
+5b13391d952a560ee35f724b380b5e678d1091c4389a1d10bf7f491975c0ca87  ./build/prepare-liview-offline-repo.sh
 61b10e366263f177340f240b97449db4a3ac3c44653ecb4af4e4ede4d9deb8f2  ./build/prepare-payload.sh
+3d06378809d49d384e6192160f1e5f33e7b9e0182e8a68674a20718138cca5ec  ./build/prepare-ubuntu-target-state.sh
 252c7b96610e6b0634a677f6b43d029c3aa6970715a896340e4213869212f3cd  ./build/rootfs/etc/limad-release
 f012b8e077eb0d308b8195d5313bd23e81c322c32917a044518b6b193d39cdf5  ./build/rootfs/etc/systemd/system/limad-runtime-deps.service
 848219bc971de725c8a32d5e0c347d6642e22aebd40636c48fa2ee2113227b40  ./build/rootfs/etc/xdg/autostart/limad-base1-first-login.desktop
@@ -205,7 +205,7 @@ e3f77284098c5d16d7c065e74f06e5ee5cb9178c0b089d7785069ed6a31af488  ./tests/test-i
 f6548adedf7218a7998c8290c3029e3229e71945d56da4bea6bfce61cb9f3a24  ./tests/test-v24-build-pipeline-safety.py
 3753bbf7e38d95518c1910e9823833200a99b0de3048b17333b6d683494969cf  ./tests/test-v24-gaming.py
 593aea11529567ab24930f11e14651904add6d61f878092cf60b7c300e3c27b4  ./tests/test-v25-grubenvolk.py
-d88df8f92b6f80c9ad1a938556aef6d71d47891fcb66b6dc7f9c31b4ef2d65ba  ./tests/test-v25-target-preflight.py
+680b342ab9cc36461d8c99a1ce4c819f7991915dac1c8931bb0f7e78b00e8321  ./tests/test-v25-target-preflight.py
 16cfdcb7e85ae4a09ec5849497a675f0179f0dd595187798df73b2558edd4be7  ./tests/test-version-consistency.py
 6bf780ae401b7c915e7d1e33c8557e6a34642a4aed8305f782b67f5151ffe2a1  ./tests/validate-app-icons.py
 13c87f85a0586d01197385d039fc1c5312c77713a6365993e3eeb64f292803d7  ./tests/validate-payload.sh
@@ -215,6 +215,7 @@ aa9671943a4757a1deef35c073444775c27210a2386d4f75a65971dd097497a1  ./tests/valida
 057ea062e4c2cf083eeff74a92bde84091574b832e01e3d3656cc9a6c1057523  ./tools/brand-grub.py
 8f87edf17470c44b179e1ef32139ce3e9d2139ad25c6b0aa14fec442e1776d40  ./tools/filter-install-sources.py
 7ebcf46ea0aa06c6c2ff6f52bfd2c81a51dc7d017949e113e51479b1d0ae8ad4  ./tools/github-starter.sh
+69c8ff63ce29fcdc073a93fc714f829932562571344f303da4585ffdb76bef12  ./tools/install-source-stack.py
 2a2b478036b855f2ddd452754d821b4e96aa19ae93de74dddf9fe9378f5bcf0d  ./tools/patch-v22-titlebars.py
 9a87fb87ec37f1b9efad5824e2a933ab186665dba10525ee10e90682c3c47eba  ./tools/reassemble-vendor.sh
 3d747eb2135de9905c3cfd6db8b9be26daaa74d15582007f1fa42ee114e53587  ./tools/strip-lidrop-airdrop.py
