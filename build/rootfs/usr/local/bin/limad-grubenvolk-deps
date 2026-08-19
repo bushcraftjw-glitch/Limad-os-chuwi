@@ -72,5 +72,5 @@ assert VERSION == "3.6.7"
 print("GRUBENVOLK Python-Laufzeit: PASS")
 PY
 
-/usr/local/bin/limad-grubenvolk --version | grep -Fxq 'GRUBENVOLK 3.6.7'
+HOME=/root /usr/local/bin/limad-grubenvolk --version | grep -Fxq 'GRUBENVOLK 3.6.7'
 echo "GRUBENVOLK dependencies: PASS"

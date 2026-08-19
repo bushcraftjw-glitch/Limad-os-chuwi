@@ -150,6 +150,7 @@ for needle in (
     "/etc/apt/sources.list.d/limad-grubenvolk-offline.",
     "GRUBENVOLK combined package resolution failed",
     "GRUBENVOLK dependencies: PASS",
+    "HOME=/root /usr/local/bin/limad-grubenvolk --version",
 ):
     if needle not in deps:
         raise AssertionError(f"GRUBENVOLK dependency helper missing {needle!r}")

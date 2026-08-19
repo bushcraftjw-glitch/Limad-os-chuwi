@@ -58,7 +58,7 @@ b78f5f2fb5ee9a8ef019651b260bc4705441999309ee6f69e467f438d358aef0  ./build/rootfs
 494712796a24efee2cf2cb569c65627a479ad69b177d8333658e94fb2c992be3  ./build/rootfs/usr/local/bin/limad-first-login-setup
 8b4e7311906a3db8efa67c31321d1aebb78c08f52aa8a6f6f949c1074f285e95  ./build/rootfs/usr/local/bin/limad-gaming-deps
 0ad7a45ee99fdc46e8c55475fb62093d3df5d14074dee0f5333db48a26887511  ./build/rootfs/usr/local/bin/limad-grubenvolk
-2ae75c7c0868c9ce5af82acdb8891980207f395323e311b96c00228555f375da  ./build/rootfs/usr/local/bin/limad-grubenvolk-deps
+f49280dbddb5699923c9dcd8e8c01a8dbea5bd628451d9e20937e8a0a15f1daf  ./build/rootfs/usr/local/bin/limad-grubenvolk-deps
 12ab098c0a5061436463dcafb3e6320f94717fa442c5bc106b42e0cb5d8b8c7e  ./build/rootfs/usr/local/bin/limad-lidrop-status-ensure
 b9e30a8144fce685b284df5d5772dba395c841ea050c04cf36d122ab96254cba  ./build/rootfs/usr/local/bin/limad-link-health-check
 dde30bd91a8c114886d2291a7864eb73beddac2c134e6338a84becfbc7efd1bf  ./build/rootfs/usr/local/bin/limad-link-status-ensure
@@ -204,7 +204,7 @@ e3f77284098c5d16d7c065e74f06e5ee5cb9178c0b089d7785069ed6a31af488  ./tests/test-i
 4a85eb4f245f43f4bbbac9234cde85d5bdf910073e1ca9669b4017e972c91803  ./tests/test-v23-liview.py
 f6548adedf7218a7998c8290c3029e3229e71945d56da4bea6bfce61cb9f3a24  ./tests/test-v24-build-pipeline-safety.py
 3753bbf7e38d95518c1910e9823833200a99b0de3048b17333b6d683494969cf  ./tests/test-v24-gaming.py
-593aea11529567ab24930f11e14651904add6d61f878092cf60b7c300e3c27b4  ./tests/test-v25-grubenvolk.py
+708c5dd238ac9bef74b188b0275b4adb8a774462d7b6c99f521896aaa8b97efa  ./tests/test-v25-grubenvolk.py
 680b342ab9cc36461d8c99a1ce4c819f7991915dac1c8931bb0f7e78b00e8321  ./tests/test-v25-target-preflight.py
 16cfdcb7e85ae4a09ec5849497a675f0179f0dd595187798df73b2558edd4be7  ./tests/test-version-consistency.py
 6bf780ae401b7c915e7d1e33c8557e6a34642a4aed8305f782b67f5151ffe2a1  ./tests/validate-app-icons.py
