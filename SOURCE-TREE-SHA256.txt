@@ -165,7 +165,7 @@ c28350a23d8d923bccc52b9d4ba875f5db66ad42be8e80a9fe89dcb547987eac  ./tests/test-v
 09acd13387637f726a8687ff72c13b0858f8b768109fffa392ccdd19bf6e5e12  ./tests/test-version-consistency.py
 6bf780ae401b7c915e7d1e33c8557e6a34642a4aed8305f782b67f5151ffe2a1  ./tests/validate-app-icons.py
 22b5770d771eb750abec0db6be5eb4aa36aa49a1c24d0c6931881df7259cd04c  ./tests/validate-payload.sh
-b59e65ce116798ef6a62e12506e7df99a4261cdd6d55a86c283a7a8fb982b2be  ./tests/validate-source.sh
+552d77951df774b0dbf36bbc4ed8e0056976902ff4b4a9575eb5bff75d13890d  ./tests/validate-source.sh
 aa9671943a4757a1deef35c073444775c27210a2386d4f75a65971dd097497a1  ./tests/validate-wallpapers.py
 62c3bed26ce46fe7ade9c08b3b139736a6608b7d38b0d80888576dee6666c998  ./tests/verify-built-iso.sh
 057ea062e4c2cf083eeff74a92bde84091574b832e01e3d3656cc9a6c1057523  ./tools/brand-grub.py
