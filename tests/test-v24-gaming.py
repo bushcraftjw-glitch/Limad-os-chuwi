@@ -33,6 +33,8 @@ if missing:
     raise AssertionError(f'gaming package list missing: {missing}')
 
 repo = (ROOT / 'build/prepare-gaming-offline-repo.sh').read_text()
+if '< <(find' in repo:
+    raise AssertionError('gaming repo builder must not use early-closing find process substitutions')
 for needle in [
     'arch=amd64,i386',
     'APT::Architectures::=amd64',

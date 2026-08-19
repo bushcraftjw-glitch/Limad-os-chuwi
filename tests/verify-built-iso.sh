@@ -10,6 +10,8 @@ ISO="$1"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CURRENT_STAGE="initialization"
+trap 'rc=$?; echo "ERROR: ISO static validation failed in stage: $CURRENT_STAGE (line $LINENO, exit $rc)" >&2; exit $rc' ERR
 
 xorriso -osirrox on -indev "$ISO" -extract /autoinstall.yaml "$TMP/autoinstall.yaml" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /casper/install-sources.yaml "$TMP/install-sources.yaml" >/dev/null 2>&1
@@ -63,17 +65,26 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-drop/li
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/lib/firmware/radeon/BONAIRE_uvd.bin "$TMP/BONAIRE_uvd.bin" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/doc/limad-os-base1/firmware/LICENSE.radeon "$TMP/LICENSE.radeon" >/dev/null 2>&1
 
+CURRENT_STAGE="autoinstall and install sources"
 grep -Fq 'id: ubuntu-desktop' "$TMP/autoinstall.yaml"
 grep -Fq 'search_drivers: true' "$TMP/autoinstall.yaml"
 python3 -B "$ROOT/tools/validate-install-sources.py" "$TMP/install-sources.yaml"
+echo "ISO VALIDATION: autoinstall/install sources PASS"
 
+CURRENT_STAGE="ISO md5 manifest"
 INSTALL_SOURCES_MD5="$(md5sum "$TMP/install-sources.yaml" | awk '{print $1}')"
 INITRD_MD5="$(md5sum "$TMP/initrd" | awk '{print $1}')"
 GRUB_MD5="$(md5sum "$TMP/grub.cfg" | awk '{print $1}')"
-grep -Fq "$INSTALL_SOURCES_MD5  ./casper/install-sources.yaml" "$TMP/md5sum.txt"
-grep -Fq "$INITRD_MD5  ./casper/initrd" "$TMP/md5sum.txt"
-grep -Fq "$GRUB_MD5  ./boot/grub/grub.cfg" "$TMP/md5sum.txt"
+manifest_md5() {
+    local target="$1"
+    awk -v target="./$target" '{ path=$2; sub(/^\*/, "", path); if (path == target) { print $1; exit } }' "$TMP/md5sum.txt"
+}
+[ "$(manifest_md5 casper/install-sources.yaml)" = "$INSTALL_SOURCES_MD5" ]
+[ "$(manifest_md5 casper/initrd)" = "$INITRD_MD5" ]
+[ "$(manifest_md5 boot/grub/grub.cfg)" = "$GRUB_MD5" ]
+echo "ISO VALIDATION: md5 overlay PASS"
 
+CURRENT_STAGE="GRUB and release marker"
 grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
@@ -86,6 +97,8 @@ if ! grep -Fxq "$EXPECTED_BUILD_MARKER" "$TMP/limad-release"; then
     cat "$TMP/limad-release" >&2
     exit 1
 fi
+echo "ISO VALIDATION: GRUB/release marker PASS"
+CURRENT_STAGE="desktop and LiMaD services"
 grep -Fq '[Icon Theme]' "$TMP/index.theme"
 test -s "$TMP/gtk4.css"
 grep -Fq 'windowcontrols button.close' "$TMP/gtk4.css"
@@ -122,6 +135,8 @@ grep -Fq 'app.zen_browser.zen' "$TMP/required-user-apps"
 grep -Fq 'com.github.wwmm.easyeffects' "$TMP/required-user-apps"
 grep -Fq 'net.davidotek.pupgui2' "$TMP/required-user-apps"
 grep -Fq 'limad-sync-gtk4-theme' "$TMP/titlebuttons-ensure"
+echo "ISO VALIDATION: desktop/services PASS"
+CURRENT_STAGE="LiMusic LiView and gaming payload"
 grep -Fq 'de.limad.LiMusic' "$TMP/updater-apps.json"
 grep -Fq 'de.limad.LiView' "$TMP/updater-apps.json"
 [ "$(cat "$TMP/liview-version")" = "1.0.0" ]
@@ -157,6 +172,8 @@ grep -Fq "'de.limad.Link.desktop'" "$TMP/desktop-core-system"
 grep -Fq 'iMac17,1' "$TMP/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$TMP/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$TMP/install-target.sh"
+echo "ISO VALIDATION: LiMusic/LiView/gaming PASS"
+CURRENT_STAGE="initrd firmware and wallpaper"
 
 # The first uncompressed initramfs CPIO contains early Radeon firmware and the
 # casper-bottom hook that installs Canonical's whitelabel files into live root.
@@ -192,7 +209,15 @@ if struct.unpack(">II", data[16:24]) != (3840, 2160):
     raise SystemExit("ERROR: default wallpaper in ISO is not 3840x2160")
 PY
 
-xorriso -indev "$ISO" -report_el_torito plain 2>/dev/null | grep -Eiq 'EFI|UEFI'
-xorriso -indev "$ISO" -pvd_info 2>/dev/null | grep -Eiq 'Volume [Ii]d.*LIMAD_OS_3_0_RC1'
-
+echo "ISO VALIDATION: initrd/firmware/wallpaper PASS"
+CURRENT_STAGE="El Torito and ISO volume metadata"
+EL_TORITO_REPORT="$TMP/el-torito.txt"
+PVD_REPORT="$TMP/pvd-info.txt"
+xorriso -indev "$ISO" -report_el_torito plain >"$EL_TORITO_REPORT" 2>&1
+grep -Eiq 'EFI|UEFI' "$EL_TORITO_REPORT"
+xorriso -indev "$ISO" -pvd_info >"$PVD_REPORT" 2>&1
+grep -Eiq 'Volume [Ii]d.*LIMAD_OS_3_0_RC1' "$PVD_REPORT"
+echo "ISO VALIDATION: boot metadata/volume ID PASS"
+CURRENT_STAGE="complete"
+trap - ERR
 echo "ISO STATIC VALIDATION: PASS"

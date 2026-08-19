@@ -61,19 +61,22 @@ DEBIAN_FRONTEND=noninteractive apt-get \
     install "${PACKAGES[@]}"
 
 find "$APT_ROOT/var/cache/apt/archives" -maxdepth 1 -type f -name '*.deb' -exec cp -a {} "$DESTINATION/" \;
-if ! find "$DESTINATION" -maxdepth 1 -type f -name '*.deb' -print -quit | grep -q .; then
+shopt -s nullglob
+DEB_FILES=("$DESTINATION"/*.deb)
+shopt -u nullglob
+if [ "${#DEB_FILES[@]}" -eq 0 ]; then
     echo "ERROR: LiView offline repository contains no DEB packages." >&2
     exit 1
 fi
 
 for package in "${PACKAGES[@]}"; do
     found=0
-    while IFS= read -r deb; do
+    for deb in "${DEB_FILES[@]}"; do
         if [ "$(dpkg-deb -f "$deb" Package)" = "$package" ]; then
             found=1
             break
         fi
-    done < <(find "$DESTINATION" -maxdepth 1 -type f -name '*.deb' -print)
+    done
     if [ "$found" -ne 1 ]; then
         echo "ERROR: Requested LiView package missing from offline repository: $package" >&2
         exit 1
@@ -82,7 +85,13 @@ done
 
 (
     cd "$DESTINATION"
-    dpkg-scanpackages --multiversion . /dev/null > Packages
+    SCAN_LOG="$(mktemp)"
+    if ! dpkg-scanpackages --multiversion . /dev/null > Packages 2>"$SCAN_LOG"; then
+        cat "$SCAN_LOG" >&2
+        rm -f "$SCAN_LOG"
+        exit 1
+    fi
+    rm -f "$SCAN_LOG"
     gzip -9c Packages > Packages.gz
     printf '%s\n' "${PACKAGES[@]}" > REQUESTED-PACKAGES.txt
     sha256sum ./*.deb Packages Packages.gz REQUESTED-PACKAGES.txt > SHA256SUMS.txt

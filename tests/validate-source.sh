@@ -105,6 +105,8 @@ grep -Fq "gh api \"repos/\$REPO/commits/main\"" "$ROOT/tools/github-starter.sh"
 grep -Fq "expected_sha=\"\$COMMIT\"" "$ROOT/tools/github-starter.sh"
 grep -Fq 'baseline-runs.txt' "$ROOT/tools/github-starter.sh"
 grep -Fq 'Built ISO release marker mismatch.' "$ROOT/tests/verify-built-iso.sh"
+grep -Fq "EL_TORITO_REPORT=\"\$TMP/el-torito.txt\"" "$ROOT/tests/verify-built-iso.sh"
+grep -Fq "PVD_REPORT=\"\$TMP/pvd-info.txt\"" "$ROOT/tests/verify-built-iso.sh"
 if grep -Fq 'git push --force' "$ROOT/tools/github-starter.sh"; then
     echo "ERROR: Force-push must not be used for Limad-os-chuwi build history" >&2
     exit 1
@@ -258,5 +260,6 @@ done
 grep -Fq 'net.davidotek.pupgui2' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
 grep -Fq 'required-user-apps-v24.done' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
 python3 -B "$ROOT/tests/test-v24-gaming.py"
+python3 -B "$ROOT/tests/test-v24-build-pipeline-safety.py"
 
 echo "SOURCE VALIDATION: PASS"

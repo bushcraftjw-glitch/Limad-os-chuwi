@@ -62,7 +62,10 @@ DEBIAN_FRONTEND=noninteractive apt-get \
     install "${PACKAGES[@]}"
 
 find "$APT_ROOT/var/cache/apt/archives" -maxdepth 1 -type f -name '*.deb' -exec cp -a {} "$DESTINATION/" \;
-if ! find "$DESTINATION" -maxdepth 1 -type f -name '*.deb' -print -quit | grep -q .; then
+shopt -s nullglob
+DEB_FILES=("$DESTINATION"/*.deb)
+shopt -u nullglob
+if [ "${#DEB_FILES[@]}" -eq 0 ]; then
     echo "ERROR: Gaming offline repository contains no DEB packages." >&2
     exit 1
 fi
@@ -79,7 +82,7 @@ package_present() {
         requested_arch="${requested##*:}"
     fi
 
-    while IFS= read -r deb; do
+    for deb in "${DEB_FILES[@]}"; do
         deb_package="$(dpkg-deb -f "$deb" Package)"
         [ "$deb_package" = "$base" ] || continue
         if [ -z "$requested_arch" ]; then
@@ -89,7 +92,7 @@ package_present() {
         if [ "$deb_arch" = "$requested_arch" ] || [ "$deb_arch" = "all" ]; then
             return 0
         fi
-    done < <(find "$DESTINATION" -maxdepth 1 -type f -name '*.deb' -print)
+    done
     return 1
 }
 
@@ -102,13 +105,13 @@ done
 
 for required_i386 in steam-libs-i386 mesa-vulkan-drivers libvulkan1 libglx-mesa0; do
     found=0
-    while IFS= read -r deb; do
+    for deb in "${DEB_FILES[@]}"; do
         if [ "$(dpkg-deb -f "$deb" Package)" = "$required_i386" ] \
             && [ "$(dpkg-deb -f "$deb" Architecture)" = "i386" ]; then
             found=1
             break
         fi
-    done < <(find "$DESTINATION" -maxdepth 1 -type f -name '*.deb' -print)
+    done
     if [ "$found" -ne 1 ]; then
         echo "ERROR: Required 32-bit gaming runtime missing: ${required_i386}:i386" >&2
         exit 1
@@ -117,7 +120,13 @@ done
 
 (
     cd "$DESTINATION"
-    dpkg-scanpackages --multiversion . /dev/null > Packages
+    SCAN_LOG="$(mktemp)"
+    if ! dpkg-scanpackages --multiversion . /dev/null > Packages 2>"$SCAN_LOG"; then
+        cat "$SCAN_LOG" >&2
+        rm -f "$SCAN_LOG"
+        exit 1
+    fi
+    rm -f "$SCAN_LOG"
     gzip -9c Packages > Packages.gz
     printf '%s\n' "${PACKAGES[@]}" > REQUESTED-PACKAGES.txt
     sha256sum ./*.deb Packages Packages.gz REQUESTED-PACKAGES.txt > SHA256SUMS.txt

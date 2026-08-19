@@ -81,6 +81,12 @@ for theme in ('LiMaD', 'hicolor'):
 
 prep = (ROOT / 'build/prepare-payload.sh').read_text()
 assert 'prepare-liview-offline-repo.sh' in prep
+
+repo_builder = (ROOT / 'build/prepare-liview-offline-repo.sh').read_text()
+assert '< <(find' not in repo_builder, 'LiView repo builder must not use early-closing find process substitutions'
+assert 'DEB_FILES=("$DESTINATION"/*.deb)' in repo_builder
+assert 'SCAN_LOG="$(mktemp)"' in repo_builder
+
 installer = (ROOT / 'build/install-target.sh').read_text()
 assert '/usr/local/bin/limad-liview-deps' in installer
 assert '/usr/local/bin/limad-liview-deps || true' not in installer

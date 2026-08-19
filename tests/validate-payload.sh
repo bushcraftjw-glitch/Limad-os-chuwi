@@ -118,7 +118,10 @@ for desktop in "${applications[@]}"; do
     fi
 done
 
-if ! find "$ROOTFS/usr/share/themes" -mindepth 1 -maxdepth 1 -type d -name 'WhiteSur*' -print -quit | grep -q .; then
+shopt -s nullglob
+WHITESUR_DIRS=("$ROOTFS/usr/share/themes"/WhiteSur*)
+shopt -u nullglob
+if [ "${#WHITESUR_DIRS[@]}" -eq 0 ]; then
     echo "ERROR: WhiteSur theme missing from payload" >&2
     exit 1
 fi
@@ -207,7 +210,10 @@ grep -Fq 'application/pdf=de.limad.LiView.desktop' "$ROOTFS/etc/xdg/mimeapps.lis
 grep -Fq 'video/x-liview-raw=de.limad.LiView.desktop' "$ROOTFS/etc/xdg/mimeapps.list"
 grep -Fq 'video/x-liview-mpeg=de.limad.LiView.desktop' "$ROOTFS/etc/xdg/mimeapps.list"
 grep -Fq 'image/svg+xml-compressed=de.limad.LiView.desktop' "$ROOTFS/etc/xdg/mimeapps.list"
-find "$ROOTFS/usr/share/limad/offline/liview" -maxdepth 1 -type f -name '*.deb' -print -quit | grep -q .
+shopt -s nullglob
+LIVIEW_DEBS=("$ROOTFS/usr/share/limad/offline/liview"/*.deb)
+shopt -u nullglob
+[ "${#LIVIEW_DEBS[@]}" -gt 0 ]
 (
     cd "$ROOTFS/usr/share/limad/offline/liview"
     sha256sum -c SHA256SUMS.txt >/dev/null
@@ -216,7 +222,10 @@ find "$ROOTFS/usr/share/limad/offline/liview" -maxdepth 1 -type f -name '*.deb' 
 for package in steam-installer steam-devices lutris protontricks wine wine32:i386 winetricks gamemode mangohud gamescope vulkan-tools mesa-vulkan-drivers:i386 libvulkan1:i386 libglx-mesa0:i386; do
     grep -Fxq "$package" "$ROOTFS/usr/share/limad/gaming/REQUIRED-PACKAGES.txt"
 done
-find "$ROOTFS/usr/share/limad/offline/gaming" -maxdepth 1 -type f -name '*.deb' -print -quit | grep -q .
+shopt -s nullglob
+GAMING_DEBS=("$ROOTFS/usr/share/limad/offline/gaming"/*.deb)
+shopt -u nullglob
+[ "${#GAMING_DEBS[@]}" -gt 0 ]
 (
     cd "$ROOTFS/usr/share/limad/offline/gaming"
     sha256sum -c SHA256SUMS.txt >/dev/null
