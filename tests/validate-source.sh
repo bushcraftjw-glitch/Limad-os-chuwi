@@ -7,8 +7,8 @@ source "$ROOT/config/build.env"
 [ "$UBUNTU_ISO_NAME" = "ubuntu-26.04-desktop-amd64.iso" ]
 [ "$UBUNTU_ISO_SHA256" = "487f87faaf547ea30e0aba4d5b53346292571256b25333a978db1692bcee9dd2" ]
 [ "$WHITESUR_REF" = "1b356fe48ad5d05fb2ca6be071efe6801df3ac72" ]
-[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V24-amd64.iso" ]
-[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v24" ]
+[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V25-amd64.iso" ]
+[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v25" ]
 
 grep -Fq 'id: ubuntu-desktop' "$ROOT/config/autoinstall.yaml"
 if grep -Fq 'ubuntu-desktop-minimal' "$ROOT/config/autoinstall.yaml"; then
@@ -187,7 +187,7 @@ grep -Fq ' dconf-cli ' "$ROOT/.github/workflows/build-iso.yml"
 grep -Fq 'dconf help compile' "$ROOT/.github/workflows/build-iso.yml"
 
 
-# V23 LiView integration retained in V24: native app, updater registration, offline runtime closure and defaults.
+# V23 LiView integration retained in V25: native app, updater registration, offline runtime closure and defaults.
 for path in \
     "$ROOT/build/liview-packages.txt" \
     "$ROOT/build/prepare-liview-offline-repo.sh" \
@@ -258,8 +258,40 @@ for package in \
     grep -Fxq "$package" "$ROOT/build/gaming-packages.txt"
 done
 grep -Fq 'net.davidotek.pupgui2' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
-grep -Fq 'required-user-apps-v24.done' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
+grep -Fq 'required-user-apps-v25.done' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
 python3 -B "$ROOT/tests/test-v24-gaming.py"
 python3 -B "$ROOT/tests/test-v24-build-pipeline-safety.py"
+
+# V25 GRUBENVOLK integration: system app, updater, Dock and offline GTK4/WebKit runtime.
+for path in \
+    "$ROOT/build/grubenvolk-packages.txt" \
+    "$ROOT/build/prepare-grubenvolk-offline-repo.sh" \
+    "$ROOT/build/rootfs/usr/local/bin/limad-grubenvolk" \
+    "$ROOT/build/rootfs/usr/local/bin/limad-grubenvolk-deps" \
+    "$ROOT/build/rootfs/usr/share/limad-grubenvolk/VERSION" \
+    "$ROOT/build/rootfs/usr/share/limad-grubenvolk/web/index.html" \
+    "$ROOT/build/rootfs/usr/share/limad-grubenvolk/src/limad_grubenvolk/__main__.py" \
+    "$ROOT/build/rootfs/usr/share/limad-grubenvolk/src/limad_grubenvolk/shell.py" \
+    "$ROOT/build/rootfs/usr/share/applications/de.limad.Grubenvolk.desktop"; do
+    test -s "$path"
+done
+[ "$(cat "$ROOT/build/rootfs/usr/share/limad-grubenvolk/VERSION")" = "3.6.7" ]
+test -x "$ROOT/build/prepare-grubenvolk-offline-repo.sh"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-grubenvolk"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-grubenvolk-deps"
+grep -Fq 'de.limad.Grubenvolk' "$ROOT/build/rootfs/usr/share/limad-updater/apps.json"
+grep -Fq 'de.limad.Grubenvolk.desktop' "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
+grep -Fq 'de.limad.Grubenvolk.desktop' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
+grep -Fq 'required-user-apps-v25.done' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
+grep -Fq 'prepare-grubenvolk-offline-repo.sh' "$ROOT/build/prepare-payload.sh"
+grep -Fq '/usr/local/bin/limad-grubenvolk-deps' "$ROOT/build/install-target.sh"
+if grep -F '/usr/local/bin/limad-grubenvolk-deps' "$ROOT/build/install-target.sh" | grep -Fq '|| true'; then
+    echo 'ERROR: GRUBENVOLK dependency installation must be install-critical' >&2
+    exit 1
+fi
+for package in python3 python3-gi gir1.2-gtk-4.0 gir1.2-webkit-6.0; do
+    grep -Fxq "$package" "$ROOT/build/grubenvolk-packages.txt"
+done
+python3 -B "$ROOT/tests/test-v25-grubenvolk.py"
 
 echo "SOURCE VALIDATION: PASS"

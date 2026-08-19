@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+SYSTEM_ROOT="/usr/share/limad-grubenvolk"
+USER_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/limad-updater/apps/de.limad.Grubenvolk/current/payload"
+APP_ROOT="$(/usr/local/libexec/limad-select-app-root "$SYSTEM_ROOT" "$USER_ROOT" "src/limad_grubenvolk/__main__.py")"
+export PYTHONPATH="$APP_ROOT/src${PYTHONPATH:+:$PYTHONPATH}"
+exec /usr/bin/python3 -m limad_grubenvolk "$@"

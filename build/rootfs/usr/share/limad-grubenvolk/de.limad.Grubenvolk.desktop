@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=GRUBENVOLK
+Comment=Flauschis im Grubenvolk
+Exec=limad-grubenvolk
+Icon=de.limad.Grubenvolk
+Terminal=false
+Categories=Game;StrategyGame;
+StartupNotify=true
+StartupWMClass=de.limad.Grubenvolk

@@ -230,6 +230,29 @@
         "VERSION"
       ],
       "restart_user_services": []
+    },
+    {
+      "app_id": "de.limad.Grubenvolk",
+      "name": "GRUBENVOLK",
+      "launcher": "/usr/local/bin/limad-grubenvolk",
+      "system_root": "/usr/share/limad-grubenvolk",
+      "system_version_file": "/usr/share/limad-grubenvolk/VERSION",
+      "required": [
+        "VERSION",
+        "web/index.html",
+        "src/limad_grubenvolk/__init__.py",
+        "src/limad_grubenvolk/__main__.py",
+        "src/limad_grubenvolk/shell.py",
+        "limad-grubenvolk",
+        "pyproject.toml",
+        "de.limad.Grubenvolk.desktop",
+        "de.limad.Grubenvolk.png",
+        "de.limad.Grubenvolk.svg"
+      ],
+      "restart_user_services": [],
+      "executables": [
+        "limad-grubenvolk"
+      ]
     }
   ]
 }

@@ -100,7 +100,7 @@ sha256sum "$OUTPUT" | tee "$OUTPUT.sha256"
 "$ROOT/tests/verify-built-iso.sh" "$OUTPUT"
 
 cat > "$OUT/BUILD-REPORT.txt" <<EOF_REPORT
-LiMaD OS 3.0 RC1 BASE1 DESIGN V24
+LiMaD OS 3.0 RC1 BASE1 DESIGN V25
 Base: Ubuntu 26.04 LTS Desktop FULL
 Official Ubuntu ISO: $UBUNTU_ISO_NAME
 Official Ubuntu SHA256: $UBUNTU_ISO_SHA256
@@ -112,7 +112,7 @@ WhiteSur commit: $WHITESUR_REF
 LiMaD icon theme: V3.2
 LiMaD wallpapers: 3 x 3840x2160, wallpaper 01 default
 Installer branding: Canonical whitelabel API, LiMaD OS Installer title, LiMaD images, German/English LiMaD slide
-Design V24: V23 desktop and LiView core unchanged; complete Steam/Lutris gaming stack added with amd64+i386 offline dependencies
+Design V25: V24 gaming and LiView core retained; GRUBENVOLK 3.6.7 added as updater-aware system app and Dock favorite with offline GTK4/WebKit runtime
 iMac17,1: DMI-targeted Radeon CIK compatibility path; upstream Radeon Bonaire firmware embedded in live initrd and installed target
 Firmware source: linux-firmware tag 20250509; firmware hashes embedded and verified
 Install source catalog: ubuntu-desktop only, Canonical catalog metadata preserved

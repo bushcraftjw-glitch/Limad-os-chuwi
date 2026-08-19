@@ -2,9 +2,9 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = 'V24'
-tag = 'base1-ubuntu2604-full-whitesur-v24'
-iso = 'LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V24-amd64.iso'
+VERSION = 'V25'
+tag = 'base1-ubuntu2604-full-whitesur-v25'
+iso = 'LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V25-amd64.iso'
 
 pairs = [
     (ROOT / 'VERSION', VERSION),
@@ -29,7 +29,7 @@ release_files = [
 ]
 for path in release_files:
     text = path.read_text()
-    if 'base1-ubuntu2604-full-whitesur-v23' in text or 'WHITESUR-V23-amd64.iso' in text:
+    if any(marker in text for marker in ('base1-ubuntu2604-full-whitesur-v23', 'WHITESUR-V23-amd64.iso', 'base1-ubuntu2604-full-whitesur-v24', 'WHITESUR-V24-amd64.iso')):
         raise AssertionError(f'stale V23 release marker in {path.relative_to(ROOT)}')
 
 print('VERSION CONSISTENCY TEST: PASS')

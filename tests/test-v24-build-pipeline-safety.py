@@ -17,6 +17,17 @@ for needle in [
     if needle not in verify:
         raise AssertionError(f"ISO verifier missing pipeline-safety marker: {needle}")
 
+if "trusted-replace-fetch-response" in verify:
+    raise AssertionError("ISO verifier still checks obsolete LiMusic pre-0.3.22 adblock marker")
+for needle in [
+    "org.limad.adblock-scriptlet-rules",
+    "exact_key_replacements",
+    "prune_keys",
+    "validated_regex_replacements",
+]:
+    if needle not in verify:
+        raise AssertionError(f"ISO verifier missing LiMusic 0.3.22 rule-schema check: {needle}")
+
 for relative in [
     "build/prepare-liview-offline-repo.sh",
     "build/prepare-gaming-offline-repo.sh",

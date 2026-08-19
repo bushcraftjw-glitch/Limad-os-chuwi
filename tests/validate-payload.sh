@@ -79,6 +79,13 @@ required=(
     "$ROOTFS/usr/share/limad/gaming/REQUIRED-PACKAGES.txt"
     "$ROOTFS/usr/share/limad/offline/gaming/Packages.gz"
     "$ROOTFS/usr/share/limad/offline/gaming/SHA256SUMS.txt"
+    "$ROOTFS/usr/local/bin/limad-grubenvolk"
+    "$ROOTFS/usr/local/bin/limad-grubenvolk-deps"
+    "$ROOTFS/usr/share/limad-grubenvolk/VERSION"
+    "$ROOTFS/usr/share/limad-grubenvolk/web/index.html"
+    "$ROOTFS/usr/share/applications/de.limad.Grubenvolk.desktop"
+    "$ROOTFS/usr/share/limad/offline/grubenvolk/Packages.gz"
+    "$ROOTFS/usr/share/limad/offline/grubenvolk/SHA256SUMS.txt"
     "$ROOTFS/etc/limad-release"
 )
 
@@ -92,6 +99,7 @@ done
 applications=(
     de.limad.Cut.desktop
     de.limad.Drop.desktop
+    de.limad.Grubenvolk.desktop
     de.limad.Klang.desktop
     de.limad.Link.desktop
     de.limad.LiMusic.desktop
@@ -196,7 +204,7 @@ grep -Fq 'com.github.wwmm.easyeffects' "$ROOTFS/usr/local/bin/limad-required-use
 grep -Fq 'net.davidotek.pupgui2' "$ROOTFS/usr/local/bin/limad-required-user-apps"
 grep -Fq 'de.limad.LiMusic' "$ROOTFS/usr/share/limad-updater/apps.json"
 [ "$(cat "$ROOTFS/usr/share/limusic/VERSION")" = "0.3.22" ]
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v24"' "$ROOTFS/etc/limad-release"
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v25"' "$ROOTFS/etc/limad-release"
 grep -Fq 'iMac17,1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$PAYLOAD/install-target.sh"
@@ -232,5 +240,26 @@ shopt -u nullglob
 )
 grep -Fq '/usr/share/limad/offline/gaming' "$ROOTFS/usr/local/bin/limad-gaming-deps"
 grep -Fq 'dpkg --add-architecture i386' "$ROOTFS/usr/local/bin/limad-gaming-deps"
+
+[ "$(cat "$ROOTFS/usr/share/limad-grubenvolk/VERSION")" = "3.6.7" ]
+grep -Fq '/usr/local/libexec/limad-select-app-root' "$ROOTFS/usr/local/bin/limad-grubenvolk"
+grep -Fq 'de.limad.Grubenvolk/current/payload' "$ROOTFS/usr/local/bin/limad-grubenvolk"
+grep -Fq 'Exec=/usr/local/bin/limad-grubenvolk' "$ROOTFS/usr/share/applications/de.limad.Grubenvolk.desktop"
+grep -Fq 'Exec=/usr/local/bin/limad-updater --app de.limad.Grubenvolk' "$ROOTFS/usr/share/applications/de.limad.Grubenvolk.desktop"
+grep -Fq 'de.limad.Grubenvolk' "$ROOTFS/usr/share/limad-updater/apps.json"
+grep -Fq 'de.limad.Grubenvolk.desktop' "$ROOTFS/usr/local/bin/limad-desktop-core-system"
+grep -Fq 'de.limad.Grubenvolk.desktop' "$ROOTFS/usr/local/bin/limad-base1-first-login"
+for package in python3 python3-gi gir1.2-gtk-4.0 gir1.2-webkit-6.0; do
+    grep -Fxq "$package" "$ROOTFS/usr/share/limad-grubenvolk/REQUIRED-PACKAGES.txt"
+done
+shopt -s nullglob
+GRUBENVOLK_DEBS=("$ROOTFS/usr/share/limad/offline/grubenvolk"/*.deb)
+shopt -u nullglob
+[ "${#GRUBENVOLK_DEBS[@]}" -gt 0 ]
+(
+    cd "$ROOTFS/usr/share/limad/offline/grubenvolk"
+    sha256sum -c SHA256SUMS.txt >/dev/null
+)
+grep -Fq '/usr/share/limad/offline/grubenvolk' "$ROOTFS/usr/local/bin/limad-grubenvolk-deps"
 
 echo "PAYLOAD VALIDATION: PASS"

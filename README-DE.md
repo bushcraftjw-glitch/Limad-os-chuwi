@@ -1,10 +1,10 @@
-# LiMaD OS 3.0 RC1 BASE1 V24
+# LiMaD OS 3.0 RC1 BASE1 V25
 
 ## Technische Basis
 
-V24 baut auf dem stabilen V23-Unterbau mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
+V25 baut auf dem stabilen V24-Unterbau mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
 
-V24 lässt Dock, Fensterbuttons, LiDrop/LiLink, LiMusic 0.3.22, LiView 1.0.0 und den vorhandenen nur für Apple `iMac17,1` aktivierten Grafik-Kompatibilitätspfad unverändert. Neu ist ein vollständiger Gaming-Stack mit Steam, Lutris, Wine/Winetricks, Protontricks, GameMode, MangoHud, Gamescope, Vulkan-Werkzeugen, vkBasalt und GOverlay. Die Ubuntu-Pakete werden inklusive amd64-/i386-Abhängigkeiten in die ISO eingebettet.
+V25 übernimmt LiView 1.0.0, den vollständigen V24-Gaming-Stack, Fensterbuttons, LiDrop/LiLink und den nur für Apple `iMac17,1` aktivierten Grafik-Kompatibilitätspfad unverändert. Neu ist GRUBENVOLK 3.6.7 als vorinstallierte, updaterfähige LiMaD-System-App. Das mitgelieferte App-Icon wird in LiMaD/hicolor installiert und GRUBENVOLK wird als 18. Favorit ans Ende des LiMaD-Docks angeheftet.
 
 
 ## LiView 1.0.0
@@ -17,7 +17,11 @@ Die für LiView benötigten Ubuntu-26.04-Pakete werden beim ISO-Build aus dem si
 
 LiView ist außerdem als `de.limad.LiView` im LiMaD-Updater registriert. Der Starter `/usr/local/bin/liview` verwendet dieselbe System-/Benutzer-Payload-Auswahl wie die bestehenden aktualisierbaren LiMaD-Apps, sodass spätere `*.limad-update.zip`-Versionen ohne Austausch des Systemstarters aktiviert und auf die Systemversion zurückgesetzt werden können.
 
-## Gaming in V24
+## GRUBENVOLK 3.6.7
+
+GRUBENVOLK wird aus dem geprüften LiMaD-Update-Payload als Systemversion unter `/usr/share/limad-grubenvolk` installiert. Der stabile Starter `/usr/local/bin/limad-grubenvolk` wählt über `limad-select-app-root` automatisch zwischen Systemversion und einem späteren Benutzer-Update. Die App-ID `de.limad.Grubenvolk` ist im LiMaD Updater registriert. GTK4, Python-GI und WebKit 6 werden inklusive Abhängigkeiten als lokales Offline-DEB-Repository in die ISO eingebettet und bei der Installation kritisch verifiziert.
+
+## Gaming aus V24
 
 Steam und Lutris werden als Ubuntu-26.04-Systempakete installiert. Zusätzlich sind Protontricks, Wine/Winetricks, GameMode, MangoHud, Gamescope, Vulkan-Werkzeuge, Mesa-Vulkan für amd64 und i386, vkBasalt sowie GOverlay enthalten. `steam-installer` zieht dabei die Ubuntu-Metapakete `steam-libs` und `steam-libs-i386` samt 32-Bit-Laufzeit nach.
 
@@ -25,11 +29,11 @@ Valve Proton wird bewusst nicht als fest eingefrorene Fremdkopie in die ISO gele
 
 Die Gaming-DEBs werden beim ISO-Build aus dem signierten Ubuntu-26.04-Archiv für `amd64` und `i386` samt Abhängigkeitsabschluss heruntergeladen. Während der Zielinstallation wird `i386` aktiviert und ausschließlich das lokale Gaming-Repository aus der ISO verwendet. Der Installationsschritt ist kritisch und prüft danach Steam, Lutris, Protontricks, Wine/Winetricks, GameMode, MangoHud, Gamescope und Vulkan-Werkzeuge.
 
-EasyEffects bleibt als Flathub-App `com.github.wwmm.easyeffects`, weil LiMaD Klang den Flatpak-Pfad verwendet. V24 aktualisiert eine bereits benutzerseitig installierte EasyEffects-Version beim Einrichtungsdurchlauf, statt sie durch das ältere Ubuntu-Systempaket zu ersetzen.
+EasyEffects bleibt als Flathub-App `com.github.wwmm.easyeffects`, weil LiMaD Klang den Flatpak-Pfad verwendet. V25 übernimmt den V24-Pfad und aktualisiert eine bereits benutzerseitig installierte EasyEffects-Version beim Einrichtungsdurchlauf, statt sie durch das ältere Ubuntu-Systempaket zu ersetzen.
 
 ## LiMaD Design
 
-Der V22-Desktop-Core bleibt in V24 unverändert und eingefroren. Der Desktop-Core (dconf, Dock, Icons) ist installationskritisch und vom optionalen GDM/Plymouth-Branding getrennt. Die GNOME-Grundeinstellungen werden vor dem ersten Login als systemweite, nicht gesperrte dconf-Defaults installiert und danach in zwei Durchläufen verifiziert. LiLink/LiDrop sind vom Desktop-Core entkoppelt und können Dock, Icons oder Fensterdesign nicht mehr blockieren.
+Der V22-Desktop-Core bleibt in V25 funktional unverändert; nur die bewusst gewünschte Dock-Liste erhält GRUBENVOLK als zusätzlichen Favoriten. Der Desktop-Core (dconf, Dock, Icons) ist installationskritisch und vom optionalen GDM/Plymouth-Branding getrennt. Die GNOME-Grundeinstellungen werden vor dem ersten Login als systemweite, nicht gesperrte dconf-Defaults installiert und danach in zwei Durchläufen verifiziert. LiLink/LiDrop sind vom Desktop-Core entkoppelt und können Dock, Icons oder Fensterdesign nicht mehr blockieren.
 
 - Dock unten, kompakt und mittig; dconf-Default plus First-Login-Zweitpass
 - LiMaD Icon Theme V3.2 plus hicolor-Fallback für alle 18 LiMaD-Launcher
@@ -79,13 +83,13 @@ Repository: `bushcraftjw-glitch/Limad-os-chuwi`
 
 Release-Tag:
 
-`base1-ubuntu2604-full-whitesur-v24`
+`base1-ubuntu2604-full-whitesur-v25`
 
 ISO:
 
-`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V24-amd64.iso`
+`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V25-amd64.iso`
 
 
-## V24 Sicherungen
+## V25 Sicherungen
 
 GTK4-Benutzerkonfiguration wird nicht gelöscht. LiMaD bindet nur `limad-titlebuttons.css` ein und lässt native Button-Geometrie unangetastet. Das LiMaD-Menü ersetzt links oben den Activities-Indikator, ohne eine zusätzliche Fremderweiterung einzuführen.

@@ -48,6 +48,15 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-gam
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/gaming/REQUIRED-PACKAGES.txt "$TMP/gaming-packages.txt" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/gaming/Packages.gz "$TMP/gaming-Packages.gz" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/gaming/SHA256SUMS.txt "$TMP/gaming-SHA256SUMS.txt" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-grubenvolk "$TMP/limad-grubenvolk" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-grubenvolk-deps "$TMP/limad-grubenvolk-deps" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-grubenvolk/VERSION "$TMP/grubenvolk-version" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-grubenvolk/REQUIRED-PACKAGES.txt "$TMP/grubenvolk-packages.txt" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-grubenvolk/web/index.html "$TMP/grubenvolk-index.html" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/applications/de.limad.Grubenvolk.desktop "$TMP/grubenvolk.desktop" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/icons/hicolor/256x256/apps/de.limad.Grubenvolk.png "$TMP/grubenvolk-icon.png" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/grubenvolk/Packages.gz "$TMP/grubenvolk-Packages.gz" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/grubenvolk/SHA256SUMS.txt "$TMP/grubenvolk-SHA256SUMS.txt" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-notes/app.py "$TMP/linotes-app.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-windows/installer.py "$TMP/windows-installer.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/lilink@limad.local/metadata.json "$TMP/lilink-metadata.json" >/dev/null 2>&1
@@ -90,7 +99,7 @@ grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
 grep -Fq 'smbios --type 1 --get-string 5 --set limad_system_product' "$TMP/grub.cfg"
-EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v24"'
+EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v25"'
 if ! grep -Fxq "$EXPECTED_BUILD_MARKER" "$TMP/limad-release"; then
     echo "ERROR: Built ISO release marker mismatch." >&2
     echo "Expected: $EXPECTED_BUILD_MARKER" >&2
@@ -135,9 +144,11 @@ fi
 grep -Fq 'app.zen_browser.zen' "$TMP/required-user-apps"
 grep -Fq 'com.github.wwmm.easyeffects' "$TMP/required-user-apps"
 grep -Fq 'net.davidotek.pupgui2' "$TMP/required-user-apps"
+grep -Fq 'required-user-apps-v25.done' "$TMP/required-user-apps"
+grep -Fq "'de.limad.Grubenvolk.desktop'" "$TMP/desktop-core-system"
 grep -Fq 'limad-sync-gtk4-theme' "$TMP/titlebuttons-ensure"
 echo "ISO VALIDATION: desktop/services PASS"
-CURRENT_STAGE="LiMusic LiView and gaming payload"
+CURRENT_STAGE="LiMusic LiView gaming and GRUBENVOLK payload"
 grep -Fq 'de.limad.LiMusic' "$TMP/updater-apps.json"
 grep -Fq 'de.limad.LiView' "$TMP/updater-apps.json"
 [ "$(cat "$TMP/liview-version")" = "1.0.0" ]
@@ -159,12 +170,42 @@ test -s "$TMP/gaming-Packages.gz"
 test -s "$TMP/gaming-SHA256SUMS.txt"
 grep -Fq '/usr/share/limad/offline/gaming' "$TMP/limad-gaming-deps"
 grep -Fq 'dpkg --add-architecture i386' "$TMP/limad-gaming-deps"
+grep -Fq 'de.limad.Grubenvolk' "$TMP/updater-apps.json"
+[ "$(cat "$TMP/grubenvolk-version")" = "3.6.7" ]
+grep -Fq '/usr/local/libexec/limad-select-app-root' "$TMP/limad-grubenvolk"
+grep -Fq 'de.limad.Grubenvolk/current/payload' "$TMP/limad-grubenvolk"
+grep -Fq '/usr/share/limad/offline/grubenvolk' "$TMP/limad-grubenvolk-deps"
+grep -Fq 'Exec=/usr/local/bin/limad-grubenvolk' "$TMP/grubenvolk.desktop"
+grep -Fq 'Exec=/usr/local/bin/limad-updater --app de.limad.Grubenvolk' "$TMP/grubenvolk.desktop"
+test -s "$TMP/grubenvolk-icon.png"
+test -s "$TMP/grubenvolk-Packages.gz"
+test -s "$TMP/grubenvolk-SHA256SUMS.txt"
+for package in python3 python3-gi gir1.2-gtk-4.0 gir1.2-webkit-6.0; do
+    grep -Fxq "$package" "$TMP/grubenvolk-packages.txt"
+done
+if grep -Eq 'https?://' "$TMP/grubenvolk-index.html"; then
+    echo 'ERROR: GRUBENVOLK payload unexpectedly references remote web assets' >&2
+    exit 1
+fi
 for package in steam-installer steam-devices lutris protontricks wine wine32:i386 winetricks gamemode mangohud gamescope vulkan-tools mesa-vulkan-drivers:i386 libvulkan1:i386 libglx-mesa0:i386; do
     grep -Fxq "$package" "$TMP/gaming-packages.txt"
 done
 [ "$(cat "$TMP/limusic-version")" = "0.3.22" ]
 grep -Fq 'ENGINE_BOOTSTRAP_SCRIPT' "$TMP/limusic-adblock-engine.py"
-grep -Fq 'trusted-replace-fetch-response' "$TMP/limusic-adblock-rules.json"
+python3 - "$TMP/limusic-adblock-rules.json" <<'PY_RULES'
+import json
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+rules = json.loads(path.read_text(encoding="utf-8"))
+if rules.get("format") != "org.limad.adblock-scriptlet-rules":
+    raise SystemExit("ERROR: LiMusic adblock rule format mismatch")
+for key in ("exact_key_replacements", "prune_keys", "validated_regex_replacements"):
+    value = rules.get(key)
+    if not isinstance(value, list) or not value:
+        raise SystemExit(f"ERROR: LiMusic adblock rule list missing or empty: {key}")
+PY_RULES
 grep -Fq 'header.set_show_title_buttons(True)' "$TMP/linotes-app.py"
 grep -Fq 'header.set_show_start_title_buttons(True)' "$TMP/windows-installer.py"
 grep -Fq "'de.limad.Mail.desktop'" "$TMP/desktop-core-system"
@@ -173,7 +214,7 @@ grep -Fq "'de.limad.Link.desktop'" "$TMP/desktop-core-system"
 grep -Fq 'iMac17,1' "$TMP/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$TMP/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$TMP/install-target.sh"
-echo "ISO VALIDATION: LiMusic/LiView/gaming PASS"
+echo "ISO VALIDATION: LiMusic/LiView/gaming/GRUBENVOLK PASS"
 CURRENT_STAGE="initrd firmware and wallpaper"
 
 # The first uncompressed initramfs CPIO contains early Radeon firmware and the

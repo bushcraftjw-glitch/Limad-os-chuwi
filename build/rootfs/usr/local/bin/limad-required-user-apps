@@ -2,7 +2,7 @@
 set -euo pipefail
 
 STATE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/limad"
-STATE_FILE="$STATE_DIR/required-user-apps-v24.done"
+STATE_FILE="$STATE_DIR/required-user-apps-v25.done"
 FLATHUB_URL="https://dl.flathub.org/repo/flathub.flatpakrepo"
 ZEN_ID="app.zen_browser.zen"
 EASYEFFECTS_ID="com.github.wwmm.easyeffects"
@@ -50,7 +50,7 @@ if command -v gsettings >/dev/null 2>&1 \
     && gsettings list-schemas 2>/dev/null | grep -Fxq org.gnome.shell \
     && gsettings writable org.gnome.shell favorite-apps 2>/dev/null | grep -qx true; then
     gsettings set org.gnome.shell favorite-apps \
-        "['app.zen_browser.zen.desktop', 'de.limad.Mail.desktop', 'de.limad.Cut.desktop', 'de.limad.Study.desktop', 'de.limad.Notes.desktop', 'de.limad.Drop.desktop', 'de.limad.Link.desktop', 'de.limad.Save.desktop', 'de.limad.WindowsApps.desktop', 'de.limad.Updater.desktop', 'de.limad.Klang.desktop', 'de.limad.Terminal.desktop', 'org.gnome.Nautilus.desktop', 'libreoffice-startcenter.desktop', 'de.limad.SystemInfo.desktop', 'de.limad.SystemUpdate.desktop', 'de.limad.Welcome.desktop']"
+        "['app.zen_browser.zen.desktop', 'de.limad.Mail.desktop', 'de.limad.Cut.desktop', 'de.limad.Study.desktop', 'de.limad.Notes.desktop', 'de.limad.Drop.desktop', 'de.limad.Link.desktop', 'de.limad.Save.desktop', 'de.limad.WindowsApps.desktop', 'de.limad.Updater.desktop', 'de.limad.Klang.desktop', 'de.limad.Terminal.desktop', 'org.gnome.Nautilus.desktop', 'libreoffice-startcenter.desktop', 'de.limad.SystemInfo.desktop', 'de.limad.SystemUpdate.desktop', 'de.limad.Welcome.desktop', 'de.limad.Grubenvolk.desktop']"
 fi
 
 touch "$STATE_FILE"

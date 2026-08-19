@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Application
+Name=GRUBENVOLK
+Comment=Flauschis im Grubenvolk
+Exec=/usr/local/bin/limad-grubenvolk
+TryExec=/usr/local/bin/limad-grubenvolk
+Icon=de.limad.Grubenvolk
+Terminal=false
+Categories=Game;StrategyGame;
+Keywords=Spiel;Game;Strategie;Grubenvolk;Flauschis;
+StartupNotify=true
+StartupWMClass=de.limad.Grubenvolk
+X-LiMaD-Version=3.6.7
+Actions=Update;
+
+[Desktop Action Update]
+Name=Nach Updates suchen
+Exec=/usr/local/bin/limad-updater --app de.limad.Grubenvolk
+Icon=system-software-update

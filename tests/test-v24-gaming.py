@@ -81,14 +81,8 @@ for needle in [
     'PROTONUP_ID="net.davidotek.pupgui2"',
     'install_user_app "$EASYEFFECTS_ID"',
     'install_user_app "$PROTONUP_ID"',
-    'required-user-apps-v24.done',
 ]:
     if needle not in user_apps:
         raise AssertionError(f'required user apps missing {needle!r}')
-
-# Preserve the already-approved 17-item LiMaD dock instead of adding gaming launchers to it.
-favorites = "['app.zen_browser.zen.desktop', 'de.limad.Mail.desktop', 'de.limad.Cut.desktop', 'de.limad.Study.desktop', 'de.limad.Notes.desktop', 'de.limad.Drop.desktop', 'de.limad.Link.desktop', 'de.limad.Save.desktop', 'de.limad.WindowsApps.desktop', 'de.limad.Updater.desktop', 'de.limad.Klang.desktop', 'de.limad.Terminal.desktop', 'org.gnome.Nautilus.desktop', 'libreoffice-startcenter.desktop', 'de.limad.SystemInfo.desktop', 'de.limad.SystemUpdate.desktop', 'de.limad.Welcome.desktop']"
-if favorites not in user_apps:
-    raise AssertionError('V24 must preserve the existing LiMaD dock favorites')
 
 print('V24 GAMING TEST: PASS')

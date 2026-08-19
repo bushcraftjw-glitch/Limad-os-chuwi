@@ -1,0 +1,67 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+PACKAGE_FILE="/usr/share/limad-grubenvolk/REQUIRED-PACKAGES.txt"
+OFFLINE_REPO="/usr/share/limad/offline/grubenvolk"
+TEMP_SOURCE="$(mktemp)"
+trap 'rm -f "$TEMP_SOURCE"' EXIT
+
+if [ ! -r "$PACKAGE_FILE" ]; then
+    echo "ERROR: GRUBENVOLK package list missing: $PACKAGE_FILE" >&2
+    exit 1
+fi
+
+mapfile -t PACKAGES < <(grep -Ev '^[[:space:]]*(#|$)' "$PACKAGE_FILE")
+if [ "${#PACKAGES[@]}" -eq 0 ]; then
+    echo "ERROR: GRUBENVOLK package list is empty." >&2
+    exit 1
+fi
+
+missing=()
+for package in "${PACKAGES[@]}"; do
+    if ! dpkg-query -W -f='${db:Status-Abbrev}\n' "$package" 2>/dev/null | grep -q '^ii '; then
+        missing+=("$package")
+    fi
+done
+
+if [ "${#missing[@]}" -gt 0 ]; then
+    if [ ! -d "$OFFLINE_REPO" ] || [ ! -s "$OFFLINE_REPO/Packages.gz" ] || [ ! -s "$OFFLINE_REPO/SHA256SUMS.txt" ]; then
+        echo "ERROR: GRUBENVOLK offline repository is missing." >&2
+        exit 1
+    fi
+    (
+        cd "$OFFLINE_REPO"
+        sha256sum -c SHA256SUMS.txt >/dev/null
+    )
+    printf 'deb [trusted=yes] file:%s ./\n' "$OFFLINE_REPO" > "$TEMP_SOURCE"
+    apt-get \
+        -o "Dir::Etc::sourcelist=$TEMP_SOURCE" \
+        -o "Dir::Etc::sourceparts=-" \
+        -o "Acquire::Languages=none" \
+        update
+    DEBIAN_FRONTEND=noninteractive apt-get \
+        -o "Dir::Etc::sourcelist=$TEMP_SOURCE" \
+        -o "Dir::Etc::sourceparts=-" \
+        -o "Acquire::Languages=none" \
+        --no-install-recommends \
+        --yes \
+        install "${missing[@]}"
+fi
+
+PYTHONPATH=/usr/share/limad-grubenvolk/src /usr/bin/python3 - <<'PY'
+import gi
+
+gi.require_version("Gtk", "4.0")
+gi.require_version("WebKit", "6.0")
+from gi.repository import Gtk, WebKit
+from limad_grubenvolk import APP_ID, VERSION
+
+assert Gtk.Application is not None
+assert WebKit.WebView is not None
+assert APP_ID == "de.limad.Grubenvolk"
+assert VERSION == "3.6.7"
+print("GRUBENVOLK Python-Laufzeit: PASS")
+PY
+
+/usr/local/bin/limad-grubenvolk --version | grep -Fxq 'GRUBENVOLK 3.6.7'
+echo "GRUBENVOLK dependencies: PASS"

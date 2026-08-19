@@ -12,10 +12,13 @@ chmod 0755 /usr/local/bin/limad-base1-first-login \
     /usr/local/bin/limad-lidrop-status-ensure \
     /usr/local/bin/limad-liview-deps \
     /usr/local/bin/limad-gaming-deps \
+    /usr/local/bin/limad-grubenvolk-deps \
+    /usr/local/bin/limad-grubenvolk \
     /usr/local/bin/liview
 
 /usr/local/bin/limad-liview-deps
 /usr/local/bin/limad-gaming-deps
+/usr/local/bin/limad-grubenvolk-deps
 
 if command -v update-mime-database >/dev/null 2>&1; then
     update-mime-database /usr/share/mime
@@ -67,4 +70,4 @@ fi
 /usr/local/bin/limad-design-system || true
 
 printf '%s
-' "LiMaD OS BASE1 V24 LiView and gaming integration complete." > /var/log/limad-base1-install.log
+' "LiMaD OS BASE1 V25 LiView, gaming and GRUBENVOLK integration complete." > /var/log/limad-base1-install.log

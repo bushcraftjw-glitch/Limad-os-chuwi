@@ -136,7 +136,8 @@ set_favorites() {
         libreoffice-startcenter.desktop \
         de.limad.SystemInfo.desktop \
         de.limad.SystemUpdate.desktop \
-        de.limad.Welcome.desktop; do
+        de.limad.Welcome.desktop \
+        de.limad.Grubenvolk.desktop; do
         if [ -f "/usr/share/applications/$desktop" ] || [ -f "/var/lib/snapd/desktop/applications/$desktop" ]; then
             favorites+=("$desktop")
         fi
