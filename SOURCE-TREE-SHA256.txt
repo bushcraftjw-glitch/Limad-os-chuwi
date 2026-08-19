@@ -168,7 +168,7 @@ bfceae34a2fa314f3fd4c85274231932b64c7b51b2b7ca913133cde8456eb287  ./tests/test-v
 386b4114c65ae6e76dfbf5dc553b745b2b65407d5db52f524ae12128231e1e07  ./tests/validate-payload.sh
 adf81d76b955f8b5d7749aae2b0d4d0be98b768ae0bf8fd71217b5fa61afb80f  ./tests/validate-source.sh
 aa9671943a4757a1deef35c073444775c27210a2386d4f75a65971dd097497a1  ./tests/validate-wallpapers.py
-e38b32fdb91951ccb0676f0d4969287ee646f78574a773fa6d2131533186644e  ./tests/verify-built-iso.sh
+361d0dad03228341d21b1e651babbc05dda9d559d3f3f7cb98b9d688aac94bc7  ./tests/verify-built-iso.sh
 057ea062e4c2cf083eeff74a92bde84091574b832e01e3d3656cc9a6c1057523  ./tools/brand-grub.py
 8f87edf17470c44b179e1ef32139ce3e9d2139ad25c6b0aa14fec442e1776d40  ./tools/filter-install-sources.py
 7ebcf46ea0aa06c6c2ff6f52bfd2c81a51dc7d017949e113e51479b1d0ae8ad4  ./tools/github-starter.sh

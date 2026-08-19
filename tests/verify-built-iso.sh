@@ -11,7 +11,8 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CURRENT_STAGE="initialization"
-trap 'rc=$?; echo "ERROR: ISO static validation failed in stage: $CURRENT_STAGE (line $LINENO, exit $rc)" >&2; exit $rc' ERR
+VALIDATION_RC=0
+trap 'VALIDATION_RC=$?; echo "ERROR: ISO static validation failed in stage: $CURRENT_STAGE (line $LINENO, exit $VALIDATION_RC)" >&2; exit "$VALIDATION_RC"' ERR
 
 xorriso -osirrox on -indev "$ISO" -extract /autoinstall.yaml "$TMP/autoinstall.yaml" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /casper/install-sources.yaml "$TMP/install-sources.yaml" >/dev/null 2>&1
