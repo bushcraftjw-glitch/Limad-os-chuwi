@@ -1,4 +1,4 @@
-bec1ad6a73d651d20e2493083e6918696b6434536d6bde7486ffac7cf86ea657  ./.github/workflows/build-iso.yml
+ad672bc6846d7620057dfca8e6731844c6a37c4005e3d12fce0fb478c78112e3  ./.github/workflows/build-iso.yml
 73d14d8a95f2f8af9f07897babfdc2d35d79d643d821cb926fd1a041cca4e963  ./.gitignore
 455055cf6febc074c82312c9b819a6d4744d6b4c233a78065480beb69bac2429  ./README-DE.md
 1f9584482f2333f8732df2712d35fd7a5a33f388bca69d0f852853b501dfe2b6  ./START-RC1-GITHUB-BUILD-LINUX.sh
@@ -28,7 +28,7 @@ f14b6c3f5c0b9ee60c172fa40ff3dcb1419080c6d1ef786607a4add4aae9fcff  ./assets/vendo
 df388f3f2f98bde93015d840ab7aa6ca83f59425cd2f8244ec6bf05c624ea25b  ./assets/vendor/SOURCE-SHA256SUMS.txt
 a2a6af05f9fc38ffd6b229f30d8776da33600442581a6071b383e1315cc305d6  ./build/branding/limad-logo-192.png
 eff142c6cdfd11ac28e6b99e8270d3cecb35930340974f96d10af95ea54bf1a5  ./build/branding/limad-logo-256.png
-db953448ecccff46276855372cddacc19b2e26cd75d7a4dd8f73cd049efaa064  ./build/build-iso.sh
+6fa9d11c0a4d766d0170789c837ea0e37c9e8b2ef60cbaac9537168737ec1c5b  ./build/build-iso.sh
 9373713eaf4cec9bb91188e07ccbb77473ea56d33e9d476163c6aad54c2e317c  ./build/casper-bottom/62limad-branding
 fce5a564ad89fb44238113b3f7f985ae10297430b8b42309812db0f85bec9aac  ./build/gaming-packages.txt
 6c74c5fc873fad051f0eb1e6d3e590e6f75116c0555b5b301d75a2f17ba01697  ./build/grubenvolk-packages.txt
@@ -37,6 +37,8 @@ b69d41a9973b27233a2f340be5991f274d2d8b7f6ff39329feb11c0ea7467ab9  ./build/instal
 27a6041347ed0460cbeee742271307c6a6eaf76e746cc02c7a49e0920bb6f868  ./build/installer-slides/1/slide_en_US.html
 d8f59549d81f2daf697349f33a8d1569cbef31185db157c83f5b47b3480d0008  ./build/installer-whitelabel.yaml
 e445b3077c8242a02239811ca0c74f7b1403437ab1f1422b2f28824669fa5b3b  ./build/liview-packages.txt
+8869e5f78089cd323f218310f9b8eb736749862793d5b7a7cb0daee1be57c2ab  ./build/preflight-target-container.sh
+ac38c296e51cc1252e4812b40d84434326ecb6cd9e3c2f12be0ada788ef49152  ./build/preflight-target-install.sh
 e64ac055ba017ef87797c650f1c19e69a4ddb37da9fe7f38c52eaa3b2c843fd6  ./build/prepare-gaming-offline-repo.sh
 c6fabab6c145b092ae9da5d16a0c31d6cc5ece1b32beac15820e3a924e0ecee7  ./build/prepare-grubenvolk-offline-repo.sh
 8094b9cb4131b7823d5111488a94e65db53c1ae966ced35b3b8d134e444e6ead  ./build/prepare-imac17-initrd.sh
@@ -203,10 +205,11 @@ e3f77284098c5d16d7c065e74f06e5ee5cb9178c0b089d7785069ed6a31af488  ./tests/test-i
 f6548adedf7218a7998c8290c3029e3229e71945d56da4bea6bfce61cb9f3a24  ./tests/test-v24-build-pipeline-safety.py
 3753bbf7e38d95518c1910e9823833200a99b0de3048b17333b6d683494969cf  ./tests/test-v24-gaming.py
 593aea11529567ab24930f11e14651904add6d61f878092cf60b7c300e3c27b4  ./tests/test-v25-grubenvolk.py
+d88df8f92b6f80c9ad1a938556aef6d71d47891fcb66b6dc7f9c31b4ef2d65ba  ./tests/test-v25-target-preflight.py
 16cfdcb7e85ae4a09ec5849497a675f0179f0dd595187798df73b2558edd4be7  ./tests/test-version-consistency.py
 6bf780ae401b7c915e7d1e33c8557e6a34642a4aed8305f782b67f5151ffe2a1  ./tests/validate-app-icons.py
 13c87f85a0586d01197385d039fc1c5312c77713a6365993e3eeb64f292803d7  ./tests/validate-payload.sh
-5fe4bf31be51a66c33788a1d304faf9bcf7db8e21715ff36cd7a7007f5991fd4  ./tests/validate-source.sh
+2b0ee1088971efeaa501de1ab92d9193e04753f8b583f9777c90c11b9c9fd672  ./tests/validate-source.sh
 aa9671943a4757a1deef35c073444775c27210a2386d4f75a65971dd097497a1  ./tests/validate-wallpapers.py
 79ef5e46f914398cd36c470766b777454f67165109d45b6c5b72aad72971d0b1  ./tests/verify-built-iso.sh
 057ea062e4c2cf083eeff74a92bde84091574b832e01e3d3656cc9a6c1057523  ./tools/brand-grub.py

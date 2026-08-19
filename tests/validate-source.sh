@@ -293,5 +293,6 @@ for package in python3 python3-gi gir1.2-gtk-4.0 gir1.2-webkit-6.0; do
     grep -Fxq "$package" "$ROOT/build/grubenvolk-packages.txt"
 done
 python3 -B "$ROOT/tests/test-v25-grubenvolk.py"
+python3 -B "$ROOT/tests/test-v25-target-preflight.py"
 
 echo "SOURCE VALIDATION: PASS"

@@ -32,6 +32,7 @@ printf '%s  %s\n' "$UBUNTU_ISO_SHA256" "$ISO" | sha256sum -c -
 
 "$ROOT/build/prepare-payload.sh"
 "$ROOT/tests/validate-payload.sh"
+"$ROOT/build/preflight-target-install.sh"
 
 rm -rf "$OVERLAY"
 mkdir -p "$OVERLAY/casper" "$OVERLAY/limad"
