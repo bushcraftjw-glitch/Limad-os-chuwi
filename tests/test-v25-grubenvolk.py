@@ -11,7 +11,7 @@ ROOTFS = ROOT / "build/rootfs"
 APP_ROOT = ROOTFS / "usr/share/limad-grubenvolk"
 APP_ID = "de.limad.Grubenvolk"
 DESKTOP_ID = f"{APP_ID}.desktop"
-VERSION = "3.6.7"
+VERSION = "3.6.8"
 
 required_paths = [
     APP_ROOT / "VERSION",
@@ -90,7 +90,7 @@ for needle in (
     "TryExec=/usr/local/bin/limad-grubenvolk",
     "Icon=de.limad.Grubenvolk",
     "StartupWMClass=de.limad.Grubenvolk",
-    "X-LiMaD-Version=3.6.7",
+    "X-LiMaD-Version=3.6.8",
     "Actions=Update;",
     "Exec=/usr/local/bin/limad-updater --app de.limad.Grubenvolk",
 ):
@@ -113,8 +113,8 @@ for theme in ("LiMaD", "hicolor"):
         if png_size(icon) != (size, size):
             raise AssertionError(f"GRUBENVOLK icon has wrong size: {icon.relative_to(ROOT)}")
     svg = ROOTFS / f"usr/share/icons/{theme}/scalable/apps/de.limad.Grubenvolk.svg"
-    if not svg.is_file() or svg.stat().st_size == 0:
-        raise AssertionError(f"GRUBENVOLK scalable icon missing: {svg.relative_to(ROOT)}")
+    if svg.exists():
+        raise AssertionError(f"GRUBENVOLK stale scalable icon must be absent: {svg.relative_to(ROOT)}")
 
 packages = [
     line.strip()
@@ -146,7 +146,7 @@ for needle in (
     'gi.require_version("Gtk", "4.0")',
     'gi.require_version("WebKit", "6.0")',
     'APP_ID == "de.limad.Grubenvolk"',
-    'VERSION == "3.6.7"',
+    'VERSION == "3.6.8"',
     "/etc/apt/sources.list.d/limad-grubenvolk-offline.",
     "GRUBENVOLK combined package resolution failed",
     "GRUBENVOLK dependencies: PASS",

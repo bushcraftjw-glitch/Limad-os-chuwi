@@ -139,15 +139,21 @@ install -m 0644 "$ROOT/build/branding/limad-logo-192.png" "$PAYLOAD/rootfs/usr/s
 install -m 0644 "$ROOT/build/branding/limad-logo-256.png" "$PAYLOAD/rootfs/usr/share/limad/branding/limad-logo-256.png"
 
 rsync -a "$ROOT/build/rootfs/" "$PAYLOAD/rootfs/"
+rm -f \
+    "$PAYLOAD/rootfs/usr/share/icons/LiMaD/scalable/apps/de.limad.LiMusic.svg" \
+    "$PAYLOAD/rootfs/usr/share/icons/hicolor/scalable/apps/de.limad.LiMusic.svg" \
+    "$PAYLOAD/rootfs/usr/share/icons/LiMaD/scalable/apps/de.limad.Grubenvolk.svg" \
+    "$PAYLOAD/rootfs/usr/share/icons/hicolor/scalable/apps/de.limad.Grubenvolk.svg"
 "$ROOT/build/prepare-liview-offline-repo.sh" "$PAYLOAD/rootfs/usr/share/limad/offline/liview"
 "$ROOT/build/prepare-gaming-offline-repo.sh" "$PAYLOAD/rootfs/usr/share/limad/offline/gaming"
+"$ROOT/build/prepare-heroic-offline-repo.sh" "$PAYLOAD/rootfs/usr/share/limad/offline/heroic"
 "$ROOT/build/prepare-grubenvolk-offline-repo.sh" "$PAYLOAD/rootfs/usr/share/limad/offline/grubenvolk"
 cp "$ROOT/build/install-target.sh" "$PAYLOAD/install-target.sh"
 chmod 0755 "$PAYLOAD/install-target.sh"
 
 mkdir -p "$PAYLOAD/rootfs/usr/share/doc/limad-os-base1"
 cat > "$PAYLOAD/rootfs/usr/share/doc/limad-os-base1/BUILD-INFO.txt" <<EOF
-LiMaD OS 3.0 RC1 BASE1 DESIGN V25
+LiMaD OS 3.0 RC1 BASE1 DESIGN V26
 Base: Ubuntu 26.04 LTS Desktop FULL
 Ubuntu SHA256: $UBUNTU_ISO_SHA256
 WhiteSur commit: $WHITESUR_REF
@@ -157,10 +163,10 @@ LiMaD wallpapers SHA256: $WALLPAPERS_ZIP_SHA256
 iMac17,1 firmware source: linux-firmware tag 20250509, Radeon Bonaire firmware
 GTK4: stock libadwaita with LiMaD traffic-light titlebutton override.
 LiDrop: browser/local-device transfer enabled; AirDrop/OpenDrop/OWL/AWDL compatibility intentionally removed in V22.
-LiMusic: 0.3.22; runtime dependencies include WebKitGTK 6, GTK4, GStreamer GTK4 sink and common codec plugin sets.
-LiView: 1.0.0; native GTK4/Poppler preview for PDF, images, video and 3D; updater-aware launcher, system MIME defaults and complete Ubuntu 26.04 offline dependency repository embedded in the ISO.
-GRUBENVOLK: 3.6.7; updater-aware GTK4/WebKit 6 game, installed as a system app, pinned to the LiMaD Dock and supplied with an offline Ubuntu 26.04 runtime repository.
-Gaming: Steam, Lutris, Protontricks, Wine/Winetricks, GameMode, MangoHud, Gamescope, Vulkan tools, vkBasalt and GOverlay are installed from a complete amd64+i386 Ubuntu 26.04 offline repository. Steam manages Valve Proton; ProtonUp-Qt is provisioned through Flathub for optional custom Proton/GE-Proton versions.
+LiMusic: 0.3.27; runtime dependencies include WebKitGTK 6, GTK4, GStreamer GTK4 sink and common codec plugin sets.
+LiView: 1.1.1; native GTK4/Poppler preview for PDF, images, video and 3D with lazy PDF pages and adaptive 3D draft rendering; updater-aware launcher, system MIME defaults and complete Ubuntu 26.04 offline dependency repository embedded in the ISO.
+GRUBENVOLK: 3.6.8; updater-aware GTK4/WebKit 6 game, installed as a system app, pinned to the LiMaD Dock and supplied with an offline Ubuntu 26.04 runtime repository.
+Gaming: Steam, Lutris, Protontricks, Wine/Winetricks, GameMode, MangoHud, Gamescope, Vulkan tools, vkBasalt and GOverlay are installed from a complete amd64+i386 Ubuntu 26.04 offline repository. Heroic Games Launcher 2.22.0 is installed during target setup from its verified official DEB plus an embedded Ubuntu dependency repository. Steam manages Valve Proton; ProtonUp-Qt is provisioned through Flathub for optional custom Proton/GE-Proton versions.
 EOF
 
 for removed in \

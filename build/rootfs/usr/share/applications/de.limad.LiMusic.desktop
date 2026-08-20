@@ -11,7 +11,7 @@ Categories=AudioVideo;Audio;Video;Player;
 Keywords=Musik;Music;Player;YouTube;
 StartupNotify=true
 StartupWMClass=de.limad.LiMusic
-X-LiMaD-Version=0.3.22
+X-LiMaD-Version=0.3.27
 Actions=Update;
 
 [Desktop Action Update]

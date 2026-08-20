@@ -13,7 +13,7 @@ StartupNotify=true
 DBusActivatable=false
 StartupWMClass=de.limad.LiView
 Keywords=PDF;Bild;Video;Vorschau;Dokument;Bearbeiten;Markup;Zeichnen;STL;OBJ;3MF;3D;
-X-LiMaD-Version=1.0.0
+X-LiMaD-Version=1.1.1
 Actions=Update;
 
 [Desktop Action Update]

@@ -21,6 +21,10 @@ from .inspector import document_info
 from .ocr import recognize_text
 
 APP_ID = "de.limad.LiView"
+PDF_INITIAL_PAGE_BATCH = 6
+PDF_SCROLL_PAGE_BATCH = 6
+PDF_THUMBNAIL_RADIUS = 4
+MODEL_REFINE_DELAY_MS = 280
 
 
 class PageView(Gtk.DrawingArea):
@@ -73,6 +77,7 @@ class PageView(Gtk.DrawingArea):
         self.window.set_current_page(self.page_index)
         if isinstance(self.window.document, StlDocument):
             self.model_drag_origin = (self.window.document.yaw, self.window.document.pitch)
+            self.window._set_3d_draft(True)
             self.set_cursor_from_name("grabbing")
             return
         if self.window.mode in {"text", "notiz"}:
@@ -103,6 +108,7 @@ class PageView(Gtk.DrawingArea):
         if isinstance(self.window.document, StlDocument):
             self.model_drag_origin = None
             self.set_cursor_from_name("grab")
+            self.window._schedule_3d_refine()
             self.queue_draw()
             return
         if self.drag_start is None:
@@ -129,6 +135,7 @@ class PageView(Gtk.DrawingArea):
         if not isinstance(self.window.document, StlDocument):
             return
         self.model_pan_origin = (self.window.document.pan_x, self.window.document.pan_y)
+        self.window._set_3d_draft(True)
         self.set_cursor_from_name("move")
 
     def _on_pan_update(self, gesture, offset_x: float, offset_y: float) -> None:
@@ -143,13 +150,16 @@ class PageView(Gtk.DrawingArea):
             return
         self.model_pan_origin = None
         self.set_cursor_from_name("grab")
+        self.window._schedule_3d_refine()
         self.window._update_title_status()
         self.queue_draw()
 
     def _on_scroll(self, controller, dx: float, dy: float) -> bool:
         if not isinstance(self.window.document, StlDocument):
             return False
+        self.window._set_3d_draft(True)
         self.window.document.zoom_model(1.12 if dy < 0 else 1.0 / 1.12)
+        self.window._schedule_3d_refine()
         self.window._update_title_status()
         self.queue_draw()
         return True
@@ -316,6 +326,7 @@ class DocumentWindow(Gtk.ApplicationWindow):
         self.animation_source_id = 0
         self.thumbnail_source_id = 0
         self.thumbnail_queue: list[Gtk.ListBoxRow] = []
+        self.model_refine_source_id = 0
         self.set_default_size(1180, 820)
         self.set_size_request(720, 480)
         self._build_actions()
@@ -602,6 +613,7 @@ class DocumentWindow(Gtk.ApplicationWindow):
         self.document_scroller.set_hexpand(True)
         self.document_scroller.set_vexpand(True)
         self.document_scroller.add_css_class("document-scroller")
+        self.document_scroller.get_vadjustment().connect("value-changed", self._on_document_scroll)
         self.content_paned.set_end_child(self.document_scroller)
 
         self.inspector_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
@@ -728,7 +740,7 @@ class DocumentWindow(Gtk.ApplicationWindow):
             return
         placeholder = getattr(row, "thumbnail_placeholder", None)
         try:
-            widget = ThumbnailView(self.document.render_thumbnail(index))
+            widget = ThumbnailView(self.document.render_thumbnail(index, 112, 150))
         except Exception:
             widget = Gtk.Label(label=f"Seite {index + 1}")
         if placeholder is not None and placeholder.get_parent() is box:
@@ -749,13 +761,113 @@ class DocumentWindow(Gtk.ApplicationWindow):
 
     def _schedule_thumbnail_loading(self) -> None:
         self._cancel_thumbnail_loading()
-        self.thumbnail_queue = [row for row in self.thumbnail_rows if not getattr(row, "thumbnail_loaded", False)]
+        if not self.thumbnail_rows:
+            return
+        start = max(0, self.current_page - PDF_THUMBNAIL_RADIUS)
+        end = min(len(self.thumbnail_rows), self.current_page + PDF_THUMBNAIL_RADIUS + 1)
+        self.thumbnail_queue = [
+            row
+            for row in self.thumbnail_rows[start:end]
+            if not getattr(row, "thumbnail_loaded", False)
+        ]
         if self.thumbnail_queue:
             self.thumbnail_source_id = GLib.idle_add(self._load_next_thumbnail)
+
+    def _append_page_view(self, page_index: int) -> None:
+        frame = Gtk.Frame()
+        frame.add_css_class("page-frame")
+        page_view = PageView(self, page_index)
+        frame.set_child(page_view)
+        self.document_box.append(frame)
+        self.page_views.append(page_view)
+
+    def _append_thumbnail_row(self, page_index: int, is_3d: bool) -> None:
+        row = Gtk.ListBoxRow()
+        row.page_index = page_index
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        box.set_margin_top(8)
+        box.set_margin_bottom(8)
+        box.set_margin_start(8)
+        box.set_margin_end(8)
+        placeholder = Gtk.Label(label="…")
+        placeholder.set_size_request(112, 72)
+        placeholder.add_css_class("dim-label")
+        box.append(placeholder)
+        row.thumbnail_placeholder = placeholder
+        row.thumbnail_loaded = False
+        number = Gtk.Label(label="3D" if is_3d else str(page_index + 1))
+        number.add_css_class("dim-label")
+        box.append(number)
+        row.set_child(box)
+        self.thumbnail_list.append(row)
+        self.thumbnail_rows.append(row)
+
+    def _ensure_pdf_pages_loaded(self, target_count: int) -> None:
+        if not isinstance(self.document, PdfDocument):
+            return
+        target = min(self.document.page_count, max(0, target_count))
+        while len(self.page_views) < target:
+            self._append_page_view(len(self.page_views))
+
+    def _on_document_scroll(self, adjustment: Gtk.Adjustment) -> None:
+        if not isinstance(self.document, PdfDocument):
+            return
+        page_size = adjustment.get_page_size()
+        upper = adjustment.get_upper()
+        if page_size <= 0 or upper <= page_size:
+            return
+        viewport_top = adjustment.get_value() + 24.0
+        for page_index, page_view in enumerate(self.page_views):
+            frame = page_view.get_parent()
+            allocation = frame.get_allocation() if frame is not None else page_view.get_allocation()
+            if allocation.y + allocation.height >= viewport_top:
+                if page_index != self.current_page:
+                    self.current_page = page_index
+                    if self.thumbnail_rows:
+                        self._syncing_thumbnail = True
+                        self.thumbnail_list.select_row(self.thumbnail_rows[self.current_page])
+                        self._syncing_thumbnail = False
+                    self._schedule_thumbnail_loading()
+                    self._update_title_status()
+                break
+        if len(self.page_views) >= self.document.page_count:
+            return
+        if adjustment.get_value() + page_size >= upper - page_size * 1.25:
+            self._ensure_pdf_pages_loaded(len(self.page_views) + PDF_SCROLL_PAGE_BATCH)
+
+    def _cancel_3d_refine(self) -> None:
+        if self.model_refine_source_id:
+            GLib.source_remove(self.model_refine_source_id)
+            self.model_refine_source_id = 0
+
+    def _set_3d_draft(self, enabled: bool) -> None:
+        if not isinstance(self.document, StlDocument):
+            return
+        self._cancel_3d_refine()
+        changed = self.document.set_preview_draft(enabled)
+        if changed and self.page_views:
+            self.page_views[0].queue_draw()
+        self._update_title_status()
+
+    def _finish_3d_refine(self) -> bool:
+        self.model_refine_source_id = 0
+        if isinstance(self.document, StlDocument):
+            changed = self.document.set_preview_draft(False)
+            if changed and self.page_views:
+                self.page_views[0].queue_draw()
+            self._update_title_status()
+        return GLib.SOURCE_REMOVE
+
+    def _schedule_3d_refine(self) -> None:
+        if not isinstance(self.document, StlDocument):
+            return
+        self._cancel_3d_refine()
+        self.model_refine_source_id = GLib.timeout_add(MODEL_REFINE_DELAY_MS, self._finish_3d_refine)
 
     def _rebuild_document(self) -> None:
         self._cancel_animation()
         self._cancel_thumbnail_loading()
+        self._cancel_3d_refine()
         self._clear_container(self.document_box)
         self._clear_container(self.thumbnail_list)
         self.page_views = []
@@ -780,37 +892,20 @@ class DocumentWindow(Gtk.ApplicationWindow):
         else:
             self.document_scroller.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
             self.document_scroller.set_child(self.document_box)
+            initial_page_count = self.document.page_count
+            if isinstance(self.document, PdfDocument):
+                initial_page_count = min(self.document.page_count, PDF_INITIAL_PAGE_BATCH)
+            for page_index in range(initial_page_count):
+                self._append_page_view(page_index)
             for page_index in range(self.document.page_count):
-                frame = Gtk.Frame()
-                frame.add_css_class("page-frame")
-                page_view = PageView(self, page_index)
-                frame.set_child(page_view)
-                self.document_box.append(frame)
-                self.page_views.append(page_view)
-
-                row = Gtk.ListBoxRow()
-                row.page_index = page_index
-                box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-                box.set_margin_top(8)
-                box.set_margin_bottom(8)
-                box.set_margin_start(8)
-                box.set_margin_end(8)
-                placeholder = Gtk.Spinner()
-                placeholder.set_spinning(True)
-                placeholder.set_size_request(132, 80)
-                box.append(placeholder)
-                row.thumbnail_placeholder = placeholder
-                row.thumbnail_loaded = False
-                number = Gtk.Label(label="3D" if is_3d else str(page_index + 1))
-                number.add_css_class("dim-label")
-                box.append(number)
-                row.set_child(box)
-                self.thumbnail_list.append(row)
-                self.thumbnail_rows.append(row)
+                self._append_thumbnail_row(page_index, is_3d)
 
         if self.thumbnail_rows:
             self._render_thumbnail_row(self.thumbnail_rows[max(0, min(self.current_page, len(self.thumbnail_rows) - 1))])
             self._schedule_thumbnail_loading()
+        if is_3d:
+            self.document.set_preview_draft(True)
+            self._schedule_3d_refine()
 
         self.search_entry.set_sensitive(isinstance(self.document, PdfDocument))
         ocr_action = self.lookup_action("ocr")
@@ -1375,7 +1470,8 @@ class DocumentWindow(Gtk.ApplicationWindow):
             x, y, z = self.document.dimensions
             projection = "Perspektive" if self.document.projection == "perspective" else "Orthografisch"
             mode = "Drahtgitter" if self.document.wireframe else "Schattiert"
-            self.status_page.set_text(f"{self.document.format_name} · {self.document.triangle_count:,} Dreiecke · {x:.2f} × {y:.2f} × {z:.2f} mm · {projection} · {mode}")
+            preview = "Entwurf" if self.document.preview_draft else "Vorschau"
+            self.status_page.set_text(f"{self.document.format_name} · {self.document.triangle_count:,} Dreiecke · {preview} · {x:.2f} × {y:.2f} × {z:.2f} mm · {projection} · {mode}")
             self.status_zoom.set_text(f"3D {int(round(self.document.model_zoom * 100))} %")
             self._update_3d_controls()
         elif isinstance(self.document, VideoDocument):
@@ -1405,13 +1501,18 @@ class DocumentWindow(Gtk.ApplicationWindow):
 
     def set_current_page(self, page_index: int) -> None:
         self.current_page = max(0, min(page_index, self.document.page_count - 1))
+        if isinstance(self.document, PdfDocument):
+            self._ensure_pdf_pages_loaded(self.current_page + 1)
         if self.thumbnail_rows:
             self._syncing_thumbnail = True
             self.thumbnail_list.select_row(self.thumbnail_rows[self.current_page])
             self._syncing_thumbnail = False
+            self._schedule_thumbnail_loading()
         self._update_title_status()
 
     def _scroll_to_page(self, page_index: int) -> None:
+        if isinstance(self.document, PdfDocument):
+            self._ensure_pdf_pages_loaded(page_index + 1)
         if not self.page_views:
             return
         page_index = max(0, min(page_index, len(self.page_views) - 1))

@@ -102,7 +102,7 @@ sha256sum "$OUTPUT" | tee "$OUTPUT.sha256"
 "$ROOT/tests/verify-built-iso.sh" "$OUTPUT"
 
 cat > "$OUT/BUILD-REPORT.txt" <<EOF_REPORT
-LiMaD OS 3.0 RC1 BASE1 DESIGN V25
+LiMaD OS 3.0 RC1 BASE1 DESIGN V26
 Base: Ubuntu 26.04 LTS Desktop FULL
 Official Ubuntu ISO: $UBUNTU_ISO_NAME
 Official Ubuntu SHA256: $UBUNTU_ISO_SHA256
@@ -114,13 +114,13 @@ WhiteSur commit: $WHITESUR_REF
 LiMaD icon theme: V3.2
 LiMaD wallpapers: 3 x 3840x2160, wallpaper 01 default
 Installer branding: Canonical whitelabel API, LiMaD OS Installer title, LiMaD images, German/English LiMaD slide
-Design V25: V24 gaming and LiView core retained; GRUBENVOLK 3.6.7 added as updater-aware system app and Dock favorite with offline GTK4/WebKit runtime
+Design V26: V25 stable base retained; LiView performance preview, confirmed LiMaD app fixes and Heroic Games Launcher offline first-install integration added
 iMac17,1: DMI-targeted Radeon CIK compatibility path; upstream Radeon Bonaire firmware embedded in live initrd and installed target
 Firmware source: linux-firmware tag 20250509; firmware hashes embedded and verified
 Install source catalog: ubuntu-desktop only, Canonical catalog metadata preserved
 LiDrop: browser/local-device transfer enabled; AirDrop/OpenDrop/OWL/AWDL compatibility removed by design
 LiMusic: 0.3.22; GTK4/WebKitGTK 6/GStreamer runtime and common codec sets installed by LiMaD runtime dependency service
-LiView: 1.0.0; PDF/image/video/3D preview and editing; all declared MIME types default to LiView; Ubuntu 26.04 dependency closure embedded for offline installation; LiMaD Updater registered
+LiView: 1.1.1; PDF/image/video/3D preview and editing; all declared MIME types default to LiView; Ubuntu 26.04 dependency closure embedded for offline installation; LiMaD Updater registered
 Gaming: Steam, Lutris, Protontricks, Wine/Winetricks, GameMode, MangoHud, Gamescope, Vulkan tools, vkBasalt and GOverlay; amd64+i386 Ubuntu 26.04 dependency closure embedded; ProtonUp-Qt provisioned through Flathub
 Output: $OUTPUT_ISO_NAME
 Output SHA256: $(sha256sum "$OUTPUT" | awk '{print $1}')

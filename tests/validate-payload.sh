@@ -79,6 +79,11 @@ required=(
     "$ROOTFS/usr/share/limad/gaming/REQUIRED-PACKAGES.txt"
     "$ROOTFS/usr/share/limad/offline/gaming/Packages.gz"
     "$ROOTFS/usr/share/limad/offline/gaming/SHA256SUMS.txt"
+    "$ROOTFS/usr/local/bin/limad-heroic-deps"
+    "$ROOTFS/usr/share/limad/offline/heroic/Packages.gz"
+    "$ROOTFS/usr/share/limad/offline/heroic/SHA256SUMS.txt"
+    "$ROOTFS/usr/share/limad/offline/heroic/PACKAGE-NAME.txt"
+    "$ROOTFS/usr/share/limad/offline/heroic/PACKAGE-VERSION.txt"
     "$ROOTFS/usr/local/bin/limad-grubenvolk"
     "$ROOTFS/usr/local/bin/limad-grubenvolk-deps"
     "$ROOTFS/usr/share/limad-grubenvolk/VERSION"
@@ -203,14 +208,14 @@ grep -Fq 'app.zen_browser.zen' "$ROOTFS/usr/local/bin/limad-required-user-apps"
 grep -Fq 'com.github.wwmm.easyeffects' "$ROOTFS/usr/local/bin/limad-required-user-apps"
 grep -Fq 'net.davidotek.pupgui2' "$ROOTFS/usr/local/bin/limad-required-user-apps"
 grep -Fq 'de.limad.LiMusic' "$ROOTFS/usr/share/limad-updater/apps.json"
-[ "$(cat "$ROOTFS/usr/share/limusic/VERSION")" = "0.3.22" ]
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v25"' "$ROOTFS/etc/limad-release"
+[ "$(cat "$ROOTFS/usr/share/limusic/VERSION")" = "0.3.27" ]
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v26"' "$ROOTFS/etc/limad-release"
 grep -Fq 'iMac17,1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$PAYLOAD/install-target.sh"
 
 
-[ "$(cat "$ROOTFS/usr/share/liview/VERSION")" = "1.0.0" ]
+[ "$(cat "$ROOTFS/usr/share/liview/VERSION")" = "1.1.1" ]
 grep -Fq '/usr/local/libexec/limad-select-app-root' "$ROOTFS/usr/local/bin/liview"
 grep -Fq 'de.limad.LiView' "$ROOTFS/usr/share/limad-updater/apps.json"
 grep -Fq 'Exec=/usr/local/bin/liview %F' "$ROOTFS/usr/share/applications/de.limad.LiView.desktop"
@@ -241,7 +246,20 @@ shopt -u nullglob
 grep -Fq '/usr/share/limad/offline/gaming' "$ROOTFS/usr/local/bin/limad-gaming-deps"
 grep -Fq 'dpkg --add-architecture i386' "$ROOTFS/usr/local/bin/limad-gaming-deps"
 
-[ "$(cat "$ROOTFS/usr/share/limad-grubenvolk/VERSION")" = "3.6.7" ]
+[ "$(cat "$ROOTFS/usr/share/limad/offline/heroic/PACKAGE-VERSION.txt")" = "2.22.0" ]
+test -s "$ROOTFS/usr/share/limad/offline/heroic/PACKAGE-NAME.txt"
+shopt -s nullglob
+HEROIC_DEBS=("$ROOTFS/usr/share/limad/offline/heroic"/*.deb)
+shopt -u nullglob
+[ "${#HEROIC_DEBS[@]}" -gt 0 ]
+(
+    cd "$ROOTFS/usr/share/limad/offline/heroic"
+    sha256sum -c SHA256SUMS.txt >/dev/null
+)
+grep -Fq '/usr/share/limad/offline/heroic' "$ROOTFS/usr/local/bin/limad-heroic-deps"
+grep -Fq '/usr/local/bin/limad-heroic-deps' "$PAYLOAD/install-target.sh"
+
+[ "$(cat "$ROOTFS/usr/share/limad-grubenvolk/VERSION")" = "3.6.8" ]
 grep -Fq '/usr/local/libexec/limad-select-app-root' "$ROOTFS/usr/local/bin/limad-grubenvolk"
 grep -Fq 'de.limad.Grubenvolk/current/payload' "$ROOTFS/usr/local/bin/limad-grubenvolk"
 grep -Fq 'Exec=/usr/local/bin/limad-grubenvolk' "$ROOTFS/usr/share/applications/de.limad.Grubenvolk.desktop"

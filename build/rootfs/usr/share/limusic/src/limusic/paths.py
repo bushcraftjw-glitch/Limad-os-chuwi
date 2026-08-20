@@ -3,7 +3,7 @@ import os
 
 APP_ID = "de.limad.LiMusic"
 APP_NAME = "LiMusic"
-VERSION = "0.3.22"
+VERSION = "0.3.27"
 
 HOME = Path.home()
 XDG_DATA_HOME = Path(os.environ.get("XDG_DATA_HOME", HOME / ".local" / "share"))

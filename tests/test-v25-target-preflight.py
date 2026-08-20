@@ -39,6 +39,7 @@ for needle in [
     'sudo chroot "$TARGET"',
     'run_stage LiView /usr/local/bin/limad-liview-deps',
     'run_stage Gaming /usr/local/bin/limad-gaming-deps',
+    'run_stage Heroic /usr/local/bin/limad-heroic-deps',
     'run_stage GRUBENVOLK /usr/local/bin/limad-grubenvolk-deps',
     "run_stage full-install-target '/usr/bin/bash /tmp/limad-install-target.sh'",
     '/usr/bin/apt-get check',

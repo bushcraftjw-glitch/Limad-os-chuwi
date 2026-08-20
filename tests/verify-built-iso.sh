@@ -34,10 +34,13 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limusic/VERSI
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limusic/src/limusic/adblock_engine.py "$TMP/limusic-adblock-engine.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limusic/data/adblock-scriptlet-rules.json "$TMP/limusic-adblock-rules.json" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-updater/apps.json "$TMP/updater-apps.json" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-updater/updater.py "$TMP/updater.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/libexec/limad-select-app-root "$TMP/select-app-root" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/liview "$TMP/liview" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-liview-deps "$TMP/limad-liview-deps" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/liview/VERSION "$TMP/liview-version" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/liview/liview/app.py "$TMP/liview-app.py" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/liview/liview/stl.py "$TMP/liview-stl.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/applications/de.limad.LiView.desktop "$TMP/liview.desktop" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/etc/xdg/mimeapps.list "$TMP/mimeapps.list" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/mime/packages/de.limad.LiView.xml "$TMP/liview-mime.xml" >/dev/null 2>&1
@@ -48,6 +51,11 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-gam
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/gaming/REQUIRED-PACKAGES.txt "$TMP/gaming-packages.txt" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/gaming/Packages.gz "$TMP/gaming-Packages.gz" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/gaming/SHA256SUMS.txt "$TMP/gaming-SHA256SUMS.txt" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-heroic-deps "$TMP/limad-heroic-deps" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/heroic/Packages.gz "$TMP/heroic-Packages.gz" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/heroic/SHA256SUMS.txt "$TMP/heroic-SHA256SUMS.txt" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/heroic/PACKAGE-NAME.txt "$TMP/heroic-package-name.txt" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/heroic/PACKAGE-VERSION.txt "$TMP/heroic-package-version.txt" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-grubenvolk "$TMP/limad-grubenvolk" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-grubenvolk-deps "$TMP/limad-grubenvolk-deps" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-grubenvolk/VERSION "$TMP/grubenvolk-version" >/dev/null 2>&1
@@ -99,7 +107,7 @@ grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
 grep -Fq 'smbios --type 1 --get-string 5 --set limad_system_product' "$TMP/grub.cfg"
-EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v25"'
+EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v26"'
 if ! grep -Fxq "$EXPECTED_BUILD_MARKER" "$TMP/limad-release"; then
     echo "ERROR: Built ISO release marker mismatch." >&2
     echo "Expected: $EXPECTED_BUILD_MARKER" >&2
@@ -148,10 +156,10 @@ grep -Fq 'required-user-apps-v25.done' "$TMP/required-user-apps"
 grep -Fq "'de.limad.Grubenvolk.desktop'" "$TMP/desktop-core-system"
 grep -Fq 'limad-sync-gtk4-theme' "$TMP/titlebuttons-ensure"
 echo "ISO VALIDATION: desktop/services PASS"
-CURRENT_STAGE="LiMusic LiView gaming and GRUBENVOLK payload"
+CURRENT_STAGE="LiMusic LiView gaming Heroic and GRUBENVOLK payload"
 grep -Fq 'de.limad.LiMusic' "$TMP/updater-apps.json"
 grep -Fq 'de.limad.LiView' "$TMP/updater-apps.json"
-[ "$(cat "$TMP/liview-version")" = "1.0.0" ]
+[ "$(cat "$TMP/liview-version")" = "1.1.1" ]
 grep -Fq '/usr/local/libexec/limad-select-app-root' "$TMP/liview"
 grep -Fq 'Exec=/usr/local/bin/liview %F' "$TMP/liview.desktop"
 grep -Fq 'application/pdf=de.limad.LiView.desktop' "$TMP/mimeapps.list"
@@ -164,14 +172,24 @@ test -s "$TMP/liview-icon.png"
 test -s "$TMP/liview-Packages.gz"
 test -s "$TMP/liview-SHA256SUMS.txt"
 grep -Fq '/usr/share/limad/offline/liview' "$TMP/limad-liview-deps"
+grep -Fq 'PDF_INITIAL_PAGE_BATCH = 6' "$TMP/liview-app.py"
+grep -Fq 'PDF_SCROLL_PAGE_BATCH = 6' "$TMP/liview-app.py"
+grep -Fq 'max_faces = 10000 if self.preview_draft else 40000' "$TMP/liview-stl.py"
 test -s "$TMP/limad-gaming-deps"
 test -s "$TMP/gaming-packages.txt"
 test -s "$TMP/gaming-Packages.gz"
 test -s "$TMP/gaming-SHA256SUMS.txt"
 grep -Fq '/usr/share/limad/offline/gaming' "$TMP/limad-gaming-deps"
 grep -Fq 'dpkg --add-architecture i386' "$TMP/limad-gaming-deps"
+test -s "$TMP/limad-heroic-deps"
+test -s "$TMP/heroic-Packages.gz"
+test -s "$TMP/heroic-SHA256SUMS.txt"
+test -s "$TMP/heroic-package-name.txt"
+[ "$(cat "$TMP/heroic-package-version.txt")" = "2.22.0" ]
+grep -Fq '/usr/share/limad/offline/heroic' "$TMP/limad-heroic-deps"
+grep -Fq '/usr/local/bin/limad-heroic-deps' "$TMP/install-target.sh"
 grep -Fq 'de.limad.Grubenvolk' "$TMP/updater-apps.json"
-[ "$(cat "$TMP/grubenvolk-version")" = "3.6.7" ]
+[ "$(cat "$TMP/grubenvolk-version")" = "3.6.8" ]
 grep -Fq '/usr/local/libexec/limad-select-app-root' "$TMP/limad-grubenvolk"
 grep -Fq 'de.limad.Grubenvolk/current/payload' "$TMP/limad-grubenvolk"
 grep -Fq '/usr/share/limad/offline/grubenvolk' "$TMP/limad-grubenvolk-deps"
@@ -190,7 +208,12 @@ fi
 for package in steam-installer steam-devices lutris protontricks wine wine32:i386 winetricks gamemode mangohud gamescope vulkan-tools mesa-vulkan-drivers:i386 libvulkan1:i386 libglx-mesa0:i386; do
     grep -Fxq "$package" "$TMP/gaming-packages.txt"
 done
-[ "$(cat "$TMP/limusic-version")" = "0.3.22" ]
+[ "$(cat "$TMP/limusic-version")" = "0.3.27" ]
+if grep -Fq '.set_message_type(' "$TMP/updater.py"; then
+    echo 'ERROR: LiMaD Updater still uses removed GTK4 set_message_type()' >&2
+    exit 1
+fi
+grep -Fq 'set_property("message-type"' "$TMP/updater.py"
 grep -Fq 'ENGINE_BOOTSTRAP_SCRIPT' "$TMP/limusic-adblock-engine.py"
 python3 - "$TMP/limusic-adblock-rules.json" <<'PY_RULES'
 import json
@@ -214,7 +237,7 @@ grep -Fq "'de.limad.Link.desktop'" "$TMP/desktop-core-system"
 grep -Fq 'iMac17,1' "$TMP/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$TMP/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$TMP/install-target.sh"
-echo "ISO VALIDATION: LiMusic/LiView/gaming/GRUBENVOLK PASS"
+echo "ISO VALIDATION: LiMusic/LiView/gaming/Heroic/GRUBENVOLK PASS"
 CURRENT_STAGE="initrd firmware and wallpaper"
 
 # The first uncompressed initramfs CPIO contains early Radeon firmware and the

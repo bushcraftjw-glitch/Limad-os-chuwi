@@ -1,0 +1,47 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+OFFLINE_REPO="/usr/share/limad/offline/heroic"
+PACKAGE_FILE="$OFFLINE_REPO/PACKAGE-NAME.txt"
+VERSION_FILE="$OFFLINE_REPO/PACKAGE-VERSION.txt"
+TEMP_SOURCE="$(mktemp /etc/apt/sources.list.d/limad-heroic-offline.XXXXXX.list)"
+trap 'rm -f "$TEMP_SOURCE"' EXIT
+
+if [ ! -s "$OFFLINE_REPO/Packages.gz" ] || [ ! -s "$OFFLINE_REPO/SHA256SUMS.txt" ] || [ ! -r "$PACKAGE_FILE" ] || [ ! -r "$VERSION_FILE" ]; then
+    echo "ERROR: Embedded Heroic offline repository is incomplete." >&2
+    exit 1
+fi
+
+(
+    cd "$OFFLINE_REPO"
+    sha256sum -c SHA256SUMS.txt >/dev/null
+)
+
+package_name="$(cat "$PACKAGE_FILE")"
+expected_version="$(cat "$VERSION_FILE")"
+if [ -z "$package_name" ] || [ -z "$expected_version" ]; then
+    echo "ERROR: Embedded Heroic package metadata is empty." >&2
+    exit 1
+fi
+
+printf 'deb [trusted=yes] file:%s ./\n' "$OFFLINE_REPO" > "$TEMP_SOURCE"
+apt-get \
+    -o "Dir::Etc::sourcelist=$TEMP_SOURCE" \
+    -o "Dir::Etc::sourceparts=-" \
+    -o "Acquire::Languages=none" \
+    update
+DEBIAN_FRONTEND=noninteractive apt-get \
+    -o "Dir::Etc::sourcelist=$TEMP_SOURCE" \
+    -o "Dir::Etc::sourceparts=-" \
+    -o "Acquire::Languages=none" \
+    --no-install-recommends \
+    --yes \
+    install "$package_name"
+
+actual_version="$(dpkg-query -W -f='${Version}' "$package_name" 2>/dev/null || true)"
+if [ "$actual_version" != "$expected_version" ]; then
+    echo "ERROR: Heroic version mismatch after installation: expected=$expected_version actual=$actual_version" >&2
+    exit 1
+fi
+
+echo "Heroic Games Launcher: PASS ($package_name $actual_version)"

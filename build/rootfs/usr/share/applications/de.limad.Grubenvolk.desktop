@@ -10,7 +10,7 @@ Categories=Game;StrategyGame;
 Keywords=Spiel;Game;Strategie;Grubenvolk;Flauschis;
 StartupNotify=true
 StartupWMClass=de.limad.Grubenvolk
-X-LiMaD-Version=3.6.7
+X-LiMaD-Version=3.6.8
 Actions=Update;
 
 [Desktop Action Update]

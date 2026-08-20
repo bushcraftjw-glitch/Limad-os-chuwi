@@ -76,7 +76,7 @@ with tempfile.TemporaryDirectory() as tmp:
         if token not in windows_apps:
             raise SystemExit(f"ERROR: Windows-Programme titlebar patch missing: {token}")
 
-checksum_file = ROOT / "assets/limusic/LiMusic-0.3.22-SHA256SUMS.txt"
+checksum_file = ROOT / "assets/limusic/LiMusic-0.3.27-SHA256SUMS.txt"
 for line in checksum_file.read_text(encoding="utf-8").splitlines():
     digest, relative = line.split("  ", 1)
     if not relative.startswith("payload/"):
@@ -107,6 +107,6 @@ for required in (
     "src/limusic/adblock_engine.py",
 ):
     if required not in entry.get("required", []):
-        raise SystemExit(f"ERROR: LiMusic 0.3.22 updater required file missing: {required}")
+        raise SystemExit(f"ERROR: LiMusic 0.3.27 updater required file missing: {required}")
 
 print("V22 APPS + TITLEBUTTONS + LIMUSIC TEST: PASS")

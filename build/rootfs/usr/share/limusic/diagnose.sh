@@ -4,7 +4,7 @@ set -euo pipefail
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/limusic"
 
 echo "=== LiMusic ==="
-echo "Version: 0.3.22"
+echo "Version: 0.3.23"
 echo
 
 echo "=== OS ==="

@@ -56,8 +56,9 @@ if command -v gst-inspect-1.0 >/dev/null 2>&1; then
 fi
 
 export PYTHONPATH="$ROOT/src${PYTHONPATH:+:$PYTHONPATH}"
+export WEBKIT_DMABUF_RENDERER_FORCE_SHM=1
 
-echo "LiMusic 0.3.22 Native Preview"
+echo "LiMusic 0.3.27 Native Preview"
 echo "Runtime: GTK4 + WebKitGTK 6 + GStreamer"
 echo "Log: $LOG_FILE"
 echo

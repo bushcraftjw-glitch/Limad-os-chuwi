@@ -14,7 +14,7 @@ MIMEAPPS = ROOTFS / 'etc/xdg/mimeapps.list'
 UPDATER = ROOTFS / 'usr/share/limad-updater/apps.json'
 PACKAGE_LIST = ROOT / 'build/liview-packages.txt'
 
-assert (APP_ROOT / 'VERSION').read_text().strip() == '1.0.0'
+assert (APP_ROOT / 'VERSION').read_text().strip() == '1.1.1'
 
 for path in sorted((APP_ROOT / 'liview').glob('*.py')):
     ast.parse(path.read_text(), filename=str(path))

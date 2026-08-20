@@ -1,4 +1,4 @@
-# GRUBENVOLK 3.6.7 runtime for Ubuntu 26.04 amd64.
+# GRUBENVOLK 3.6.8 runtime for Ubuntu 26.04 amd64.
 python3
 python3-gi
 gir1.2-gtk-4.0

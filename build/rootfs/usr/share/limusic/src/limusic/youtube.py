@@ -264,10 +264,18 @@ class YouTubeMusicView:
         self.site = site
         self.site_label = "YouTube" if site == "youtube" else "YouTube Music"
         self.base_url = YOUTUBE_URL if site == "youtube" else YOUTUBE_MUSIC_URL
-        self.session = session or WebKit.NetworkSession.new(
-            str(WEBKIT_DATA_DIR),
-            str(WEBKIT_CACHE_DIR),
-        )
+        if session is None:
+            self.session = WebKit.NetworkSession.new(
+                str(WEBKIT_DATA_DIR),
+                str(WEBKIT_CACHE_DIR),
+            )
+            cookie_manager = self.session.get_cookie_manager()
+            cookie_manager.set_persistent_storage(
+                str(WEBKIT_DATA_DIR / "cookies.sqlite"),
+                WebKit.CookiePersistentStorage.SQLITE,
+            )
+        else:
+            self.session = session
         self.content_manager = WebKit.UserContentManager.new()
         self.webview = WebKit.WebView(
             network_session=self.session,
@@ -277,6 +285,7 @@ class YouTubeMusicView:
         settings.set_property("media-playback-requires-user-gesture", False)
         self.webview.set_hexpand(True)
         self.webview.set_vexpand(True)
+        self.webview.set_focusable(True)
         self.webview.connect("create", self._on_create)
         self.webview.connect("load-changed", self._on_load_changed)
         self.webview.connect("notify::title", self._on_title_changed)

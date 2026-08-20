@@ -68,9 +68,9 @@ from limad_grubenvolk import APP_ID, VERSION
 assert Gtk.Application is not None
 assert WebKit.WebView is not None
 assert APP_ID == "de.limad.Grubenvolk"
-assert VERSION == "3.6.7"
+assert VERSION == "3.6.8"
 print("GRUBENVOLK Python-Laufzeit: PASS")
 PY
 
-HOME=/root /usr/local/bin/limad-grubenvolk --version | grep -Fxq 'GRUBENVOLK 3.6.7'
+HOME=/root /usr/local/bin/limad-grubenvolk --version | grep -Fxq 'GRUBENVOLK 3.6.8'
 echo "GRUBENVOLK dependencies: PASS"

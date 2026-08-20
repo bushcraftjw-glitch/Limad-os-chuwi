@@ -7,8 +7,8 @@ source "$ROOT/config/build.env"
 [ "$UBUNTU_ISO_NAME" = "ubuntu-26.04-desktop-amd64.iso" ]
 [ "$UBUNTU_ISO_SHA256" = "487f87faaf547ea30e0aba4d5b53346292571256b25333a978db1692bcee9dd2" ]
 [ "$WHITESUR_REF" = "1b356fe48ad5d05fb2ca6be071efe6801df3ac72" ]
-[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V25-amd64.iso" ]
-[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v25" ]
+[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V26-amd64.iso" ]
+[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v26" ]
 
 grep -Fq 'id: ubuntu-desktop' "$ROOT/config/autoinstall.yaml"
 if grep -Fq 'ubuntu-desktop-minimal' "$ROOT/config/autoinstall.yaml"; then
@@ -138,7 +138,7 @@ test -s "$ROOT/build/rootfs/etc/xdg/autostart/limad-titlebuttons-ensure.desktop"
 test -s "$ROOT/build/rootfs/usr/share/applications/de.limad.LiMusic.desktop"
 test -s "$ROOT/build/rootfs/usr/share/limad-updater/apps.json"
 test -s "$ROOT/build/rootfs/usr/share/limusic/VERSION"
-[ "$(cat "$ROOT/build/rootfs/usr/share/limusic/VERSION")" = "0.3.22" ]
+[ "$(cat "$ROOT/build/rootfs/usr/share/limusic/VERSION")" = "0.3.27" ]
 test -s "$ROOT/build/rootfs/usr/share/limusic/src/limusic/adblock_engine.py"
 test -s "$ROOT/build/rootfs/usr/share/limusic/data/adblock-scriptlet-rules.json"
 for package in gstreamer1.0-gtk4 gstreamer1.0-libav gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-tools gir1.2-webkit-6.0; do
@@ -174,6 +174,7 @@ python3 -B "$ROOT/tests/test-imac17-firmware.py"
 python3 -B "$ROOT/tests/test-lilink-and-lidrop-scope.py"
 python3 -B "$ROOT/tests/test-v22-menu-lidrop.py"
 python3 -B "$ROOT/tests/test-v22-apps-titlebuttons.py"
+python3 -B "$ROOT/tests/test-v26-updater-gtk4.py"
 
 grep -Fq "INSTALL_SOURCES_ORIGINAL=\"\$CACHE/install-sources.original.yaml\"" "$ROOT/build/build-iso.sh"
 grep -Fq "MD5_ORIGINAL=\"\$CACHE/md5sum.original.txt\"" "$ROOT/build/build-iso.sh"
@@ -202,7 +203,7 @@ for path in \
     "$ROOT/build/rootfs/etc/xdg/mimeapps.list"; do
     test -s "$path"
 done
-[ "$(cat "$ROOT/build/rootfs/usr/share/liview/VERSION")" = "1.0.0" ]
+[ "$(cat "$ROOT/build/rootfs/usr/share/liview/VERSION")" = "1.1.1" ]
 test -x "$ROOT/build/prepare-liview-offline-repo.sh"
 test -x "$ROOT/build/rootfs/usr/local/bin/liview"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-liview-deps"
@@ -233,6 +234,7 @@ for size in 64 128 256 512; do
     test -s "$ROOT/build/rootfs/usr/share/icons/hicolor/${size}x${size}/apps/de.limad.LiView.png"
 done
 python3 -B "$ROOT/tests/test-v23-liview.py"
+python3 -B "$ROOT/tests/test-v26-liview-performance.py"
 
 # V24 gaming integration: native Ubuntu stack, amd64+i386 offline closure and ProtonUp-Qt.
 for path in \
@@ -262,6 +264,24 @@ grep -Fq 'required-user-apps-v25.done' "$ROOT/build/rootfs/usr/local/bin/limad-r
 python3 -B "$ROOT/tests/test-v24-gaming.py"
 python3 -B "$ROOT/tests/test-v24-build-pipeline-safety.py"
 
+
+# V26 Heroic Games Launcher: official pinned DEB plus target-aware offline dependency closure.
+for path in \
+    "$ROOT/build/prepare-heroic-offline-repo.sh" \
+    "$ROOT/build/rootfs/usr/local/bin/limad-heroic-deps"; do
+    test -s "$path"
+done
+test -x "$ROOT/build/prepare-heroic-offline-repo.sh"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-heroic-deps"
+grep -Fq 'prepare-heroic-offline-repo.sh' "$ROOT/build/prepare-payload.sh"
+grep -Fq '/usr/local/bin/limad-heroic-deps' "$ROOT/build/install-target.sh"
+grep -Fq 'run_stage Heroic /usr/local/bin/limad-heroic-deps' "$ROOT/build/preflight-target-install.sh"
+if grep -F '/usr/local/bin/limad-heroic-deps' "$ROOT/build/install-target.sh" | grep -Fq '|| true'; then
+    echo 'ERROR: Heroic installation must be install-critical' >&2
+    exit 1
+fi
+python3 -B "$ROOT/tests/test-v26-heroic.py"
+
 # V25 GRUBENVOLK integration: system app, updater, Dock and offline GTK4/WebKit runtime.
 for path in \
     "$ROOT/build/grubenvolk-packages.txt" \
@@ -275,7 +295,7 @@ for path in \
     "$ROOT/build/rootfs/usr/share/applications/de.limad.Grubenvolk.desktop"; do
     test -s "$path"
 done
-[ "$(cat "$ROOT/build/rootfs/usr/share/limad-grubenvolk/VERSION")" = "3.6.7" ]
+[ "$(cat "$ROOT/build/rootfs/usr/share/limad-grubenvolk/VERSION")" = "3.6.8" ]
 test -x "$ROOT/build/prepare-grubenvolk-offline-repo.sh"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-grubenvolk"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-grubenvolk-deps"

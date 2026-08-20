@@ -1,4 +1,25 @@
-# LiMusic 0.3.22 Native Purple Preview
+# LiMusic 0.3.27 Native Purple Preview
+
+## Changes in 0.3.27
+
+- YouTube and YouTube Music cookies are stored persistently in `~/.local/share/limusic/webkit-data/cookies.sqlite`.
+- The original LiMusic headphone/note artwork is retained and only the opaque outer canvas is made transparent.
+- The inconsistent generic `de.limad.LiMusic.svg` fallback is removed so it cannot replace the original artwork.
+- YouTube search behavior is unchanged from 0.3.26.
+
+## Changes in 0.3.26
+
+- The app-level search field is hidden in the YouTube tab so the native YouTube search is the only visible search field there.
+- The embedded YouTube WebView explicitly accepts keyboard focus and receives focus when the YouTube tab is opened.
+- The existing YouTube Music app-level search activation typo is corrected.
+
+## Changes in 0.3.25
+
+- WebKitGTK is started with shared-memory DMA-BUF transport to avoid corrupted YouTube and YouTube Music rendering on affected Linux GPU/driver combinations.
+
+## Changes in 0.3.23
+
+- Closing the main window now terminates LiMusic when no detached player is active.
 
 LiMusic 0.3.22 keeps the tested 0.3.3 GTK4/WebKitGTK/GStreamer playback logic unchanged and applies the LiMaD purple visual identity to the real application.
 

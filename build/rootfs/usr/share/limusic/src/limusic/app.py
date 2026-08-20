@@ -499,6 +499,11 @@ class MainWindow(Gtk.ApplicationWindow):
         self.search.connect("activate", self._search_activated)
         bar.append(self.search)
 
+        self.search_spacer = Gtk.Box()
+        self.search_spacer.set_hexpand(True)
+        self.search_spacer.set_visible(False)
+        bar.append(self.search_spacer)
+
         self.topbar_actions = Gtk.Stack()
         self.topbar_actions.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.topbar_actions.set_transition_duration(120)
@@ -903,6 +908,8 @@ class MainWindow(Gtk.ApplicationWindow):
         self._set_active_nav(target)
         if target == "youtube":
             self.current_mode = "youtube"
+            self.search.set_visible(True)
+            self.search_spacer.set_visible(False)
             self.search.set_placeholder_text("YouTube Music durchsuchen …")
             self.topbar_actions.set_visible_child_name("youtube")
             self.queue_panel.set_visible(False)
@@ -910,17 +917,23 @@ class MainWindow(Gtk.ApplicationWindow):
             self.youtube.apply_integrated_mode()
         elif target == "youtube_video":
             self.current_mode = "youtube_video"
-            self.search.set_placeholder_text("YouTube durchsuchen …")
+            self.search.set_visible(False)
+            self.search_spacer.set_visible(True)
             self.topbar_actions.set_visible_child_name("youtube_video")
             self.queue_panel.set_visible(False)
             self.youtube_video.load()
+            self.youtube_video.webview.grab_focus()
             self.youtube_video.apply_integrated_mode()
         elif target == "library":
             self.current_mode = "local"
+            self.search.set_visible(True)
+            self.search_spacer.set_visible(False)
             self.search.set_placeholder_text("Lokale Songs und Videos suchen …")
             self.topbar_actions.set_visible_child_name("local")
             self.queue_panel.set_visible(True)
         else:
+            self.search.set_visible(True)
+            self.search_spacer.set_visible(False)
             self.search.set_placeholder_text("Lokale Songs und Videos suchen …")
             self.topbar_actions.set_visible_child_name("local")
             self.queue_panel.set_visible(True)
@@ -930,7 +943,7 @@ class MainWindow(Gtk.ApplicationWindow):
             self._refresh_library()
 
     def _search_activated(self, entry):
-        if self.current_mode == mode:
+        if self.current_mode == "youtube":
             self.youtube.search(entry.get_text())
         elif self.current_mode == "youtube_video":
             self.youtube_video.search(entry.get_text())
@@ -1256,7 +1269,8 @@ class MainWindow(Gtk.ApplicationWindow):
         ):
             self.hide()
             return True
-        return False
+        self.get_application().quit()
+        return True
 
     def _on_main_seek(self, _scale, _scroll, value):
         if not self._updating_seek:

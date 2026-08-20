@@ -13,6 +13,11 @@ from PIL import Image
 from .documents import BaseDocument, DocumentError
 
 
+MODEL_PREVIEW_TRIANGLE_LIMIT = 40000
+MODEL_DRAFT_FACE_LIMIT = 8000
+MODEL_STANDARD_FACE_LIMIT = 24000
+
+
 class StlDocument(BaseDocument):
     kind = "3d"
 
@@ -20,9 +25,17 @@ class StlDocument(BaseDocument):
         super().__init__(path)
         self.source_suffix = Path(self.path).suffix.lower()
         self.format_name = {".stl": "STL", ".obj": "OBJ", ".3mf": "3MF"}.get(self.source_suffix, "3D")
+        self._source_triangle_count = 0
+        self._precomputed_bounds = None
+        self.preview_draft = True
         self.triangles = self._load_model(self.path)
         if not self.triangles:
             raise DocumentError(f"{self.format_name} enthält keine darstellbaren Dreiecke.")
+        if self._source_triangle_count == 0:
+            self._source_triangle_count = len(self.triangles)
+        if self._precomputed_bounds is None:
+            self._precomputed_bounds = self._bounds_from_triangles(self.triangles)
+        self.triangles = self._limit_preview_triangles(self.triangles, MODEL_PREVIEW_TRIANGLE_LIMIT)
         self.yaw = math.radians(35.0)
         self.pitch = math.radians(-25.0)
         self.model_zoom = 1.0
@@ -39,7 +52,7 @@ class StlDocument(BaseDocument):
 
     @property
     def triangle_count(self) -> int:
-        return len(self.triangles)
+        return self._source_triangle_count
 
     @property
     def dimensions(self) -> tuple[float, float, float]:
@@ -71,16 +84,34 @@ class StlDocument(BaseDocument):
     def _load_binary_stl(self, data: bytes, count: int):
         triangles = []
         offset = 84
-        for _ in range(count):
+        preview_limit = MODEL_PREVIEW_TRIANGLE_LIMIT
+        step = max(1, math.ceil(count / preview_limit))
+        min_x = min_y = min_z = math.inf
+        max_x = max_y = max_z = -math.inf
+        parsed = 0
+        for face_index in range(count):
             if offset + 50 > len(data):
                 break
             values = struct.unpack_from("<12fH", data, offset)
-            triangles.append((
+            triangle = (
                 (float(values[3]), float(values[4]), float(values[5])),
                 (float(values[6]), float(values[7]), float(values[8])),
                 (float(values[9]), float(values[10]), float(values[11])),
-            ))
+            )
+            for x, y, z in triangle:
+                min_x = min(min_x, x)
+                max_x = max(max_x, x)
+                min_y = min(min_y, y)
+                max_y = max(max_y, y)
+                min_z = min(min_z, z)
+                max_z = max(max_z, z)
+            if face_index % step == 0:
+                triangles.append(triangle)
+            parsed += 1
             offset += 50
+        self._source_triangle_count = parsed
+        if parsed:
+            self._precomputed_bounds = (min_x, max_x, min_y, max_y, min_z, max_z)
         return triangles
 
     def _load_ascii_stl(self, data: bytes):
@@ -291,16 +322,36 @@ class StlDocument(BaseDocument):
             ]
         return triangles
 
-    def _calculate_bounds(self) -> None:
-        xs, ys, zs = [], [], []
-        for triangle in self.triangles:
+    @staticmethod
+    def _bounds_from_triangles(triangles):
+        min_x = min_y = min_z = math.inf
+        max_x = max_y = max_z = -math.inf
+        for triangle in triangles:
             for x, y, z in triangle:
-                xs.append(x)
-                ys.append(y)
-                zs.append(z)
-        self.min_x, self.max_x = min(xs), max(xs)
-        self.min_y, self.max_y = min(ys), max(ys)
-        self.min_z, self.max_z = min(zs), max(zs)
+                min_x = min(min_x, x)
+                max_x = max(max_x, x)
+                min_y = min(min_y, y)
+                max_y = max(max_y, y)
+                min_z = min(min_z, z)
+                max_z = max(max_z, z)
+        return min_x, max_x, min_y, max_y, min_z, max_z
+
+    @staticmethod
+    def _limit_preview_triangles(triangles, limit: int):
+        if len(triangles) <= limit:
+            return triangles
+        step = max(1, math.ceil(len(triangles) / limit))
+        return triangles[::step]
+
+    def set_preview_draft(self, enabled: bool) -> bool:
+        enabled = bool(enabled)
+        if self.preview_draft == enabled:
+            return False
+        self.preview_draft = enabled
+        return True
+
+    def _calculate_bounds(self) -> None:
+        self.min_x, self.max_x, self.min_y, self.max_y, self.min_z, self.max_z = self._precomputed_bounds
         self.center = (
             (self.min_x + self.max_x) / 2.0,
             (self.min_y + self.max_y) / 2.0,
@@ -435,8 +486,8 @@ class StlDocument(BaseDocument):
         cy = height / 2.0 + self.pan_y - 12.0
         self._draw_grid(cr, cx, cy, view_scale)
         rendered = []
-        max_faces = 120000
-        step = max(1, len(self.triangles) // max_faces)
+        max_faces = MODEL_DRAFT_FACE_LIMIT if self.preview_draft else MODEL_STANDARD_FACE_LIMIT
+        step = max(1, math.ceil(len(self.triangles) / max_faces))
         key_light = (0.32, -0.48, 0.82)
         fill_light = (-0.62, 0.22, 0.58)
         for triangle in self.triangles[::step]:
@@ -461,10 +512,7 @@ class StlDocument(BaseDocument):
                 continue
             base = 0.42 + intensity * 0.44
             cr.set_source_rgb(base * 0.86, base * 0.92, base)
-            cr.fill_preserve()
-            cr.set_source_rgba(0.04, 0.05, 0.065, 0.34)
-            cr.set_line_width(0.45)
-            cr.stroke()
+            cr.fill()
         cr.restore()
 
     def save(self) -> None:

@@ -1,6 +1,6 @@
-# Drittanbieter-Hinweise – LiMusic 0.3.22
+# Drittanbieter-Hinweise – LiMusic 0.3.23
 
-LiMusic 0.3.22 enthält **keinen kopierten Quellcode** aus uBlock Origin oder AdGuard Scriptlets.
+LiMusic 0.3.23 enthält **keinen kopierten Quellcode** aus uBlock Origin oder AdGuard Scriptlets.
 
 Die neue LiMusic-Scriptlet-Engine ist eine eigenständige Implementierung eines kleinen, für YouTube benötigten Teilumfangs. Die Architektur und die deklarativen Regeltypen orientieren sich an öffentlich dokumentierten Konzepten wie Response-Replacement, JSON-Pruning und Scriptlet-Regeln.
 
