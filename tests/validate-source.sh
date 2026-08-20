@@ -178,7 +178,7 @@ python3 -B "$ROOT/tests/test-v26-updater-gtk4.py"
 
 grep -Fq "INSTALL_SOURCES_ORIGINAL=\"\$CACHE/install-sources.original.yaml\"" "$ROOT/build/build-iso.sh"
 grep -Fq "MD5_ORIGINAL=\"\$CACHE/md5sum.original.txt\"" "$ROOT/build/build-iso.sh"
-grep -Fq "rm -rf \"\$CACHE\"" "$ROOT/build/build-iso.sh"
+grep -Fq "find \"\$CACHE\" -mindepth 1 -maxdepth 1 ! -name \"\$UBUNTU_ISO_NAME\" -exec rm -rf -- {} +" "$ROOT/build/build-iso.sh"
 grep -Fq "rm -f \"out/\$OUTPUT_ISO_NAME\"" "$ROOT/.github/workflows/build-iso.yml"
 grep -Fq 'INSTALL_SOURCES_MD5=' "$ROOT/tests/verify-built-iso.sh"
 grep -Fq 'INITRD_MD5=' "$ROOT/tests/verify-built-iso.sh"

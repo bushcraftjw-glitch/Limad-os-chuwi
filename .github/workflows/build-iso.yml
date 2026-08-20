@@ -35,6 +35,12 @@ jobs:
           sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet /usr/local/share/boost /opt/hostedtoolcache || true
           df -h
 
+      - name: Restore Ubuntu ISO cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/ubuntu-26.04-desktop-amd64.iso
+          key: ubuntu-26.04-desktop-amd64-487f87faaf547ea30e0aba4d5b53346292571256b25333a978db1692bcee9dd2
+
       - name: Install build dependencies
         run: |
           sudo apt-get update

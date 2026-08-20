@@ -42,4 +42,23 @@ validate_payload = (ROOT / "tests/validate-payload.sh").read_text()
 if 'find "$ROOTFS/usr/share/limad/offline' in validate_payload and "| grep -q ." in validate_payload:
     raise AssertionError("validate-payload still uses find|grep -q for offline repositories")
 
+workflow = (ROOT / ".github/workflows/build-iso.yml").read_text()
+build_iso = (ROOT / "build/build-iso.sh").read_text()
+for needle in [
+    "uses: actions/cache@v4",
+    "path: .cache/ubuntu-26.04-desktop-amd64.iso",
+    "key: ubuntu-26.04-desktop-amd64-487f87faaf547ea30e0aba4d5b53346292571256b25333a978db1692bcee9dd2",
+]:
+    if needle not in workflow:
+        raise AssertionError(f"GitHub workflow missing Ubuntu ISO cache marker: {needle}")
+for needle in [
+    "select_fastest_iso_url()",
+    "https://nl.releases.ubuntu.com/26.04/$UBUNTU_ISO_NAME",
+    "https://ftp.fau.de/ubuntu-releases/releases/26.04/$UBUNTU_ISO_NAME",
+    'echo "Ubuntu ISO cache hit: $ISO"',
+    '! -name "$UBUNTU_ISO_NAME"',
+]:
+    if needle not in build_iso:
+        raise AssertionError(f"build-iso missing Ubuntu download/cache marker: {needle}")
+
 print("V24 BUILD PIPELINE SAFETY TEST: PASS")
