@@ -1,3 +1,7 @@
+windowcontrols {
+  border-spacing: 6px;
+  padding: 0 10px;
+}
 windowcontrols button.close,
 windowcontrols button.minimize,
 windowcontrols button.maximize,
@@ -7,9 +11,12 @@ headerbar windowcontrols button.maximize,
 windowcontrols > button.close,
 windowcontrols > button.minimize,
 windowcontrols > button.maximize {
+  min-width: 16px;
+  min-height: 16px;
+  padding: 4px 1px;
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 12px 12px;
+  background-size: 16px 16px;
 }
 windowcontrols button.close, headerbar windowcontrols button.close, windowcontrols > button.close { background-image: url("limad-assets/close.svg"); }
 windowcontrols button.minimize, headerbar windowcontrols button.minimize, windowcontrols > button.minimize { background-image: url("limad-assets/minimize.svg"); }

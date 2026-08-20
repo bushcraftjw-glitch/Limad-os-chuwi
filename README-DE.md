@@ -1,10 +1,10 @@
-# LiMaD OS 3.0 RC1 BASE1 V26
+# LiMaD OS 3.0 RC1 BASE1 V27
 
 ## Technische Basis
 
-V26 baut auf dem auf Lenovo real installierten V25-Unterbau mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
+V27 baut auf dem auf Lenovo real installierten V25-Unterbau mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
 
-V26 übernimmt die bestätigten V25-Fixes und aktualisiert LiMusic auf 0.3.27, LiView auf 1.1.1 und GRUBENVOLK auf 3.6.8. LiView lädt große PDFs seitenweise und rendert große 3D-Meshes zunächst als Entwurf. Heroic Games Launcher 2.22.0 wird bei der Zielinstallation aus dem verifizierten offiziellen DEB und einem eingebetteten Offline-Abhängigkeitsrepository installiert.
+V27 übernimmt die bestätigten V25-Fixes und aktualisiert LiMusic auf 0.3.27, LiView auf 1.1.1 und GRUBENVOLK auf 3.6.8. LiView lädt große PDFs seitenweise und rendert große 3D-Meshes zunächst als Entwurf. Heroic Games Launcher 2.22.0 wird bei der Zielinstallation aus dem verifizierten offiziellen DEB und einem eingebetteten Offline-Abhängigkeitsrepository installiert.
 
 
 ## LiView 1.1.1
@@ -21,7 +21,7 @@ LiView ist außerdem als `de.limad.LiView` im LiMaD-Updater registriert. Der Sta
 
 GRUBENVOLK wird aus dem geprüften LiMaD-Update-Payload als Systemversion unter `/usr/share/limad-grubenvolk` installiert. Der stabile Starter `/usr/local/bin/limad-grubenvolk` wählt über `limad-select-app-root` automatisch zwischen Systemversion und einem späteren Benutzer-Update. Die App-ID `de.limad.Grubenvolk` ist im LiMaD Updater registriert. GTK4, Python-GI und WebKit 6 werden inklusive Abhängigkeiten als lokales Offline-DEB-Repository in die ISO eingebettet und bei der Installation kritisch verifiziert.
 
-## Gaming aus V24 + Heroic in V26
+## Gaming aus V24 + Heroic in V27
 
 Steam und Lutris werden als Ubuntu-26.04-Systempakete installiert. Zusätzlich sind Protontricks, Wine/Winetricks, GameMode, MangoHud, Gamescope, Vulkan-Werkzeuge, Mesa-Vulkan für amd64 und i386, vkBasalt sowie GOverlay enthalten. `steam-installer` zieht dabei die Ubuntu-Metapakete `steam-libs` und `steam-libs-i386` samt 32-Bit-Laufzeit nach.
 
@@ -29,11 +29,11 @@ Valve Proton wird bewusst nicht als fest eingefrorene Fremdkopie in die ISO gele
 
 Die Gaming-DEBs werden beim ISO-Build aus dem signierten Ubuntu-26.04-Archiv für `amd64` und `i386` samt Abhängigkeitsabschluss heruntergeladen. Zusätzlich wird Heroic Games Launcher 2.22.0 als gepinntes offizielles amd64-DEB mit SHA256-Prüfung geladen; seine Ubuntu-Abhängigkeiten werden gegen den vorbereiteten Desktop-Zielzustand aufgelöst und ebenfalls in die ISO eingebettet. Während der Zielinstallation wird `i386` aktiviert und ausschließlich aus den eingebetteten lokalen Repositories installiert. Gaming und Heroic sind installationskritisch.
 
-EasyEffects bleibt als Flathub-App `com.github.wwmm.easyeffects`, weil LiMaD Klang den Flatpak-Pfad verwendet. V26 übernimmt den bestätigten V25-Pfad und aktualisiert eine bereits benutzerseitig installierte EasyEffects-Version beim Einrichtungsdurchlauf, statt sie durch das ältere Ubuntu-Systempaket zu ersetzen.
+EasyEffects bleibt als Flathub-App `com.github.wwmm.easyeffects`, weil LiMaD Klang den Flatpak-Pfad verwendet. V27 übernimmt den bestätigten V25-Pfad und aktualisiert eine bereits benutzerseitig installierte EasyEffects-Version beim Einrichtungsdurchlauf, statt sie durch das ältere Ubuntu-Systempaket zu ersetzen.
 
 ## LiMaD Design
 
-Der V22-Desktop-Core bleibt in V26 funktional unverändert; nur die bewusst gewünschte Dock-Liste erhält GRUBENVOLK als zusätzlichen Favoriten. Der Desktop-Core (dconf, Dock, Icons) ist installationskritisch und vom optionalen GDM/Plymouth-Branding getrennt. Die GNOME-Grundeinstellungen werden vor dem ersten Login als systemweite, nicht gesperrte dconf-Defaults installiert und danach in zwei Durchläufen verifiziert. LiLink/LiDrop sind vom Desktop-Core entkoppelt und können Dock, Icons oder Fensterdesign nicht mehr blockieren.
+Der V22-Desktop-Core bleibt in V27 funktional unverändert; nur die bewusst gewünschte Dock-Liste erhält GRUBENVOLK als zusätzlichen Favoriten. Der Desktop-Core (dconf, Dock, Icons) ist installationskritisch und vom optionalen GDM/Plymouth-Branding getrennt. Die GNOME-Grundeinstellungen werden vor dem ersten Login als systemweite, nicht gesperrte dconf-Defaults installiert und danach in zwei Durchläufen verifiziert. LiLink/LiDrop sind vom Desktop-Core entkoppelt und können Dock, Icons oder Fensterdesign nicht mehr blockieren.
 
 - Dock unten, kompakt und mittig; dconf-Default plus First-Login-Zweitpass
 - LiMaD Icon Theme V3.2 plus hicolor-Fallback für alle 18 LiMaD-Launcher
@@ -83,13 +83,18 @@ Repository: `bushcraftjw-glitch/Limad-os-chuwi`
 
 Release-Tag:
 
-`base1-ubuntu2604-full-whitesur-v26`
+`base1-ubuntu2604-full-whitesur-v27`
 
 ISO:
 
-`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V26-amd64.iso`
+`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V27-amd64.iso`
 
 
-## V26 Sicherungen
 
-GTK4-Benutzerkonfiguration wird nicht gelöscht. LiMaD bindet nur `limad-titlebuttons.css` ein und lässt native Button-Geometrie unangetastet. Das LiMaD-Menü ersetzt links oben den Activities-Indikator, ohne eine zusätzliche Fremderweiterung einzuführen.
+## V27 Fensterbuttons
+
+GTK4/libadwaita verwendet weiterhin nur den isolierten LiMaD-Traffic-Light-Overlay. V27 übernimmt für diese drei Fensterbuttons die Geometrie des gepinnten WhiteSur-Commits: 16x16 px sichtbare Assets, 6 px Abstand, 10 px Rand im Window-Control-Container und 4 px vertikales / 1 px horizontales Button-Padding. Andere Headerbar- oder App-Geometrie wird nicht überschrieben.
+
+## V27 Sicherungen
+
+GTK4-Benutzerkonfiguration wird nicht gelöscht. LiMaD bindet nur `limad-titlebuttons.css` ein und begrenzt die GTK4-Anpassung auf die drei WhiteSur-Traffic-Light-Buttons; die übrige Headerbar- und App-Geometrie bleibt unangetastet. Das LiMaD-Menü ersetzt links oben den Activities-Indikator, ohne eine zusätzliche Fremderweiterung einzuführen.

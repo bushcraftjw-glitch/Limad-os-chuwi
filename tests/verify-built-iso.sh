@@ -107,7 +107,7 @@ grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
 grep -Fq 'smbios --type 1 --get-string 5 --set limad_system_product' "$TMP/grub.cfg"
-EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v26"'
+EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v27"'
 if ! grep -Fxq "$EXPECTED_BUILD_MARKER" "$TMP/limad-release"; then
     echo "ERROR: Built ISO release marker mismatch." >&2
     echo "Expected: $EXPECTED_BUILD_MARKER" >&2
@@ -120,6 +120,12 @@ CURRENT_STAGE="desktop and LiMaD services"
 grep -Fq '[Icon Theme]' "$TMP/index.theme"
 test -s "$TMP/gtk4.css"
 grep -Fq 'windowcontrols button.close' "$TMP/gtk4.css"
+grep -Fq 'border-spacing: 6px;' "$TMP/gtk4.css"
+grep -Fq 'padding: 0 10px;' "$TMP/gtk4.css"
+grep -Fq 'min-width: 16px;' "$TMP/gtk4.css"
+grep -Fq 'min-height: 16px;' "$TMP/gtk4.css"
+grep -Fq 'padding: 4px 1px;' "$TMP/gtk4.css"
+grep -Fq 'background-size: 16px 16px;' "$TMP/gtk4.css"
 grep -Fq 'url("limad-assets/close.svg")' "$TMP/gtk4.css"
 test -s "$TMP/close.svg"
 test -s "$TMP/hicolor-study.png"

@@ -7,8 +7,8 @@ source "$ROOT/config/build.env"
 [ "$UBUNTU_ISO_NAME" = "ubuntu-26.04-desktop-amd64.iso" ]
 [ "$UBUNTU_ISO_SHA256" = "487f87faaf547ea30e0aba4d5b53346292571256b25333a978db1692bcee9dd2" ]
 [ "$WHITESUR_REF" = "1b356fe48ad5d05fb2ca6be071efe6801df3ac72" ]
-[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V26-amd64.iso" ]
-[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v26" ]
+[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V27-amd64.iso" ]
+[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v27" ]
 
 grep -Fq 'id: ubuntu-desktop' "$ROOT/config/autoinstall.yaml"
 if grep -Fq 'ubuntu-desktop-minimal' "$ROOT/config/autoinstall.yaml"; then

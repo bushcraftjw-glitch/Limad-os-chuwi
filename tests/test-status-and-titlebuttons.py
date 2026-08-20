@@ -15,14 +15,19 @@ for token in (
     'url("limad-assets/close.svg")',
     'url("limad-assets/minimize.svg")',
     'url("limad-assets/maximize.svg")',
-    'background-size: 12px 12px',
+    'border-spacing: 6px',
+    'padding: 0 10px',
+    'min-width: 16px',
+    'min-height: 16px',
+    'padding: 4px 1px',
+    'background-size: 16px 16px',
 ):
     if token not in css:
         raise SystemExit(f'ERROR: GTK4 titlebutton token missing: {token}')
 
-for forbidden in ('padding:', 'margin:', 'border:', 'box-shadow:', 'background-color:'):
+for forbidden in ('margin:', 'border:', 'box-shadow:', 'background-color:'):
     if forbidden in css:
-        raise SystemExit(f'ERROR: GTK4 titlebutton override changes native geometry/style: {forbidden}')
+        raise SystemExit(f'ERROR: GTK4 titlebutton override changes unrelated native style: {forbidden}')
 sync = (ROOT / 'build/rootfs/usr/local/bin/limad-sync-gtk4-theme').read_text(encoding='utf-8')
 if 'rm -rf -- "${DEST:?}/assets"' in sync or '"$DEST/gtk.css"' in sync and 'rm -rf' in sync:
     raise SystemExit('ERROR: GTK4 sync still deletes user GTK4 configuration')

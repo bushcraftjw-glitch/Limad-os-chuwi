@@ -209,7 +209,7 @@ grep -Fq 'com.github.wwmm.easyeffects' "$ROOTFS/usr/local/bin/limad-required-use
 grep -Fq 'net.davidotek.pupgui2' "$ROOTFS/usr/local/bin/limad-required-user-apps"
 grep -Fq 'de.limad.LiMusic' "$ROOTFS/usr/share/limad-updater/apps.json"
 [ "$(cat "$ROOTFS/usr/share/limusic/VERSION")" = "0.3.27" ]
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v26"' "$ROOTFS/etc/limad-release"
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v27"' "$ROOTFS/etc/limad-release"
 grep -Fq 'iMac17,1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$PAYLOAD/install-target.sh"
