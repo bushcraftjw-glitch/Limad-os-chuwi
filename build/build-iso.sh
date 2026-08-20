@@ -24,80 +24,9 @@ if ! sudo -n true >/dev/null 2>&1; then
     exit 1
 fi
 
-UBUNTU_ISO_URLS=(
-    "$UBUNTU_ISO_URL"
-    "https://nl.releases.ubuntu.com/26.04/$UBUNTU_ISO_NAME"
-    "https://ftp.fau.de/ubuntu-releases/releases/26.04/$UBUNTU_ISO_NAME"
-)
-
-select_fastest_iso_url() {
-    local best_url=""
-    local best_speed=0
-    local url
-    local speed
-    local speed_int
-
-    echo "Benchmarking Ubuntu ISO mirrors..." >&2
-    for url in "${UBUNTU_ISO_URLS[@]}"; do
-        speed="$(
-            curl \
-                --fail \
-                --location \
-                --silent \
-                --connect-timeout 5 \
-                --max-time 15 \
-                --range 0-4194303 \
-                --output /dev/null \
-                --write-out '%{speed_download}' \
-                "$url" 2>/dev/null || true
-        )"
-        speed_int="${speed%%.*}"
-        if [[ "$speed_int" =~ ^[0-9]+$ ]] && (( speed_int > 0 )); then
-            printf 'Mirror benchmark: %s bytes/s  %s\n' "$speed_int" "$url" >&2
-            if (( speed_int > best_speed )); then
-                best_speed="$speed_int"
-                best_url="$url"
-            fi
-        else
-            printf 'Mirror benchmark: unavailable  %s\n' "$url" >&2
-        fi
-    done
-
-    if [[ -z "$best_url" ]]; then
-        best_url="$UBUNTU_ISO_URL"
-    fi
-
-    printf 'Selected Ubuntu ISO mirror: %s\n' "$best_url" >&2
-    printf '%s\n' "$best_url"
-}
-
-download_ubuntu_iso() {
-    local selected_url
-    local url
-    local attempted="|"
-
-    selected_url="$(select_fastest_iso_url)"
-    for url in "$selected_url" "${UBUNTU_ISO_URLS[@]}"; do
-        if [[ "$attempted" == *"|$url|"* ]]; then
-            continue
-        fi
-        attempted+="$url|"
-        rm -f "$ISO"
-        echo "Downloading Ubuntu ISO from: $url"
-        if curl --fail --location --retry 5 --retry-delay 3 --output "$ISO" "$url"; then
-            return 0
-        fi
-        echo "WARNING: Ubuntu ISO download failed from $url; trying next mirror." >&2
-    done
-
-    echo "ERROR: Ubuntu ISO download failed from all configured mirrors." >&2
-    return 1
-}
-
 if [ ! -f "$ISO" ] || ! printf '%s  %s\n' "$UBUNTU_ISO_SHA256" "$ISO" | sha256sum -c - >/dev/null 2>&1; then
-    download_ubuntu_iso
-else
-    echo "Ubuntu ISO cache hit: $ISO"
+    rm -f "$ISO"
+    curl --fail --location --retry 5 --retry-delay 3 --output "$ISO" "$UBUNTU_ISO_URL"
 fi
 printf '%s  %s\n' "$UBUNTU_ISO_SHA256" "$ISO" | sha256sum -c -
 
@@ -197,4 +126,4 @@ Output: $OUTPUT_ISO_NAME
 Output SHA256: $(sha256sum "$OUTPUT" | awk '{print $1}')
 EOF_REPORT
 
-find "$CACHE" -mindepth 1 -maxdepth 1 ! -name "$UBUNTU_ISO_NAME" -exec rm -rf -- {} +
+rm -rf "$CACHE"
