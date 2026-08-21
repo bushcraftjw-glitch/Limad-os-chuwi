@@ -34,6 +34,10 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limusic "
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limusic/VERSION "$TMP/limusic-version" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limusic/src/limusic/adblock_engine.py "$TMP/limusic-adblock-engine.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limusic/data/adblock-scriptlet-rules.json "$TMP/limusic-adblock-rules.json" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-save/VERSION "$TMP/lisave-version" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-save/core.py "$TMP/lisave-core.py" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-save/app.py "$TMP/lisave-app.py" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-save-first-login-detect "$TMP/lisave-first-login" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-updater/apps.json "$TMP/updater-apps.json" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-updater/updater.py "$TMP/updater.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/libexec/limad-select-app-root "$TMP/select-app-root" >/dev/null 2>&1
@@ -112,7 +116,7 @@ grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
 grep -Fq 'smbios --type 1 --get-string 5 --set limad_system_product' "$TMP/grub.cfg"
-EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v30"'
+EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v32"'
 if ! grep -Fxq "$EXPECTED_BUILD_MARKER" "$TMP/limad-release"; then
     echo "ERROR: Built ISO release marker mismatch." >&2
     echo "Expected: $EXPECTED_BUILD_MARKER" >&2
@@ -121,6 +125,13 @@ if ! grep -Fxq "$EXPECTED_BUILD_MARKER" "$TMP/limad-release"; then
     exit 1
 fi
 echo "ISO VALIDATION: GRUB/release marker PASS"
+[ "$(cat "$TMP/lisave-version")" = "1.0.0-preview5" ]
+grep -Fq 'restic_json_stream' "$TMP/lisave-core.py"
+grep -Fq 'phase="archive-write"' "$TMP/lisave-core.py"
+grep -Fq 'phase="archive-verify"' "$TMP/lisave-core.py"
+grep -Fq 'Restzeit: ca.' "$TMP/lisave-app.py"
+grep -Fq 'Ende ca.' "$TMP/lisave-app.py"
+echo "ISO VALIDATION: LiSave preview5 live progress PASS"
 CURRENT_STAGE="desktop and LiMaD services"
 grep -Fq '[Icon Theme]' "$TMP/index.theme"
 test -s "$TMP/gtk4.css"
@@ -239,6 +250,10 @@ for package in steam-installer steam-devices lutris protontricks wine wine32:i38
     grep -Fxq "$package" "$TMP/gaming-packages.txt"
 done
 [ "$(cat "$TMP/limusic-version")" = "0.3.27" ]
+[ "$(cat "$TMP/lisave-version")" = "1.0.0-preview4" ]
+grep -Fq 'write_backup_archive' "$TMP/lisave-core.py"
+grep -Fq 'opened_backup' "$TMP/lisave-core.py"
+grep -Fq '*.lisavebackup.zip' "$TMP/lisave-first-login"
 if grep -Fq '.set_message_type(' "$TMP/updater.py"; then
     echo 'ERROR: LiMaD Updater still uses removed GTK4 set_message_type()' >&2
     exit 1

@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+import os
+import subprocess
+import time
+import zipfile
+from pathlib import Path, PurePosixPath
+
+home = Path.home()
+config = Path(os.environ.get("XDG_CONFIG_HOME", home / ".config")) / "limad"
+marker = config / "lisave-clean-restore-offered-build6.done"
+if marker.exists():
+    raise SystemExit(0)
+time.sleep(8)
+roots = [Path("/run/media") / os.environ.get("USER", home.name), Path("/media") / os.environ.get("USER", home.name), Path("/mnt")]
+found = []
+for root in roots:
+    if not root.is_dir():
+        continue
+    try:
+        for candidate in root.glob("**/*.lisavebackup.zip"):
+            try:
+                with zipfile.ZipFile(candidate) as zf:
+                    infos = [info for info in zf.infolist() if not info.is_dir()]
+                    names = {PurePosixPath(info.filename).as_posix(): info.file_size for info in infos}
+                    config_ok = any(name.endswith("/repository/config") and size > 0 for name, size in names.items())
+                    metadata_ok = any(name.endswith("/lisave.json") and size > 0 for name, size in names.items())
+                    if config_ok and metadata_ok and zf.testzip() is None:
+                        found.append(candidate)
+            except (OSError, zipfile.BadZipFile):
+                pass
+        for candidate in root.glob("**/*.lisavebackup"):
+            if (candidate / "repository/config").is_file() and (candidate / "repository/config").stat().st_size > 0 and (candidate / "lisave.json").is_file() and (candidate / "lisave.json").stat().st_size > 0:
+                found.append(candidate)
+    except OSError:
+        pass
+if not found:
+    raise SystemExit(0)
+config.mkdir(parents=True, exist_ok=True)
+marker.touch()
+latest = sorted(found, key=lambda path: path.stat().st_mtime, reverse=True)[0]
+env = os.environ.copy()
+env["LISAVE_INITIAL_TARGET"] = str(latest)
+subprocess.Popen(["/usr/local/bin/limad-save"], env=env, start_new_session=True)

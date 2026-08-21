@@ -216,6 +216,17 @@ grep -Fq 'header.set_decoration_layout("close,maximize,minimize:")' "$ROOTFS/usr
 grep -Fq 'header.set_show_start_title_buttons(True)' "$ROOTFS/usr/share/limad-windows/installer.py"
 grep -Fq 'header.set_show_end_title_buttons(False)' "$ROOTFS/usr/share/limad-windows/installer.py"
 [ "$(cat "$ROOTFS/usr/share/limad-windows/VERSION")" = "2.2.8" ]
+[ "$(cat "$ROOTFS/usr/share/limad-save/VERSION")" = "1.0.0-preview5" ]
+grep -Fq 'write_backup_archive' "$ROOTFS/usr/share/limad-save/core.py"
+grep -Fq 'opened_backup' "$ROOTFS/usr/share/limad-save/core.py"
+grep -Fq 'restic_json_stream' "$ROOTFS/usr/share/limad-save/core.py"
+grep -Fq 'phase="archive-write"' "$ROOTFS/usr/share/limad-save/core.py"
+grep -Fq 'phase="archive-verify"' "$ROOTFS/usr/share/limad-save/core.py"
+grep -Fq 'Restzeit: ca.' "$ROOTFS/usr/share/limad-save/app.py"
+grep -Fq 'Ende ca.' "$ROOTFS/usr/share/limad-save/app.py"
+grep -Fq 'Quelle:' "$ROOTFS/usr/share/limad-save/app.py"
+grep -Fq 'Ziel:' "$ROOTFS/usr/share/limad-save/app.py"
+grep -Fq '*.lisavebackup.zip' "$ROOTFS/usr/local/bin/limad-save-first-login-detect"
 grep -Fq 'APP_VERSION = "2.2.8"' "$ROOTFS/usr/share/limad-windows/installer.py"
 grep -Fq 'header.set_decoration_layout("close,maximize,minimize:")' "$ROOTFS/usr/share/limad-windows/installer.py"
 grep -Fq 'app.zen_browser.zen' "$ROOTFS/usr/local/bin/limad-required-user-apps"
@@ -227,7 +238,7 @@ grep -Fq 'com.github.wwmm.easyeffects' "$ROOTFS/usr/local/bin/limad-required-use
 grep -Fq 'net.davidotek.pupgui2' "$ROOTFS/usr/local/bin/limad-required-user-apps"
 grep -Fq 'de.limad.LiMusic' "$ROOTFS/usr/share/limad-updater/apps.json"
 [ "$(cat "$ROOTFS/usr/share/limusic/VERSION")" = "0.3.27" ]
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v30"' "$ROOTFS/etc/limad-release"
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v32"' "$ROOTFS/etc/limad-release"
 grep -Fq 'iMac17,1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$PAYLOAD/install-target.sh"

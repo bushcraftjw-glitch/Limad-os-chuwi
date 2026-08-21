@@ -1,10 +1,10 @@
-# LiMaD OS 3.0 RC1 BASE1 V30
+# LiMaD OS 3.0 RC1 BASE1 V32
 
 ## Technische Basis
 
-V30 baut auf der bestätigten V29-Basis mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
+V32 baut auf der bestätigten V31-Basis mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
 
-V30 übernimmt den bestätigten V29-Stand unverändert und ergänzt ausschließlich drei Integrationen: Windows-Programme 2.2.8, Fedora Media Writer als Flathub-App `org.fedoraproject.MediaWriter` ohne Dock-Favorit sowie das feste Voltroute-Lesezeichen `https://volteroute.netlify.app/` im Zen Browser. Die V29-Fensterbutton-Reihenfolge `close,maximize,minimize:` und das nicht-destruktive Dock-Favoritenverhalten bleiben unverändert. LiMusic bleibt auf 0.3.27, LiView auf 1.1.1 und GRUBENVOLK auf 3.6.8.
+V32 übernimmt den bestätigten V31-Stand unverändert und ändert ausschließlich LiSave auf 1.0.0-preview5: während der Sicherung zeigt LiSave jetzt die aktuelle Phase, Quelle, Ziel, den gerade verarbeiteten Eintrag, echten Prozentfortschritt, Daten- und Dateimengen, Verarbeitungsgeschwindigkeit, Restzeit und die ungefähre Endzeit. Restic-Backup-Fortschritt wird aus dem offiziellen JSON-Statusstrom gelesen; ZIP-Schreiben und ZIP-Prüfung werden anhand der tatsächlich verarbeiteten Bytes gemessen. Phasen ohne belastbare Prozentdaten bleiben bewusst als laufende Aktivität markiert. Das portable `*.lisavebackup.zip`-Format aus V31 bleibt unverändert. Windows-Programme 2.2.8, Fedora Media Writer, das Voltroute-Lesezeichen, die V29-Fensterbutton-Reihenfolge `close,maximize,minimize:` und das nicht-destruktive Dock-Favoritenverhalten bleiben unverändert. LiMusic bleibt auf 0.3.27, LiView auf 1.1.1 und GRUBENVOLK auf 3.6.8.
 
 
 ## LiView 1.1.1
@@ -83,11 +83,11 @@ Repository: `bushcraftjw-glitch/Limad-os-chuwi`
 
 Release-Tag:
 
-`base1-ubuntu2604-full-whitesur-v30`
+`base1-ubuntu2604-full-whitesur-v32`
 
 ISO:
 
-`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V30-amd64.iso`
+`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V32-amd64.iso`
 
 
 
