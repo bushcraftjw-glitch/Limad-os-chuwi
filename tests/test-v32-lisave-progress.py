@@ -12,9 +12,16 @@ CORE = ROOT / "build/rootfs/usr/share/limad-save/core.py"
 APP = ROOT / "build/rootfs/usr/share/limad-save/app.py"
 CLI = ROOT / "build/rootfs/usr/share/limad-save/cli.py"
 VERSION = ROOT / "build/rootfs/usr/share/limad-save/VERSION"
+VERIFY_BUILT_ISO = ROOT / "tests/verify-built-iso.sh"
 
 if VERSION.read_text(encoding="utf-8").strip() != "1.0.0-preview5":
     raise AssertionError("LiSave V32 system version must be 1.0.0-preview5")
+
+verify_source = VERIFY_BUILT_ISO.read_text(encoding="utf-8")
+if '[ "$(cat "$TMP/lisave-version")" = "1.0.0-preview5" ]' not in verify_source:
+    raise AssertionError("V32 built-ISO validator does not require LiSave 1.0.0-preview5")
+if '1.0.0-preview4' in verify_source:
+    raise AssertionError("V32 built-ISO validator still contains stale LiSave preview4 marker")
 
 core_source = CORE.read_text(encoding="utf-8")
 app_source = APP.read_text(encoding="utf-8")

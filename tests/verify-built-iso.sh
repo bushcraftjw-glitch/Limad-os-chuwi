@@ -250,7 +250,7 @@ for package in steam-installer steam-devices lutris protontricks wine wine32:i38
     grep -Fxq "$package" "$TMP/gaming-packages.txt"
 done
 [ "$(cat "$TMP/limusic-version")" = "0.3.27" ]
-[ "$(cat "$TMP/lisave-version")" = "1.0.0-preview4" ]
+[ "$(cat "$TMP/lisave-version")" = "1.0.0-preview5" ]
 grep -Fq 'write_backup_archive' "$TMP/lisave-core.py"
 grep -Fq 'opened_backup' "$TMP/lisave-core.py"
 grep -Fq '*.lisavebackup.zip' "$TMP/lisave-first-login"
