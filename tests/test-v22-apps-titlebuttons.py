@@ -44,7 +44,7 @@ for token in (
         raise SystemExit(f"ERROR: V22 required-app token missing: {token}")
 
 ensure = (ROOT / "build/rootfs/usr/local/bin/limad-titlebuttons-ensure").read_text(encoding="utf-8")
-for token in ("close,minimize,maximize:", "limad-sync-gtk4-theme"):
+for token in ("close,maximize,minimize:", "limad-sync-gtk4-theme"):
     if token not in ensure:
         raise SystemExit(f"ERROR: titlebutton ensure token missing: {token}")
 
@@ -65,11 +65,11 @@ with tempfile.TemporaryDirectory() as tmp:
     subprocess.run([str(ROOT / "tools/patch-v22-titlebars.py"), str(tmp_root)], check=True)
     notes = (tmp_root / "usr/share/limad-notes/app.py").read_text(encoding="utf-8")
     windows_apps = (tmp_root / "usr/share/limad-windows/installer.py").read_text(encoding="utf-8")
-    for token in ('header.set_show_title_buttons(True)', 'header.set_decoration_layout("close,minimize,maximize:")'):
+    for token in ('header.set_show_title_buttons(True)', 'header.set_decoration_layout("close,maximize,minimize:")'):
         if token not in notes:
             raise SystemExit(f"ERROR: LiNotes titlebar patch missing: {token}")
     for token in (
-        'header.set_decoration_layout("close,minimize,maximize:")',
+        'header.set_decoration_layout("close,maximize,minimize:")',
         'header.set_show_start_title_buttons(True)',
         'header.set_show_end_title_buttons(False)',
     ):

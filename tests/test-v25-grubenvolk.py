@@ -167,13 +167,9 @@ for line in installer.splitlines():
         raise AssertionError("GRUBENVOLK dependency installation must be install-critical")
 
 expected_favorites = "['app.zen_browser.zen.desktop', 'de.limad.Mail.desktop', 'de.limad.Cut.desktop', 'de.limad.Study.desktop', 'de.limad.Notes.desktop', 'de.limad.Drop.desktop', 'de.limad.Link.desktop', 'de.limad.Save.desktop', 'de.limad.WindowsApps.desktop', 'de.limad.Updater.desktop', 'de.limad.Klang.desktop', 'de.limad.Terminal.desktop', 'org.gnome.Nautilus.desktop', 'libreoffice-startcenter.desktop', 'de.limad.SystemInfo.desktop', 'de.limad.SystemUpdate.desktop', 'de.limad.Welcome.desktop', 'de.limad.Grubenvolk.desktop']"
-for rel in (
-    "usr/local/bin/limad-desktop-core-system",
-    "usr/local/bin/limad-required-user-apps",
-):
-    text = (ROOTFS / rel).read_text()
-    if expected_favorites not in text:
-        raise AssertionError(f"V25 Dock list missing GRUBENVOLK in {rel}")
+desktop_core = (ROOTFS / "usr/local/bin/limad-desktop-core-system").read_text()
+if expected_favorites not in desktop_core:
+    raise AssertionError("V25 initial Dock list missing GRUBENVOLK in desktop core")
 first_login = (ROOTFS / "usr/local/bin/limad-base1-first-login").read_text()
 if "de.limad.Grubenvolk.desktop" not in first_login:
     raise AssertionError("V25 first-login Dock list missing GRUBENVOLK")

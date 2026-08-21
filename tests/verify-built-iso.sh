@@ -73,6 +73,9 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/e
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/lidrop@limad.local/extension.js "$TMP/lidrop-extension.js" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/limad-menu@limad.local/metadata.json "$TMP/limad-menu-metadata.json" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/limad-menu@limad.local/extension.js "$TMP/limad-menu-extension.js" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/limad-appgrid-labels@limad.local/metadata.json "$TMP/appgrid-labels-metadata.json" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/limad-appgrid-labels@limad.local/extension.js "$TMP/appgrid-labels-extension.js" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/limad-appgrid-labels@limad.local/stylesheet.css "$TMP/appgrid-labels-stylesheet.css" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/icons/hicolor/256x256/apps/de.limad.Study.png "$TMP/hicolor-study.png" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/lib/systemd/user/limad-link.service "$TMP/limad-link.service" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/lib/systemd/user/limad-drop.service "$TMP/limad-drop.service" >/dev/null 2>&1
@@ -107,7 +110,7 @@ grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
 grep -Fq 'smbios --type 1 --get-string 5 --set limad_system_product' "$TMP/grub.cfg"
-EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v27"'
+EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v29"'
 if ! grep -Fxq "$EXPECTED_BUILD_MARKER" "$TMP/limad-release"; then
     echo "ERROR: Built ISO release marker mismatch." >&2
     echo "Expected: $EXPECTED_BUILD_MARKER" >&2
@@ -123,6 +126,11 @@ grep -Fq 'windowcontrols button.close' "$TMP/gtk4.css"
 grep -Fq 'border-spacing: 6px;' "$TMP/gtk4.css"
 grep -Fq 'padding: 0 10px;' "$TMP/gtk4.css"
 grep -Fq 'min-width: 16px;' "$TMP/gtk4.css"
+grep -Fq '"uuid": "limad-appgrid-labels@limad.local"' "$TMP/appgrid-labels-metadata.json"
+grep -Fq '"shell-version": ["50"]' "$TMP/appgrid-labels-metadata.json"
+grep -Fq 'line_wrap: true' "$TMP/appgrid-labels-extension.js"
+grep -Fq 'Pango.WrapMode.WORD_CHAR' "$TMP/appgrid-labels-extension.js"
+grep -Fq 'max-height: 2.4em;' "$TMP/appgrid-labels-stylesheet.css"
 grep -Fq 'min-height: 16px;' "$TMP/gtk4.css"
 grep -Fq 'padding: 4px 1px;' "$TMP/gtk4.css"
 grep -Fq 'background-size: 16px 16px;' "$TMP/gtk4.css"

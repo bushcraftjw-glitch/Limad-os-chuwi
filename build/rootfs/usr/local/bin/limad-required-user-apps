@@ -49,8 +49,22 @@ install_user_app "$PROTONUP_ID"
 if command -v gsettings >/dev/null 2>&1 \
     && gsettings list-schemas 2>/dev/null | grep -Fxq org.gnome.shell \
     && gsettings writable org.gnome.shell favorite-apps 2>/dev/null | grep -qx true; then
-    gsettings set org.gnome.shell favorite-apps \
-        "['app.zen_browser.zen.desktop', 'de.limad.Mail.desktop', 'de.limad.Cut.desktop', 'de.limad.Study.desktop', 'de.limad.Notes.desktop', 'de.limad.Drop.desktop', 'de.limad.Link.desktop', 'de.limad.Save.desktop', 'de.limad.WindowsApps.desktop', 'de.limad.Updater.desktop', 'de.limad.Klang.desktop', 'de.limad.Terminal.desktop', 'org.gnome.Nautilus.desktop', 'libreoffice-startcenter.desktop', 'de.limad.SystemInfo.desktop', 'de.limad.SystemUpdate.desktop', 'de.limad.Welcome.desktop', 'de.limad.Grubenvolk.desktop']"
+    ZEN_DESKTOP="app.zen_browser.zen.desktop"
+    CURRENT_FAVORITES="$(gsettings get org.gnome.shell favorite-apps 2>/dev/null || printf '[]')"
+    if [[ "$CURRENT_FAVORITES" != *"'$ZEN_DESKTOP'"* ]]; then
+        if [[ "$CURRENT_FAVORITES" == "[]" ]]; then
+            UPDATED_FAVORITES="['$ZEN_DESKTOP']"
+        elif [[ "$CURRENT_FAVORITES" == \[*\] ]]; then
+            UPDATED_FAVORITES="${CURRENT_FAVORITES%]}"
+            UPDATED_FAVORITES+=", '$ZEN_DESKTOP']"
+        else
+            echo "LiMaD required apps: unexpected favorite-apps value; preserving it unchanged." >&2
+            UPDATED_FAVORITES=""
+        fi
+        if [[ -n "$UPDATED_FAVORITES" ]]; then
+            gsettings set org.gnome.shell favorite-apps "$UPDATED_FAVORITES"
+        fi
+    fi
 fi
 
 touch "$STATE_FILE"

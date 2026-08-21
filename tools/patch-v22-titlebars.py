@@ -29,14 +29,14 @@ def main() -> int:
         "        header = Gtk.HeaderBar()\n        header.add_css_class(\"linotes-header\")\n",
         "        header = Gtk.HeaderBar()\n"
         "        header.set_show_title_buttons(True)\n"
-        "        header.set_decoration_layout(\"close,minimize,maximize:\")\n"
+        "        header.set_decoration_layout(\"close,maximize,minimize:\")\n"
         "        header.add_css_class(\"linotes-header\")\n",
     )
     patch_exact(
         windows_apps,
         "        header = Adw.HeaderBar()\n        self.switcher = Adw.ViewSwitcher(stack=self.stack, policy=Adw.ViewSwitcherPolicy.WIDE)\n",
         "        header = Adw.HeaderBar()\n"
-        "        header.set_decoration_layout(\"close,minimize,maximize:\")\n"
+        "        header.set_decoration_layout(\"close,maximize,minimize:\")\n"
         "        header.set_show_start_title_buttons(True)\n"
         "        header.set_show_end_title_buttons(False)\n"
         "        self.switcher = Adw.ViewSwitcher(stack=self.stack, policy=Adw.ViewSwitcherPolicy.WIDE)\n",

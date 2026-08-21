@@ -5,6 +5,7 @@ STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/limad"
 CORE_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v22-core.done"
 BUTTON_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v22-buttons.done"
 AUX_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v22-aux.done"
+APPGRID_MARKER="$STATE_DIR/base1-ubuntu2604-full-whitesur-v28-appgrid.done"
 LOG="$STATE_DIR/design-v22.log"
 mkdir -p "$STATE_DIR"
 exec >>"$LOG" 2>&1
@@ -90,7 +91,7 @@ apply_core_settings() {
     set_key org.gnome.desktop.interface gtk-theme "'WhiteSur-Dark'"
     set_key org.gnome.desktop.interface icon-theme "'LiMaD'"
     set_key org.gnome.desktop.interface color-scheme "'prefer-dark'"
-    set_key org.gnome.desktop.wm.preferences button-layout "'close,minimize,maximize:'"
+    set_key org.gnome.desktop.wm.preferences button-layout "'close,maximize,minimize:'"
     set_key org.gnome.desktop.background picture-uri "'file:///usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png'"
     set_key org.gnome.desktop.background picture-uri-dark "'file:///usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png'"
     set_key org.gnome.desktop.background picture-options "'zoom'"
@@ -172,7 +173,7 @@ if [ ! -e "$CORE_MARKER" ]; then
     CORE_FAILURES=0
     verify_key org.gnome.desktop.interface gtk-theme "'WhiteSur-Dark'" || CORE_FAILURES=$((CORE_FAILURES + 1))
     verify_key org.gnome.desktop.interface icon-theme "'LiMaD'" || CORE_FAILURES=$((CORE_FAILURES + 1))
-    verify_key org.gnome.desktop.wm.preferences button-layout "'close,minimize,maximize:'" || CORE_FAILURES=$((CORE_FAILURES + 1))
+    verify_key org.gnome.desktop.wm.preferences button-layout "'close,maximize,minimize:'" || CORE_FAILURES=$((CORE_FAILURES + 1))
     verify_key org.gnome.shell.extensions.dash-to-dock dock-position "'BOTTOM'" || CORE_FAILURES=$((CORE_FAILURES + 1))
     verify_key org.gnome.shell.extensions.dash-to-dock extend-height false || CORE_FAILURES=$((CORE_FAILURES + 1))
     verify_key org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 60 || CORE_FAILURES=$((CORE_FAILURES + 1))
@@ -202,6 +203,16 @@ fi
 
 if [ -x /usr/local/bin/limad-user-folders-setup ]; then
     /usr/local/bin/limad-user-folders-setup >/dev/null 2>&1 || true
+fi
+
+if [ ! -e "$APPGRID_MARKER" ]; then
+    if command -v gnome-extensions >/dev/null 2>&1 &&
+       enable_extension_reliably limad-appgrid-labels@limad.local; then
+        touch "$APPGRID_MARKER"
+        echo "LiMaD app grid labels V28: PASS"
+    else
+        echo "WARN: LiMaD app grid labels V28 not enabled; retrying next login"
+    fi
 fi
 
 if [ ! -e "$AUX_MARKER" ]; then

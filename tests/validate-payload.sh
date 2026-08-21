@@ -24,6 +24,9 @@ required=(
     "$ROOTFS/usr/share/gnome-shell/extensions/lidrop@limad.local/lidrop.svg"
     "$ROOTFS/usr/share/gnome-shell/extensions/limad-menu@limad.local/metadata.json"
     "$ROOTFS/usr/share/gnome-shell/extensions/limad-menu@limad.local/extension.js"
+    "$ROOTFS/usr/share/gnome-shell/extensions/limad-appgrid-labels@limad.local/metadata.json"
+    "$ROOTFS/usr/share/gnome-shell/extensions/limad-appgrid-labels@limad.local/extension.js"
+    "$ROOTFS/usr/share/gnome-shell/extensions/limad-appgrid-labels@limad.local/stylesheet.css"
     "$ROOTFS/usr/lib/systemd/user/limad-link.service"
     "$ROOTFS/usr/lib/systemd/user/limad-drop.service"
     "$ROOTFS/usr/local/bin/limad-lidrop-status-ensure"
@@ -149,6 +152,9 @@ for uuid in lilink@limad.local lidrop@limad.local; do
 done
 
 grep -Fq "Main.panel.addToStatusArea(this.uuid, this._indicator, 0, 'left');" "$ROOTFS/usr/share/gnome-shell/extensions/limad-menu@limad.local/extension.js"
+grep -Fq '"shell-version": ["50"]' "$ROOTFS/usr/share/gnome-shell/extensions/limad-appgrid-labels@limad.local/metadata.json"
+grep -Fq 'line_wrap: true' "$ROOTFS/usr/share/gnome-shell/extensions/limad-appgrid-labels@limad.local/extension.js"
+grep -Fq 'max-height: 2.4em;' "$ROOTFS/usr/share/gnome-shell/extensions/limad-appgrid-labels@limad.local/stylesheet.css"
 
 for desktop in "${applications[@]}"; do
     icon="$(awk -F= '$1 == "Icon" {print substr($0, 6); exit}' "$ROOTFS/usr/share/applications/$desktop")"
@@ -201,7 +207,7 @@ for removed in limad-airdrop-check limad-airdrop-control limad-airdrop-session l
     fi
 done
 grep -Fq 'header.set_show_title_buttons(True)' "$ROOTFS/usr/share/limad-notes/app.py"
-grep -Fq 'header.set_decoration_layout("close,minimize,maximize:")' "$ROOTFS/usr/share/limad-notes/app.py"
+grep -Fq 'header.set_decoration_layout("close,maximize,minimize:")' "$ROOTFS/usr/share/limad-notes/app.py"
 grep -Fq 'header.set_show_start_title_buttons(True)' "$ROOTFS/usr/share/limad-windows/installer.py"
 grep -Fq 'header.set_show_end_title_buttons(False)' "$ROOTFS/usr/share/limad-windows/installer.py"
 grep -Fq 'app.zen_browser.zen' "$ROOTFS/usr/local/bin/limad-required-user-apps"
@@ -209,7 +215,7 @@ grep -Fq 'com.github.wwmm.easyeffects' "$ROOTFS/usr/local/bin/limad-required-use
 grep -Fq 'net.davidotek.pupgui2' "$ROOTFS/usr/local/bin/limad-required-user-apps"
 grep -Fq 'de.limad.LiMusic' "$ROOTFS/usr/share/limad-updater/apps.json"
 [ "$(cat "$ROOTFS/usr/share/limusic/VERSION")" = "0.3.27" ]
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v27"' "$ROOTFS/etc/limad-release"
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v29"' "$ROOTFS/etc/limad-release"
 grep -Fq 'iMac17,1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options radeon cik_support=1' "$PAYLOAD/install-target.sh"
 grep -Fq 'options amdgpu cik_support=0' "$PAYLOAD/install-target.sh"

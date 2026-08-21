@@ -1,10 +1,10 @@
-# LiMaD OS 3.0 RC1 BASE1 V27
+# LiMaD OS 3.0 RC1 BASE1 V29
 
 ## Technische Basis
 
-V27 baut auf dem auf Lenovo real installierten V25-Unterbau mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
+V29 baut auf der bestätigten V28-Basis mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
 
-V27 übernimmt die bestätigten V25-Fixes und aktualisiert LiMusic auf 0.3.27, LiView auf 1.1.1 und GRUBENVOLK auf 3.6.8. LiView lädt große PDFs seitenweise und rendert große 3D-Meshes zunächst als Entwurf. Heroic Games Launcher 2.22.0 wird bei der Zielinstallation aus dem verifizierten offiziellen DEB und einem eingebetteten Offline-Abhängigkeitsrepository installiert.
+V29 übernimmt den bestätigten V28-Stand und ändert ausschließlich zwei Desktop-Details: Die Fensterbuttons links verwenden die Reihenfolge `close,maximize,minimize:` bei unveränderten LiMaD-Traffic-Light-Assets, und die Einrichtung der erforderlichen Benutzer-Apps überschreibt keine nachträglich angehefteten Dock-Favoriten mehr. Das Dock behält `icon-size-fixed=true`, sodass zusätzliche Icons bei Platzmangel per horizontalem Scrollen erreichbar bleiben. LiMusic bleibt auf 0.3.27, LiView auf 1.1.1 und GRUBENVOLK auf 3.6.8.
 
 
 ## LiView 1.1.1
@@ -43,7 +43,7 @@ Der V22-Desktop-Core bleibt in V27 funktional unverändert; nur die bewusst gew�
 - WhiteSur GTK3 systemweit, gepinnt auf Commit `1b356fe48ad5d05fb2ca6be071efe6801df3ac72`
 - GTK4/libadwaita bleibt auf dem stabilen Ubuntu-Unterbau; LiMaD setzt nur einen kleinen rot/gelb/grünen Fensterbutton-Override, damit moderne GNOME-Apps keine Headerbar-Regressions bekommen
 - LiLink/LiDrop GNOME-50-Statussymbole werden als systemweite GNOME-Shell-Erweiterungen mitgeliefert und beim ersten Login geprüft
-- Fensterbuttons links: `close,minimize,maximize:`
+- Fensterbuttons links: `close,maximize,minimize:`
 - LiMaD Icon Theme V3.2
 - drei LiMaD 4K-Hintergrundbilder, Wallpaper 01 als Standard
 - Ubuntu Dock unten, kompakt und zentriert (`extend-height=false`, 60px Icons)
@@ -83,13 +83,17 @@ Repository: `bushcraftjw-glitch/Limad-os-chuwi`
 
 Release-Tag:
 
-`base1-ubuntu2604-full-whitesur-v27`
+`base1-ubuntu2604-full-whitesur-v29`
 
 ISO:
 
-`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V27-amd64.iso`
+`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V29-amd64.iso`
 
 
+
+## V28 App-Übersicht
+
+GNOME Shell 50 zeigt App-Namen standardmäßig einzeilig und erweitert sie nur bei Fokus bzw. Hover. V28 ergänzt deshalb die kleine systemweite Erweiterung `limad-appgrid-labels@limad.local`. Sie verändert ausschließlich die App-Namen im Haupt-App-Grid: Zeilenumbruch ist dauerhaft aktiv und die Label-Höhe auf zwei Zeilen begrenzt. Reihen, Spalten, Icon-Größe, Abstände, Dock und Suche werden nicht verändert. Die Erweiterung wird beim ersten Login über einen eigenen V28-Marker aktiviert, damit bestehende V27-Benutzerzustände nicht zurückgesetzt werden.
 
 ## V27 Fensterbuttons
 

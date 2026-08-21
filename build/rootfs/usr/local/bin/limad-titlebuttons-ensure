@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 set -euo pipefail
 
-LAYOUT="'close,minimize,maximize:'"
+LAYOUT="'close,maximize,minimize:'"
 
 if command -v gsettings >/dev/null 2>&1 \
     && gsettings list-schemas 2>/dev/null | grep -Fxq org.gnome.desktop.wm.preferences \

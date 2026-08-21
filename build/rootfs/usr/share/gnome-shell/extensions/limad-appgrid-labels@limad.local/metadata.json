@@ -1,0 +1,6 @@
+{
+  "uuid": "limad-appgrid-labels@limad.local",
+  "name": "LiMaD App-Namen",
+  "description": "Zweizeilige App-Namen für die GNOME-50-App-Übersicht",
+  "shell-version": ["50"]
+}

@@ -97,7 +97,7 @@ if not match:
 keyfile = match.group(1)
 for token in (
     "icon-theme='LiMaD'", "gtk-theme='WhiteSur-Dark'",
-    "button-layout='close,minimize,maximize:'", "dock-position='BOTTOM'",
+    "button-layout='close,maximize,minimize:'", "dock-position='BOTTOM'",
     'extend-height=false', 'dash-max-icon-size=60',
     "[org/gnome/shell]", "favorite-apps=['app.zen_browser.zen.desktop'",
     "'de.limad.Mail.desktop'", "'de.limad.Cut.desktop'",

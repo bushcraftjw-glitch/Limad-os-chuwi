@@ -153,7 +153,7 @@ chmod 0755 "$PAYLOAD/install-target.sh"
 
 mkdir -p "$PAYLOAD/rootfs/usr/share/doc/limad-os-base1"
 cat > "$PAYLOAD/rootfs/usr/share/doc/limad-os-base1/BUILD-INFO.txt" <<EOF
-LiMaD OS 3.0 RC1 BASE1 DESIGN V26
+LiMaD OS 3.0 RC1 BASE1 DESIGN V29
 Base: Ubuntu 26.04 LTS Desktop FULL
 Ubuntu SHA256: $UBUNTU_ISO_SHA256
 WhiteSur commit: $WHITESUR_REF
@@ -162,6 +162,7 @@ LiMaD icons SHA256: $ICONS_ZIP_SHA256
 LiMaD wallpapers SHA256: $WALLPAPERS_ZIP_SHA256
 iMac17,1 firmware source: linux-firmware tag 20250509, Radeon Bonaire firmware
 GTK4: stock libadwaita with LiMaD traffic-light titlebutton override.
+App grid: GNOME Shell 50 main-grid labels wrap to a maximum of two lines through limad-appgrid-labels@limad.local.
 LiDrop: browser/local-device transfer enabled; AirDrop/OpenDrop/OWL/AWDL compatibility intentionally removed in V22.
 LiMusic: 0.3.27; runtime dependencies include WebKitGTK 6, GTK4, GStreamer GTK4 sink and common codec plugin sets.
 LiView: 1.1.1; native GTK4/Poppler preview for PDF, images, video and 3D with lazy PDF pages and adaptive 3D draft rendering; updater-aware launcher, system MIME defaults and complete Ubuntu 26.04 offline dependency repository embedded in the ISO.

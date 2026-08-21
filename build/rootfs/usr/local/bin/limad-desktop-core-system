@@ -18,7 +18,7 @@ gtk-theme='WhiteSur-Dark'
 icon-theme='LiMaD'
 color-scheme='prefer-dark'
 [org/gnome/desktop/wm/preferences]
-button-layout='close,minimize,maximize:'
+button-layout='close,maximize,minimize:'
 [org/gnome/desktop/background]
 picture-uri='file:///usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png'
 picture-uri-dark='file:///usr/share/backgrounds/limad/LiMaD-Wallpaper-01-Logo-Links-4K.png'
