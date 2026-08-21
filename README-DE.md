@@ -1,10 +1,10 @@
-# LiMaD OS 3.0 RC1 BASE1 V33
+# LiMaD OS 3.0 RC1 BASE1 V34
 
 ## Technische Basis
 
-V33 baut auf der bestätigten V32-Basis mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
+V34 baut auf dem V33-Funktionsstand mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
 
-V33 übernimmt den bestätigten V32-Stand unverändert und ändert ausschließlich LiSave auf 1.0.1: Die Wiederherstellung läuft vollständig im Hintergrund-Worker und zeigt acht klar getrennte Phasen. Das temporäre Restic-Restore liefert über den offiziellen JSON-Statusstrom echten Byte-/Dateifortschritt; die anschließende Übernahme in das neue Benutzerprofil misst tatsächlich kopierte Bytes, Dateien, Geschwindigkeit, Restzeit und Endzeit. Quelle, Ziel und aktueller Eintrag werden laufend angezeigt. UI-Ereignisse werden gebündelt, damit auch sehr viele Restic-Dateiereignisse die GTK-Oberfläche nicht blockieren. Das portable `*.lisavebackup.zip`-Format aus V31/V32 bleibt unverändert. Alle übrigen V32-Bereiche bleiben unverändert.
+V34 übernimmt die LiSave-1.0.1-Restore-Funktion aus V33 unverändert. Korrigiert wird ausschließlich die Release-/Update-Verpackung: LiSave-Update-Prüfsummen beziehen sich wie bei den bewährten Update-Paketen nur auf Dateien unter `payload/`; `limad-update.json` wird nicht selbst in `SHA256SUMS` aufgenommen. Das portable `*.lisavebackup.zip`-Format und die Restore-Logik bleiben unverändert.
 
 
 ## LiView 1.1.1
@@ -83,11 +83,11 @@ Repository: `bushcraftjw-glitch/Limad-os-chuwi`
 
 Release-Tag:
 
-`base1-ubuntu2604-full-whitesur-v33`
+`base1-ubuntu2604-full-whitesur-v34`
 
 ISO:
 
-`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V33-amd64.iso`
+`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V34-amd64.iso`
 
 
 
