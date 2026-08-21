@@ -1,10 +1,10 @@
-# LiMaD OS 3.0 RC1 BASE1 V32
+# LiMaD OS 3.0 RC1 BASE1 V33
 
 ## Technische Basis
 
-V32 baut auf der bestätigten V31-Basis mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
+V33 baut auf der bestätigten V32-Basis mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
 
-V32 übernimmt den bestätigten V31-Stand unverändert und ändert ausschließlich LiSave auf 1.0.0-preview5: während der Sicherung zeigt LiSave jetzt die aktuelle Phase, Quelle, Ziel, den gerade verarbeiteten Eintrag, echten Prozentfortschritt, Daten- und Dateimengen, Verarbeitungsgeschwindigkeit, Restzeit und die ungefähre Endzeit. Restic-Backup-Fortschritt wird aus dem offiziellen JSON-Statusstrom gelesen; ZIP-Schreiben und ZIP-Prüfung werden anhand der tatsächlich verarbeiteten Bytes gemessen. Phasen ohne belastbare Prozentdaten bleiben bewusst als laufende Aktivität markiert. Das portable `*.lisavebackup.zip`-Format aus V31 bleibt unverändert. Windows-Programme 2.2.8, Fedora Media Writer, das Voltroute-Lesezeichen, die V29-Fensterbutton-Reihenfolge `close,maximize,minimize:` und das nicht-destruktive Dock-Favoritenverhalten bleiben unverändert. LiMusic bleibt auf 0.3.27, LiView auf 1.1.1 und GRUBENVOLK auf 3.6.8.
+V33 übernimmt den bestätigten V32-Stand unverändert und ändert ausschließlich LiSave auf 1.0.1: Die Wiederherstellung läuft vollständig im Hintergrund-Worker und zeigt acht klar getrennte Phasen. Das temporäre Restic-Restore liefert über den offiziellen JSON-Statusstrom echten Byte-/Dateifortschritt; die anschließende Übernahme in das neue Benutzerprofil misst tatsächlich kopierte Bytes, Dateien, Geschwindigkeit, Restzeit und Endzeit. Quelle, Ziel und aktueller Eintrag werden laufend angezeigt. UI-Ereignisse werden gebündelt, damit auch sehr viele Restic-Dateiereignisse die GTK-Oberfläche nicht blockieren. Das portable `*.lisavebackup.zip`-Format aus V31/V32 bleibt unverändert. Alle übrigen V32-Bereiche bleiben unverändert.
 
 
 ## LiView 1.1.1
@@ -83,11 +83,11 @@ Repository: `bushcraftjw-glitch/Limad-os-chuwi`
 
 Release-Tag:
 
-`base1-ubuntu2604-full-whitesur-v32`
+`base1-ubuntu2604-full-whitesur-v33`
 
 ISO:
 
-`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V32-amd64.iso`
+`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V33-amd64.iso`
 
 
 

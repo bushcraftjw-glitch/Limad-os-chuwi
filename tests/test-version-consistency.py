@@ -2,9 +2,9 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = 'V32'
-tag = 'base1-ubuntu2604-full-whitesur-v32'
-iso = 'LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V32-amd64.iso'
+VERSION = 'V33'
+tag = 'base1-ubuntu2604-full-whitesur-v33'
+iso = 'LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V33-amd64.iso'
 
 pairs = [
     (ROOT / 'VERSION', VERSION),

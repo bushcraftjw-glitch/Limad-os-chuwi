@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from typing import Callable
 
-VERSION = "1.0.0-preview5"
+VERSION = "1.0.1"
 APP_ID = "de.limad.Save"
 HOME = Path.home()
 CONFIG_HOME = Path(os.environ.get("XDG_CONFIG_HOME", HOME / ".config"))
@@ -476,15 +476,24 @@ def temporary_parent_for(backup: Path) -> Path:
 
 
 @contextmanager
-def opened_backup(target: Path):
+def opened_backup(target: Path, progress=None, *, phase_index: int = 1, phase_total: int = 6):
     selected = resolve_existing_backup(target)
     if selected.is_dir():
         validate_bundle_files(selected)
+        emit_progress(
+            progress,
+            "LiSave-Backup-Ordner wurde geöffnet.",
+            phase="archive-open", phase_index=phase_index, phase_total=phase_total,
+            source=str(selected), target=str(selected), fraction=1.0,
+        )
         yield selected
         return
     parent = temporary_parent_for(selected)
     with tempfile.TemporaryDirectory(prefix=".lisave-open-", dir=parent) as temporary:
-        bundle = extract_backup_archive(selected, Path(temporary))
+        bundle = extract_backup_archive(
+            selected, Path(temporary), progress,
+            phase_index=phase_index, phase_total=phase_total, target=selected,
+        )
         yield bundle
 
 
@@ -1025,20 +1034,109 @@ def latest_snapshot(bundle: Path, password: str) -> dict:
     return max(snapshots, key=lambda item: item.get("time", ""))
 
 
-def copy_item(source: Path, destination: Path) -> None:
+def restore_item_stats(source: Path) -> tuple[int, int]:
+    if source.is_symlink():
+        return 0, 1
+    if source.is_file():
+        try:
+            return source.stat().st_size, 1
+        except OSError:
+            return 0, 1
+    if not source.is_dir():
+        return 0, 0
+    total_bytes = 0
+    total_files = 0
+    for root, dirs, files in os.walk(source, followlinks=False):
+        root_path = Path(root)
+        for name in dirs:
+            if (root_path / name).is_symlink():
+                total_files += 1
+        for name in files:
+            path = root_path / name
+            total_files += 1
+            if path.is_symlink():
+                continue
+            try:
+                total_bytes += path.stat().st_size
+            except OSError:
+                pass
+    return total_bytes, total_files
+
+
+def copy_item_with_progress(source: Path, destination: Path, state: dict, progress=None) -> None:
+    def emit(current_source: Path, current_destination: Path, *, force: bool = False) -> None:
+        now = time.monotonic()
+        if not force and now - float(state.get("last_update", 0.0)) < 0.20:
+            return
+        done = int(state.get("bytes_done", 0))
+        total = int(state.get("bytes_total", 0))
+        speed, remaining = progress_metrics(float(state["started"]), done, total)
+        emit_progress(
+            progress,
+            "Persönliche Daten werden in das neue Benutzerprofil übernommen …",
+            phase="restore-copy", phase_index=6, phase_total=8,
+            source=str(current_source), target=str(current_destination), current=str(current_destination),
+            fraction=(done / total) if total else 1.0,
+            bytes_done=done, bytes_total=total or None,
+            files_done=int(state.get("files_done", 0)), files_total=int(state.get("files_total", 0)) or None,
+            speed_bps=speed or None, seconds_remaining=remaining,
+        )
+        state["last_update"] = now
+
+    def copy_file(src: Path, dst: Path) -> None:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        if dst.exists() and dst.is_dir():
+            shutil.rmtree(dst)
+        elif dst.exists() or dst.is_symlink():
+            dst.unlink()
+        if src.is_symlink():
+            dst.symlink_to(os.readlink(src))
+            state["files_done"] = int(state.get("files_done", 0)) + 1
+            emit(src, dst)
+            return
+        shutil.copy2(src, dst)
+        try:
+            state["bytes_done"] = int(state.get("bytes_done", 0)) + src.stat().st_size
+        except OSError:
+            pass
+        state["files_done"] = int(state.get("files_done", 0)) + 1
+        emit(src, dst)
+
     if source.is_dir() and not source.is_symlink():
         destination.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(source, destination, dirs_exist_ok=True, symlinks=True)
+        for root, dirs, files in os.walk(source, followlinks=False):
+            root_path = Path(root)
+            relative = root_path.relative_to(source)
+            target_root = destination / relative
+            target_root.mkdir(parents=True, exist_ok=True)
+            kept_dirs = []
+            for name in dirs:
+                src_dir = root_path / name
+                dst_dir = target_root / name
+                if src_dir.is_symlink():
+                    copy_file(src_dir, dst_dir)
+                else:
+                    dst_dir.mkdir(parents=True, exist_ok=True)
+                    kept_dirs.append(name)
+            dirs[:] = kept_dirs
+            for name in files:
+                copy_file(root_path / name, target_root / name)
     elif source.exists() or source.is_symlink():
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        if destination.exists() and destination.is_dir():
-            shutil.rmtree(destination)
-        elif destination.exists() or destination.is_symlink():
-            destination.unlink()
-        if source.is_symlink():
-            destination.symlink_to(os.readlink(source))
-        else:
-            shutil.copy2(source, destination)
+        copy_file(source, destination)
+    emit(source, destination, force=True)
+
+
+def copy_item(source: Path, destination: Path) -> None:
+    total_bytes, total_files = restore_item_stats(source)
+    state = {
+        "started": time.monotonic(),
+        "bytes_done": 0,
+        "bytes_total": total_bytes,
+        "files_done": 0,
+        "files_total": total_files,
+        "last_update": 0.0,
+    }
+    copy_item_with_progress(source, destination, state, None)
 
 
 def install_flatpaks(apps: list[dict], progress: Callable[[str], None] | None = None) -> list[dict]:
@@ -1101,16 +1199,81 @@ def find_stage(restore_root: Path) -> Path:
 def restore(target: Path, password: str, categories: dict | None = None, progress: Callable[[str], None] | None = None) -> dict:
     ensure_dependencies()
     categories = {**DEFAULT_CATEGORIES, **(categories or {})}
-    if progress:
-        progress("Backup-Container wird geöffnet und geprüft …")
-    with opened_backup(target) as bundle:
+    phase_total = 8
+    emit_progress(
+        progress,
+        "Backup-Container wird geöffnet …",
+        phase="restore-open", phase_index=1, phase_total=phase_total,
+        source=str(target), target="Temporärer LiSave-Arbeitsbereich",
+    )
+    with opened_backup(target, progress, phase_index=1, phase_total=phase_total) as bundle:
+        emit_progress(
+            progress,
+            "Verschlüsseltes Backup wird vor der Wiederherstellung geprüft …",
+            phase="restore-check", phase_index=2, phase_total=phase_total,
+            source=str(repository_path(bundle)), target=str(repository_path(bundle)),
+        )
         restic(bundle, password, ["check"], timeout=None)
         snapshot = latest_snapshot(bundle, password)
-        if progress:
-            progress("Backup wird temporär entschlüsselt …")
         with tempfile.TemporaryDirectory(prefix="lisave-restore-") as temporary:
             restore_root = Path(temporary)
-            restic(bundle, password, ["restore", str(snapshot["id"]), "--target", str(restore_root)], timeout=None)
+            restore_state = {
+                "bytes_done": 0, "bytes_total": 0, "files_done": 0, "files_total": 0,
+                "speed_bps": 0.0, "seconds_remaining": None, "current": "",
+            }
+            emit_progress(
+                progress,
+                "Sicherungsstand wird vollständig in einen temporären Bereich wiederhergestellt …",
+                phase="restore-snapshot", phase_index=3, phase_total=phase_total,
+                source=f"Snapshot {snapshot.get('id', '')}", target=str(restore_root), fraction=0.0,
+            )
+
+            def on_restore_message(message: dict) -> None:
+                message_type = message.get("message_type")
+                if message_type == "status":
+                    done = int(message.get("bytes_restored") or 0)
+                    total = int(message.get("total_bytes") or 0)
+                    elapsed = float(message.get("seconds_elapsed") or 0)
+                    speed = done / elapsed if done > 0 and elapsed > 0 else 0.0
+                    remaining = int((total - done) / speed) if speed > 0 and total >= done else None
+                    restore_state.update({
+                        "bytes_done": done, "bytes_total": total,
+                        "files_done": int(message.get("files_restored") or 0),
+                        "files_total": int(message.get("total_files") or 0),
+                        "speed_bps": speed, "seconds_remaining": remaining,
+                    })
+                elif message_type == "verbose_status":
+                    item = str(message.get("item") or "")
+                    if item:
+                        restore_state["current"] = item
+                else:
+                    return
+                done = int(restore_state["bytes_done"])
+                total = int(restore_state["bytes_total"])
+                emit_progress(
+                    progress,
+                    "Sicherungsstand wird vollständig in einen temporären Bereich wiederhergestellt …",
+                    phase="restore-snapshot", phase_index=3, phase_total=phase_total,
+                    source=f"Snapshot {snapshot.get('id', '')}", target=str(restore_root),
+                    current=str(restore_state.get("current") or "") or None,
+                    fraction=(done / total) if total else float(message.get("percent_done") or 0.0),
+                    bytes_done=done, bytes_total=total or None,
+                    files_done=int(restore_state["files_done"]), files_total=int(restore_state["files_total"]) or None,
+                    speed_bps=float(restore_state["speed_bps"]) or None,
+                    seconds_remaining=restore_state["seconds_remaining"],
+                )
+
+            restic_json_stream(
+                bundle, password,
+                ["restore", str(snapshot["id"]), "--target", str(restore_root), "--json", "--verbose=2"],
+                on_restore_message,
+            )
+            emit_progress(
+                progress,
+                "Temporäre Wiederherstellung wird validiert und vorbereitet …",
+                phase="restore-plan", phase_index=4, phase_total=phase_total,
+                source=str(restore_root), target=str(HOME),
+            )
             stage = find_stage(restore_root)
             manifest = load_json(stage / "manifest.json", {})
             old_home = Path(str(manifest.get("home") or ""))
@@ -1118,10 +1281,21 @@ def restore(target: Path, password: str, categories: dict | None = None, progres
                 raise LiSaveError("Ungültiger Benutzerpfad im LiSave-Manifest.")
             restored_home = restore_root / old_home.relative_to("/")
             apps = manifest.get("flatpaks", []) if isinstance(manifest, dict) else []
-            flatpak_failures = install_flatpaks(apps if isinstance(apps, list) else [], progress)
+            emit_progress(
+                progress,
+                "Benötigte Programme werden geprüft und bei Bedarf installiert …",
+                phase="restore-apps", phase_index=5, phase_total=phase_total,
+                source="Gesicherter Programmplan", target="Benutzerinstallation",
+            )
+            app_progress = lambda message: emit_progress(
+                progress, str(message), phase="restore-apps", phase_index=5, phase_total=phase_total,
+                source="Flathub", target="Benutzerinstallation", current=str(message),
+            )
+            flatpak_failures = install_flatpaks(apps if isinstance(apps, list) else [], app_progress)
             stop_apps()
             restored = []
             source_map = manifest.get("sources", {}) if isinstance(manifest, dict) else {}
+            restore_items = []
             for category, enabled in categories.items():
                 if not enabled or category == "windows_full":
                     continue
@@ -1134,10 +1308,35 @@ def restore(target: Path, password: str, categories: dict | None = None, progres
                     source = restored_home / relative
                     destination = HOME / relative
                     if source.exists() or source.is_symlink():
-                        if progress:
-                            progress(f"Wird wiederhergestellt: {destination}")
-                        copy_item(source, destination)
-                        restored.append(str(destination))
+                        restore_items.append((source, destination))
+            total_bytes = 0
+            total_files = 0
+            for source, _destination in restore_items:
+                item_bytes, item_files = restore_item_stats(source)
+                total_bytes += item_bytes
+                total_files += item_files
+            copy_state = {
+                "started": time.monotonic(),
+                "bytes_done": 0, "bytes_total": total_bytes,
+                "files_done": 0, "files_total": total_files,
+                "last_update": 0.0,
+            }
+            emit_progress(
+                progress,
+                "Persönliche Daten werden in das neue Benutzerprofil übernommen …",
+                phase="restore-copy", phase_index=6, phase_total=phase_total,
+                source=str(restored_home), target=str(HOME), fraction=0.0,
+                bytes_done=0, bytes_total=total_bytes or None, files_done=0, files_total=total_files or None,
+            )
+            for source, destination in restore_items:
+                copy_item_with_progress(source, destination, copy_state, progress)
+                restored.append(str(destination))
+            emit_progress(
+                progress,
+                "System- und App-Einstellungen werden übernommen …",
+                phase="restore-settings", phase_index=7, phase_total=phase_total,
+                source=str(stage), target=str(HOME),
+            )
             dconf_failures = restore_dconf(stage) if categories.get("settings", True) else []
             study_import = ""
             if categories.get("study", True) and not (DATA_HOME / "limad-study/study.db").is_file():
@@ -1156,6 +1355,14 @@ def restore(target: Path, password: str, categories: dict | None = None, progres
                 values = load_json(windows_file, [])
                 if isinstance(values, list):
                     windows_pending = [str(item.get("name") or item.get("exe") or "Windows-Programm") for item in values if isinstance(item, dict)]
+            emit_progress(
+                progress,
+                "Wiederherstellung wird abgeschlossen und protokolliert …",
+                phase="restore-complete", phase_index=8, phase_total=phase_total,
+                source=str(HOME), target=str(REPORT_DIR), fraction=1.0,
+                bytes_done=total_bytes, bytes_total=total_bytes or None,
+                files_done=total_files, files_total=total_files or None, seconds_remaining=0,
+            )
             report = {
                 "ok": True,
                 "restoredAt": now_iso(),

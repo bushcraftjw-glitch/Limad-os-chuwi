@@ -30,6 +30,8 @@ class LiSaveApp(Gtk.Application):
         self.progress_timing = None
         self.progress_determinate = False
         self.progress_timer = None
+        self.progress_pending = None
+        self.progress_pending_lock = threading.Lock()
         self.running = False
         self.buttons = []
         self.switches = {}
@@ -275,6 +277,13 @@ class LiSaveApp(Gtk.Application):
         if not self.running:
             self.progress_timer = None
             return False
+        pending = None
+        with self.progress_pending_lock:
+            if self.progress_pending is not None:
+                pending = self.progress_pending
+                self.progress_pending = None
+        if pending is not None:
+            self.update_progress(pending)
         if not self.progress_determinate:
             self.progress.pulse()
         return True
@@ -282,7 +291,8 @@ class LiSaveApp(Gtk.Application):
     def run_async(self, function, callback):
         self.busy(True, "LiSave arbeitet …")
         def progress(message):
-            GLib.idle_add(self.update_progress, message)
+            with self.progress_pending_lock:
+                self.progress_pending = message
         def worker():
             try:
                 result, error = function(progress), None

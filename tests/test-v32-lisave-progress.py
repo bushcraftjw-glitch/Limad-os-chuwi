@@ -14,21 +14,21 @@ CLI = ROOT / "build/rootfs/usr/share/limad-save/cli.py"
 VERSION = ROOT / "build/rootfs/usr/share/limad-save/VERSION"
 VERIFY_BUILT_ISO = ROOT / "tests/verify-built-iso.sh"
 
-if VERSION.read_text(encoding="utf-8").strip() != "1.0.0-preview5":
-    raise AssertionError("LiSave V32 system version must be 1.0.0-preview5")
+if VERSION.read_text(encoding="utf-8").strip() != "1.0.1":
+    raise AssertionError("LiSave current system version must be 1.0.1")
 
 verify_source = VERIFY_BUILT_ISO.read_text(encoding="utf-8")
-if '[ "$(cat "$TMP/lisave-version")" = "1.0.0-preview5" ]' not in verify_source:
-    raise AssertionError("V32 built-ISO validator does not require LiSave 1.0.0-preview5")
-if '1.0.0-preview4' in verify_source:
-    raise AssertionError("V32 built-ISO validator still contains stale LiSave preview4 marker")
+if '[ "$(cat "$TMP/lisave-version")" = "1.0.1" ]' not in verify_source:
+    raise AssertionError("Built-ISO validator does not require current LiSave 1.0.1")
+if '1.0.0-preview' in verify_source:
+    raise AssertionError("Built-ISO validator still contains stale LiSave preview marker")
 
 core_source = CORE.read_text(encoding="utf-8")
 app_source = APP.read_text(encoding="utf-8")
 cli_source = CLI.read_text(encoding="utf-8")
 
 for needle in (
-    'VERSION = "1.0.0-preview5"',
+    'VERSION = "1.0.1"',
     "def restic_json_stream(",
     'message.get("seconds_remaining")',
     'message.get("current_files")',
@@ -38,7 +38,7 @@ for needle in (
     "seconds_remaining=",
 ):
     if needle not in core_source:
-        raise AssertionError(f"LiSave V32 progress core missing: {needle}")
+        raise AssertionError(f"LiSave progress core missing: {needle}")
 
 for needle in (
     'Gtk.Frame(label="Fortschritt")',
@@ -51,7 +51,7 @@ for needle in (
     'self.progress.pulse()',
 ):
     if needle not in app_source:
-        raise AssertionError(f"LiSave V32 progress UI missing: {needle}")
+        raise AssertionError(f"LiSave progress UI missing: {needle}")
 
 if "isinstance(update, dict)" not in cli_source:
     raise AssertionError("LiSave CLI does not handle structured progress events")

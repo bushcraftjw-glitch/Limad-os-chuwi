@@ -116,7 +116,7 @@ grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
 grep -Fq 'smbios --type 1 --get-string 5 --set limad_system_product' "$TMP/grub.cfg"
-EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v32"'
+EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v33"'
 if ! grep -Fxq "$EXPECTED_BUILD_MARKER" "$TMP/limad-release"; then
     echo "ERROR: Built ISO release marker mismatch." >&2
     echo "Expected: $EXPECTED_BUILD_MARKER" >&2
@@ -125,7 +125,7 @@ if ! grep -Fxq "$EXPECTED_BUILD_MARKER" "$TMP/limad-release"; then
     exit 1
 fi
 echo "ISO VALIDATION: GRUB/release marker PASS"
-[ "$(cat "$TMP/lisave-version")" = "1.0.0-preview5" ]
+[ "$(cat "$TMP/lisave-version")" = "1.0.1" ]
 grep -Fq 'restic_json_stream' "$TMP/lisave-core.py"
 grep -Fq 'phase="archive-write"' "$TMP/lisave-core.py"
 grep -Fq 'phase="archive-verify"' "$TMP/lisave-core.py"
@@ -250,7 +250,7 @@ for package in steam-installer steam-devices lutris protontricks wine wine32:i38
     grep -Fxq "$package" "$TMP/gaming-packages.txt"
 done
 [ "$(cat "$TMP/limusic-version")" = "0.3.27" ]
-[ "$(cat "$TMP/lisave-version")" = "1.0.0-preview5" ]
+[ "$(cat "$TMP/lisave-version")" = "1.0.1" ]
 grep -Fq 'write_backup_archive' "$TMP/lisave-core.py"
 grep -Fq 'opened_backup' "$TMP/lisave-core.py"
 grep -Fq '*.lisavebackup.zip' "$TMP/lisave-first-login"
