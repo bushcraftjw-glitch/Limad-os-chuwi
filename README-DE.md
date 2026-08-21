@@ -1,10 +1,10 @@
-# LiMaD OS 3.0 RC1 BASE1 V29
+# LiMaD OS 3.0 RC1 BASE1 V30
 
 ## Technische Basis
 
-V29 baut auf der bestätigten V28-Basis mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
+V30 baut auf der bestätigten V29-Basis mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
 
-V29 übernimmt den bestätigten V28-Stand und ändert ausschließlich zwei Desktop-Details: Die Fensterbuttons links verwenden die Reihenfolge `close,maximize,minimize:` bei unveränderten LiMaD-Traffic-Light-Assets, und die Einrichtung der erforderlichen Benutzer-Apps überschreibt keine nachträglich angehefteten Dock-Favoriten mehr. Das Dock behält `icon-size-fixed=true`, sodass zusätzliche Icons bei Platzmangel per horizontalem Scrollen erreichbar bleiben. LiMusic bleibt auf 0.3.27, LiView auf 1.1.1 und GRUBENVOLK auf 3.6.8.
+V30 übernimmt den bestätigten V29-Stand unverändert und ergänzt ausschließlich drei Integrationen: Windows-Programme 2.2.8, Fedora Media Writer als Flathub-App `org.fedoraproject.MediaWriter` ohne Dock-Favorit sowie das feste Voltroute-Lesezeichen `https://volteroute.netlify.app/` im Zen Browser. Die V29-Fensterbutton-Reihenfolge `close,maximize,minimize:` und das nicht-destruktive Dock-Favoritenverhalten bleiben unverändert. LiMusic bleibt auf 0.3.27, LiView auf 1.1.1 und GRUBENVOLK auf 3.6.8.
 
 
 ## LiView 1.1.1
@@ -83,11 +83,11 @@ Repository: `bushcraftjw-glitch/Limad-os-chuwi`
 
 Release-Tag:
 
-`base1-ubuntu2604-full-whitesur-v29`
+`base1-ubuntu2604-full-whitesur-v30`
 
 ISO:
 
-`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V29-amd64.iso`
+`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V30-amd64.iso`
 
 
 

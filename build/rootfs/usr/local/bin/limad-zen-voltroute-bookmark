@@ -1,0 +1,42 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+ZEN_ID="app.zen_browser.zen"
+EXTENSION_ID="app.zen_browser.zen.systemconfig"
+XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+
+if ! command -v flatpak >/dev/null 2>&1; then
+    echo "LiMaD Zen bookmark: flatpak is unavailable." >&2
+    exit 1
+fi
+
+REF="$(flatpak info --user --show-ref "$ZEN_ID")"
+IFS='/' read -r REF_KIND REF_APP ARCH BRANCH <<< "$REF"
+if [[ "$REF_KIND" != "app" || "$REF_APP" != "$ZEN_ID" || -z "$ARCH" || -z "$BRANCH" ]]; then
+    echo "LiMaD Zen bookmark: unexpected Zen Flatpak ref: $REF" >&2
+    exit 1
+fi
+
+POLICY_DIR="$XDG_DATA_HOME/flatpak/extension/$EXTENSION_ID/$ARCH/$BRANCH/policies"
+POLICY_FILE="$POLICY_DIR/policies.json"
+mkdir -p "$POLICY_DIR"
+TMP_FILE="$(mktemp "$POLICY_DIR/.policies.json.XXXXXX")"
+trap 'rm -f "$TMP_FILE"' EXIT
+cat > "$TMP_FILE" <<'JSON'
+{
+  "policies": {
+    "DisableAppUpdate": true,
+    "DontCheckDefaultBrowser": true,
+    "Bookmarks": [
+      {
+        "Title": "Voltroute",
+        "URL": "https://volteroute.netlify.app/",
+        "Placement": "toolbar"
+      }
+    ]
+  }
+}
+JSON
+chmod 0644 "$TMP_FILE"
+mv -f "$TMP_FILE" "$POLICY_FILE"
+trap - EXIT

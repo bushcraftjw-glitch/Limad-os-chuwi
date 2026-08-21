@@ -5,9 +5,11 @@ STATE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/limad"
 STATE_FILE="$STATE_DIR/required-user-apps-v25.done"
 FLATHUB_URL="https://dl.flathub.org/repo/flathub.flatpakrepo"
 ZEN_ID="app.zen_browser.zen"
+MEDIAWRITER_ID="org.fedoraproject.MediaWriter"
 EASYEFFECTS_ID="com.github.wwmm.easyeffects"
 PROTONUP_ID="net.davidotek.pupgui2"
 ZEN_SETUP_HELPER="${LIMAD_ZEN_SETUP_HELPER:-/usr/local/bin/limad-zen-deutsch-setup}"
+ZEN_BOOKMARK_HELPER="${LIMAD_ZEN_BOOKMARK_HELPER:-/usr/local/bin/limad-zen-voltroute-bookmark}"
 KLANG_PRESET_HELPER="${LIMAD_KLANG_PRESET_HELPER:-/usr/local/bin/limad-install-klang-preset}"
 
 mkdir -p "$STATE_DIR"
@@ -42,6 +44,8 @@ install_user_app() {
 
 install_user_app "$ZEN_ID"
 "$ZEN_SETUP_HELPER"
+"$ZEN_BOOKMARK_HELPER"
+install_user_app "$MEDIAWRITER_ID"
 install_user_app "$EASYEFFECTS_ID"
 "$KLANG_PRESET_HELPER"
 install_user_app "$PROTONUP_ID"
@@ -69,5 +73,5 @@ fi
 
 touch "$STATE_FILE"
 if command -v notify-send >/dev/null 2>&1; then
-    notify-send -u low "LiMaD Apps bereit" "Zen Browser, EasyEffects und ProtonUp-Qt sind eingerichtet." || true
+    notify-send -u low "LiMaD Apps bereit" "Zen Browser, Fedora Media Writer, EasyEffects und ProtonUp-Qt sind eingerichtet." || true
 fi

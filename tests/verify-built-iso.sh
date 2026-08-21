@@ -28,6 +28,7 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/gtk4/li
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-design-system "$TMP/design-system" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-desktop-core-system "$TMP/desktop-core-system" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-required-user-apps "$TMP/required-user-apps" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-zen-voltroute-bookmark "$TMP/zen-voltroute-bookmark" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-titlebuttons-ensure "$TMP/titlebuttons-ensure" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limusic "$TMP/limusic" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limusic/VERSION "$TMP/limusic-version" >/dev/null 2>&1
@@ -67,6 +68,7 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/grubenvolk/SHA256SUMS.txt "$TMP/grubenvolk-SHA256SUMS.txt" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-notes/app.py "$TMP/linotes-app.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-windows/installer.py "$TMP/windows-installer.py" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-windows/VERSION "$TMP/windows-version" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/lilink@limad.local/metadata.json "$TMP/lilink-metadata.json" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/lilink@limad.local/extension.js "$TMP/lilink-extension.js" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/gnome-shell/extensions/lidrop@limad.local/metadata.json "$TMP/lidrop-metadata.json" >/dev/null 2>&1
@@ -110,7 +112,7 @@ grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
 grep -Fq 'smbios --type 1 --get-string 5 --set limad_system_product' "$TMP/grub.cfg"
-EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v29"'
+EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v30"'
 if ! grep -Fxq "$EXPECTED_BUILD_MARKER" "$TMP/limad-release"; then
     echo "ERROR: Built ISO release marker mismatch." >&2
     echo "Expected: $EXPECTED_BUILD_MARKER" >&2
@@ -164,11 +166,22 @@ if grep -Fq 'firefox_firefox.desktop' "$TMP/desktop-core-system"; then
     exit 1
 fi
 grep -Fq 'app.zen_browser.zen' "$TMP/required-user-apps"
+grep -Fq 'org.fedoraproject.MediaWriter' "$TMP/required-user-apps"
+grep -Fq 'limad-zen-voltroute-bookmark' "$TMP/required-user-apps"
+grep -Fq 'https://volteroute.netlify.app/' "$TMP/zen-voltroute-bookmark"
+grep -Fq 'app.zen_browser.zen.systemconfig' "$TMP/zen-voltroute-bookmark"
 grep -Fq 'com.github.wwmm.easyeffects' "$TMP/required-user-apps"
 grep -Fq 'net.davidotek.pupgui2' "$TMP/required-user-apps"
 grep -Fq 'required-user-apps-v25.done' "$TMP/required-user-apps"
 grep -Fq "'de.limad.Grubenvolk.desktop'" "$TMP/desktop-core-system"
 grep -Fq 'limad-sync-gtk4-theme' "$TMP/titlebuttons-ensure"
+[ "$(cat "$TMP/windows-version")" = "2.2.8" ]
+grep -Fq 'APP_VERSION = "2.2.8"' "$TMP/windows-installer.py"
+grep -Fq 'header.set_decoration_layout("close,maximize,minimize:")' "$TMP/windows-installer.py"
+if grep -Fq 'header.set_decoration_layout("close,minimize,maximize:")' "$TMP/windows-installer.py"; then
+    echo 'ERROR: Windows-Programme contains the old V28 titlebutton order' >&2
+    exit 1
+fi
 echo "ISO VALIDATION: desktop/services PASS"
 CURRENT_STAGE="LiMusic LiView gaming Heroic and GRUBENVOLK payload"
 grep -Fq 'de.limad.LiMusic' "$TMP/updater-apps.json"

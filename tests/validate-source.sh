@@ -7,8 +7,8 @@ source "$ROOT/config/build.env"
 [ "$UBUNTU_ISO_NAME" = "ubuntu-26.04-desktop-amd64.iso" ]
 [ "$UBUNTU_ISO_SHA256" = "487f87faaf547ea30e0aba4d5b53346292571256b25333a978db1692bcee9dd2" ]
 [ "$WHITESUR_REF" = "1b356fe48ad5d05fb2ca6be071efe6801df3ac72" ]
-[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V29-amd64.iso" ]
-[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v29" ]
+[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V30-amd64.iso" ]
+[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v30" ]
 
 grep -Fq 'id: ubuntu-desktop' "$ROOT/config/autoinstall.yaml"
 if grep -Fq 'ubuntu-desktop-minimal' "$ROOT/config/autoinstall.yaml"; then
@@ -121,6 +121,7 @@ test -x "$ROOT/tools/brand-grub.py"
 test -x "$ROOT/tools/strip-lidrop-airdrop.py"
 test -x "$ROOT/tools/patch-v22-titlebars.py"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-zen-voltroute-bookmark"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-titlebuttons-ensure"
 test -x "$ROOT/build/rootfs/usr/local/bin/limusic"
 test -x "$ROOT/build/build-iso.sh"
@@ -145,6 +146,8 @@ for package in gstreamer1.0-gtk4 gstreamer1.0-libav gstreamer1.0-plugins-base gs
     grep -Fq "    $package" "$ROOT/build/rootfs/usr/local/bin/limad-runtime-deps"
 done
 grep -Fq 'app.zen_browser.zen' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
+grep -Fq 'org.fedoraproject.MediaWriter' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
+grep -Fq 'limad-zen-voltroute-bookmark' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
 grep -Fq 'com.github.wwmm.easyeffects' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
 if grep -Fq 'firefox_firefox.desktop' "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"; then
     echo "ERROR: Firefox must not remain in V22 Dock defaults" >&2
@@ -177,6 +180,9 @@ python3 -B "$ROOT/tests/test-v22-apps-titlebuttons.py"
 python3 -B "$ROOT/tests/test-v28-app-grid-labels.py"
 python3 -B "$ROOT/tests/test-v29-titlebutton-order.py"
 python3 -B "$ROOT/tests/test-v29-dock-favorites.py"
+python3 -B "$ROOT/tests/test-v30-windows-programme.py"
+python3 -B "$ROOT/tests/test-v30-mediawriter.py"
+python3 -B "$ROOT/tests/test-v30-zen-bookmark.py"
 python3 -B "$ROOT/tests/test-v26-updater-gtk4.py"
 
 grep -Fq "INSTALL_SOURCES_ORIGINAL=\"\$CACHE/install-sources.original.yaml\"" "$ROOT/build/build-iso.sh"
