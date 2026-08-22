@@ -14,15 +14,15 @@ APP = ROOT / "build/rootfs/usr/share/limad-save/app.py"
 VERSION = ROOT / "build/rootfs/usr/share/limad-save/VERSION"
 VERIFY = ROOT / "tests/verify-built-iso.sh"
 
-if VERSION.read_text(encoding="utf-8").strip() != "1.0.1":
-    raise AssertionError("LiSave V33 system version must be 1.0.1")
+if VERSION.read_text(encoding="utf-8").strip() != "1.0.2":
+    raise AssertionError("LiSave V33 system version must be 1.0.2")
 
 core_source = CORE.read_text(encoding="utf-8")
 app_source = APP.read_text(encoding="utf-8")
 verify_source = VERIFY.read_text(encoding="utf-8")
 
 for needle in (
-    'VERSION = "1.0.1"',
+    'VERSION = "1.0.2"',
     'phase="restore-snapshot"',
     'message.get("bytes_restored")',
     'message.get("files_restored")',
@@ -43,8 +43,8 @@ for needle in (
     if needle not in app_source:
         raise AssertionError(f"LiSave V33 GTK progress coalescing missing: {needle}")
 
-if verify_source.count('[ "$(cat "$TMP/lisave-version")" = "1.0.1" ]') < 2:
-    raise AssertionError("Built ISO validator must require LiSave 1.0.1 at both validation points")
+if verify_source.count('[ "$(cat "$TMP/lisave-version")" = "1.0.2" ]') < 2:
+    raise AssertionError("Built ISO validator must require LiSave 1.0.2 at both validation points")
 if '1.0.0-preview' in verify_source:
     raise AssertionError("Built ISO validator still contains a preview LiSave version")
 
@@ -75,10 +75,17 @@ with tempfile.TemporaryDirectory(prefix="limad-v33-restore-") as temporary:
     module.CONFIG_HOME = new_home / ".config"
     module.DATA_HOME = new_home / ".local/share"
     module.STATE_HOME = new_home / ".local/state"
-    module.REPORT_DIR = module.STATE_HOME / "limad-save/reports"
+    module.STATE_DIR = module.STATE_HOME / "limad-save"
+    module.REPORT_DIR = module.STATE_DIR / "reports"
+    module.RESTORE_WORK_DIR = module.STATE_DIR / "restore-work"
 
     module.ensure_dependencies = lambda: None
-    module.restic = lambda *args, **kwargs: subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr=None)
+    def fake_restic(*args, **kwargs):
+        arguments = args[2] if len(args) > 2 else []
+        if arguments and arguments[0] == "stats":
+            return subprocess.CompletedProcess(args=[], returncode=0, stdout='{"total_size":1048600,"total_file_count":3}\n', stderr=None)
+        return subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr=None)
+    module.restic = fake_restic
     module.latest_snapshot = lambda *args, **kwargs: {"id": "snapshot-123", "time": "2026-08-21T20:00:00Z"}
     module.install_flatpaks = lambda apps, progress=None: []
     module.stop_apps = lambda: None

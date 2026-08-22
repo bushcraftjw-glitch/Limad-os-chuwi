@@ -1,10 +1,12 @@
-# LiMaD OS 3.0 RC1 BASE1 V34
+# LiMaD OS 3.0 RC1 BASE1 V36
 
 ## Technische Basis
 
-V34 baut auf dem V33-Funktionsstand mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
+V36 enthält genau zwei Session-Persistenz-Fixes: Die LiMaD-Willkommen-App 1.0.1 speichert die Auswahl ‚Beim nächsten Start wieder anzeigen‘ nun sowohl bei ‚Los geht’s‘ als auch beim normalen Schließen des Fensters. Außerdem schreibt `limad-base1-first-login` keine `org.gnome.shell favorite-apps` mehr und bewertet eine benutzerdefinierte Dock-Liste nicht mehr als Setup-Fehler. Die LiMaD-Dockbelegung bleibt ausschließlich als dconf-Systemdefault für neue Benutzer erhalten; danach bleiben Reihenfolge, hinzugefügte und entfernte Favoriten unverändert. V35/LiSave 1.0.2 bleibt ansonsten unverändert.
 
-V34 übernimmt die LiSave-1.0.1-Restore-Funktion aus V33 unverändert. Korrigiert wird ausschließlich die Release-/Update-Verpackung: LiSave-Update-Prüfsummen beziehen sich wie bei den bewährten Update-Paketen nur auf Dateien unter `payload/`; `limad-update.json` wird nicht selbst in `SHA256SUMS` aufgenommen. Das portable `*.lisavebackup.zip`-Format und die Restore-Logik bleiben unverändert.
+V35 baut auf V34 mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
+
+V35 enthält LiSave 1.0.2. Die Wiederherstellung verwendet nicht mehr das systemweite `/tmp`, weil dieses auf Ubuntu als begrenztes tmpfs eingebunden sein kann. Der vollständige Restore wird stattdessen in einem disk-basierten Arbeitsbereich unter `~/.local/state/limad-save/restore-work` vorbereitet. Vor dem Restore ermittelt LiSave über Restic die tatsächliche Restore-Größe und prüft den freien Speicher für temporären Stand und anschließende Übernahme. Restic-interne Temporärdateien werden für den Restore ebenfalls in diesen Arbeitsbereich gelenkt. Restic-JSON-Fehler werden als lesbare Fehlermeldung angezeigt. Das portable `*.lisavebackup.zip`-Format bleibt unverändert.
 
 
 ## LiView 1.1.1
@@ -83,11 +85,11 @@ Repository: `bushcraftjw-glitch/Limad-os-chuwi`
 
 Release-Tag:
 
-`base1-ubuntu2604-full-whitesur-v34`
+`base1-ubuntu2604-full-whitesur-v36`
 
 ISO:
 
-`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V34-amd64.iso`
+`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V36-amd64.iso`
 
 
 

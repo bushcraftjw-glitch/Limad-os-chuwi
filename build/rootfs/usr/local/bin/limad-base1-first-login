@@ -51,26 +51,6 @@ verify_key() {
     fi
 }
 
-verify_favorites() {
-    local actual
-    if ! have_key org.gnome.shell favorite-apps; then
-        echo "ERROR: missing required GSettings key org.gnome.shell favorite-apps"
-        return 1
-    fi
-    actual="$(gsettings get org.gnome.shell favorite-apps 2>/dev/null || true)"
-    for desktop in \
-        de.limad.Mail.desktop \
-        de.limad.Cut.desktop \
-        de.limad.Study.desktop \
-        de.limad.Drop.desktop \
-        de.limad.Link.desktop; do
-        if [[ "$actual" != *"'$desktop'"* ]]; then
-            echo "ERROR: required favorite missing: $desktop actual=$actual"
-            return 1
-        fi
-    done
-}
-
 enable_extension_reliably() {
     local uuid="$1"
     local attempt
@@ -117,42 +97,6 @@ apply_core_settings() {
     set_key org.gnome.shell.extensions.dash-to-dock background-opacity 0.78
 }
 
-set_favorites() {
-    local favorites=()
-    local desktop value
-    for desktop in \
-        app.zen_browser.zen.desktop \
-        de.limad.Mail.desktop \
-        de.limad.Cut.desktop \
-        de.limad.Study.desktop \
-        de.limad.Notes.desktop \
-        de.limad.Drop.desktop \
-        de.limad.Link.desktop \
-        de.limad.Save.desktop \
-        de.limad.WindowsApps.desktop \
-        de.limad.Updater.desktop \
-        de.limad.Klang.desktop \
-        de.limad.Terminal.desktop \
-        org.gnome.Nautilus.desktop \
-        libreoffice-startcenter.desktop \
-        de.limad.SystemInfo.desktop \
-        de.limad.SystemUpdate.desktop \
-        de.limad.Welcome.desktop \
-        de.limad.Grubenvolk.desktop; do
-        if [ -f "/usr/share/applications/$desktop" ] || [ -f "/var/lib/snapd/desktop/applications/$desktop" ]; then
-            favorites+=("$desktop")
-        fi
-    done
-    if [ "${#favorites[@]}" -gt 0 ] && have_key org.gnome.shell favorite-apps; then
-        value="["
-        for desktop in "${favorites[@]}"; do
-            value+="'$desktop', "
-        done
-        value="${value%, }]"
-        set_key org.gnome.shell favorite-apps "$value"
-    fi
-}
-
 if [ ! -e "$CORE_MARKER" ]; then
     refresh_schemas
     if command -v gnome-extensions >/dev/null 2>&1; then
@@ -161,14 +105,12 @@ if [ ! -e "$CORE_MARKER" ]; then
     fi
 
     apply_core_settings
-    set_favorites
 
     # A second pass after GNOME Shell extensions have initialized prevents the
     # Ubuntu Dock session defaults from winning a first-login timing race.
     sleep 3
     refresh_schemas
     apply_core_settings
-    set_favorites
 
     CORE_FAILURES=0
     verify_key org.gnome.desktop.interface gtk-theme "'WhiteSur-Dark'" || CORE_FAILURES=$((CORE_FAILURES + 1))
@@ -181,7 +123,6 @@ if [ ! -e "$CORE_MARKER" ]; then
     verify_key org.gnome.shell.extensions.dash-to-dock dock-fixed true || CORE_FAILURES=$((CORE_FAILURES + 1))
     verify_key org.gnome.shell.extensions.dash-to-dock show-apps-always-in-the-edge false || CORE_FAILURES=$((CORE_FAILURES + 1))
     verify_key org.gnome.shell.extensions.dash-to-dock show-mounts false || CORE_FAILURES=$((CORE_FAILURES + 1))
-    verify_favorites || CORE_FAILURES=$((CORE_FAILURES + 1))
 
     if [ "$CORE_FAILURES" -ne 0 ]; then
         echo "ERROR: LiMaD core desktop setup has $CORE_FAILURES verification failure(s)"

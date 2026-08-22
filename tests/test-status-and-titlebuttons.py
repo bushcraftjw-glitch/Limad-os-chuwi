@@ -83,10 +83,12 @@ for token in (
     'CORE_MARKER=', 'AUX_MARKER=', 'sleep 3',
     "dock-position \"'BOTTOM'\"", 'extend-height false',
     "icon-theme \"'LiMaD'\"", 'enable_extension_reliably limad-menu@limad.local',
-    'always-center-icons true', 'show-apps-always-in-the-edge false', 'verify_favorites',
+    'always-center-icons true', 'show-apps-always-in-the-edge false',
 ):
     if token not in first_login:
         raise SystemExit(f'ERROR: first-login core token missing: {token}')
+if 'favorite-apps' in first_login:
+    raise SystemExit('ERROR: first-login must not modify user Dock favorites')
 if 'LiLink status extension could not be enabled' in first_login:
     raise SystemExit('ERROR: old coupled LiLink/core failure path remains')
 

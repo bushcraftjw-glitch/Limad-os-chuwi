@@ -1,4 +1,4 @@
-# LiSave 1.0.1
+# LiSave 1.0.2
 
 LiSave erstellt verschlüsselte Wiederherstellungsbackups als einzelne portable `*.lisavebackup.zip`-Datei. Preview5 ergänzt eine vollständige Live-Fortschrittsanzeige für Sicherung, Öffnen vorhandener Archive, ZIP-Erstellung und ZIP-Prüfung.
 

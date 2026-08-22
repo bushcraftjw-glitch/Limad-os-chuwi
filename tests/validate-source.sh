@@ -7,8 +7,8 @@ source "$ROOT/config/build.env"
 [ "$UBUNTU_ISO_NAME" = "ubuntu-26.04-desktop-amd64.iso" ]
 [ "$UBUNTU_ISO_SHA256" = "487f87faaf547ea30e0aba4d5b53346292571256b25333a978db1692bcee9dd2" ]
 [ "$WHITESUR_REF" = "1b356fe48ad5d05fb2ca6be071efe6801df3ac72" ]
-[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V34-amd64.iso" ]
-[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v34" ]
+[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V36-amd64.iso" ]
+[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v36" ]
 
 grep -Fq 'id: ubuntu-desktop' "$ROOT/config/autoinstall.yaml"
 if grep -Fq 'ubuntu-desktop-minimal' "$ROOT/config/autoinstall.yaml"; then
@@ -70,7 +70,10 @@ grep -Fq 'org.gnome.desktop.background picture-uri' "$ROOT/build/rootfs/usr/loca
 grep -Fq 'set_key org.gnome.shell.extensions.dash-to-dock extend-height false' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
 grep -Fq 'verify_key org.gnome.shell.extensions.dash-to-dock always-center-icons true' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
 grep -Fq 'verify_key org.gnome.shell.extensions.dash-to-dock show-apps-always-in-the-edge false' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
-grep -Fq 'verify_favorites' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
+if grep -Fq 'favorite-apps' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"; then
+    echo 'ERROR: first-login must not overwrite or validate user Dock favorites' >&2
+    exit 1
+fi
 grep -Fq "dock-position='BOTTOM'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
 grep -Fq "icon-theme='LiMaD'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
 grep -Fq "favorite-apps=['app.zen_browser.zen.desktop'" "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
@@ -186,6 +189,8 @@ python3 -B "$ROOT/tests/test-v30-zen-bookmark.py"
 python3 -B "$ROOT/tests/test-v31-lisave-portable.py"
 python3 -B "$ROOT/tests/test-v32-lisave-progress.py"
 python3 -B "$ROOT/tests/test-v33-lisave-restore-progress.py"
+python3 -B "$ROOT/tests/test-v35-lisave-restore-storage.py"
+python3 -B "$ROOT/tests/test-v36-session-persistence.py"
 python3 -B "$ROOT/tests/test-v26-updater-gtk4.py"
 
 grep -Fq "INSTALL_SOURCES_ORIGINAL=\"\$CACHE/install-sources.original.yaml\"" "$ROOT/build/build-iso.sh"
@@ -313,7 +318,6 @@ test -x "$ROOT/build/rootfs/usr/local/bin/limad-grubenvolk"
 test -x "$ROOT/build/rootfs/usr/local/bin/limad-grubenvolk-deps"
 grep -Fq 'de.limad.Grubenvolk' "$ROOT/build/rootfs/usr/share/limad-updater/apps.json"
 grep -Fq 'de.limad.Grubenvolk.desktop' "$ROOT/build/rootfs/usr/local/bin/limad-desktop-core-system"
-grep -Fq 'de.limad.Grubenvolk.desktop' "$ROOT/build/rootfs/usr/local/bin/limad-base1-first-login"
 grep -Fq 'required-user-apps-v25.done' "$ROOT/build/rootfs/usr/local/bin/limad-required-user-apps"
 grep -Fq 'prepare-grubenvolk-offline-repo.sh' "$ROOT/build/prepare-payload.sh"
 grep -Fq '/usr/local/bin/limad-grubenvolk-deps' "$ROOT/build/install-target.sh"

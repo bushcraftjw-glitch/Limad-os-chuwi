@@ -1,0 +1,6 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+MARK="${XDG_CONFIG_HOME:-$HOME/.config}/limad/welcome-3.0.done"
+[[ -e "$MARK" ]] && exit 0
+exec /usr/local/bin/limad-welcome

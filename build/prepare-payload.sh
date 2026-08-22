@@ -153,7 +153,7 @@ chmod 0755 "$PAYLOAD/install-target.sh"
 
 mkdir -p "$PAYLOAD/rootfs/usr/share/doc/limad-os-base1"
 cat > "$PAYLOAD/rootfs/usr/share/doc/limad-os-base1/BUILD-INFO.txt" <<EOF
-LiMaD OS 3.0 RC1 BASE1 DESIGN V34
+LiMaD OS 3.0 RC1 BASE1 DESIGN V36
 Base: Ubuntu 26.04 LTS Desktop FULL
 Ubuntu SHA256: $UBUNTU_ISO_SHA256
 WhiteSur commit: $WHITESUR_REF

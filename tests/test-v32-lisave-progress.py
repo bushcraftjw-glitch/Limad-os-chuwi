@@ -14,12 +14,12 @@ CLI = ROOT / "build/rootfs/usr/share/limad-save/cli.py"
 VERSION = ROOT / "build/rootfs/usr/share/limad-save/VERSION"
 VERIFY_BUILT_ISO = ROOT / "tests/verify-built-iso.sh"
 
-if VERSION.read_text(encoding="utf-8").strip() != "1.0.1":
-    raise AssertionError("LiSave current system version must be 1.0.1")
+if VERSION.read_text(encoding="utf-8").strip() != "1.0.2":
+    raise AssertionError("LiSave current system version must be 1.0.2")
 
 verify_source = VERIFY_BUILT_ISO.read_text(encoding="utf-8")
-if '[ "$(cat "$TMP/lisave-version")" = "1.0.1" ]' not in verify_source:
-    raise AssertionError("Built-ISO validator does not require current LiSave 1.0.1")
+if '[ "$(cat "$TMP/lisave-version")" = "1.0.2" ]' not in verify_source:
+    raise AssertionError("Built-ISO validator does not require current LiSave 1.0.2")
 if '1.0.0-preview' in verify_source:
     raise AssertionError("Built-ISO validator still contains stale LiSave preview marker")
 
@@ -28,7 +28,7 @@ app_source = APP.read_text(encoding="utf-8")
 cli_source = CLI.read_text(encoding="utf-8")
 
 for needle in (
-    'VERSION = "1.0.1"',
+    'VERSION = "1.0.2"',
     "def restic_json_stream(",
     'message.get("seconds_remaining")',
     'message.get("current_files")',

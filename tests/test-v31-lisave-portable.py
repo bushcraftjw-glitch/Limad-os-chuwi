@@ -10,11 +10,11 @@ CORE = ROOT / "build/rootfs/usr/share/limad-save/core.py"
 VERSION = ROOT / "build/rootfs/usr/share/limad-save/VERSION"
 DETECTOR = ROOT / "build/rootfs/usr/local/bin/limad-save-first-login-detect"
 
-if VERSION.read_text(encoding="utf-8").strip() != "1.0.1":
-    raise AssertionError("LiSave portable ZIP regression must use current 1.0.1 system version")
+if VERSION.read_text(encoding="utf-8").strip() != "1.0.2":
+    raise AssertionError("LiSave portable ZIP regression must use current 1.0.2 system version")
 source = CORE.read_text(encoding="utf-8")
 for needle in (
-    'VERSION = "1.0.1"',
+    'VERSION = "1.0.2"',
     'def write_backup_archive(',
     'def extract_backup_archive(',
     'def opened_backup(',

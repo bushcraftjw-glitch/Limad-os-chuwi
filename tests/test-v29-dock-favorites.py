@@ -10,6 +10,8 @@ if 'icon-size-fixed=true' not in CORE:
     raise AssertionError('desktop core must keep fixed-size Dock scrolling enabled')
 if 'set_key org.gnome.shell.extensions.dash-to-dock icon-size-fixed true' not in FIRST_LOGIN:
     raise AssertionError('first-login must keep fixed-size Dock scrolling enabled')
+if 'favorite-apps' in FIRST_LOGIN:
+    raise AssertionError('first-login must never write or validate the user Dock favorites')
 if 'CURRENT_FAVORITES="$(gsettings get org.gnome.shell favorite-apps' not in USER_APPS:
     raise AssertionError('required-user-apps must read the existing favorites before changing them')
 if 'UPDATED_FAVORITES+="' not in USER_APPS or "'$ZEN_DESKTOP']" not in USER_APPS:

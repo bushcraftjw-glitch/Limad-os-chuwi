@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from typing import Callable
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 APP_ID = "de.limad.Save"
 HOME = Path.home()
 CONFIG_HOME = Path(os.environ.get("XDG_CONFIG_HOME", HOME / ".config"))
@@ -29,6 +29,7 @@ CONFIG_FILE = CONFIG_DIR / "config.json"
 STATE_DIR = STATE_HOME / "limad-save"
 REPORT_DIR = STATE_DIR / "reports"
 SNAPSHOT_STAGE = STATE_DIR / "snapshots"
+RESTORE_WORK_DIR = STATE_DIR / "restore-work"
 DEFAULT_CATEGORIES = {
     "documents": True,
     "zen": True,
@@ -561,11 +562,47 @@ def restic(bundle: Path, password: str, arguments: list[str], *, check: bool = T
         return run(args, check=check, timeout=timeout)
 
 
-def restic_json_stream(bundle: Path, password: str, arguments: list[str], on_message, *, check: bool = True) -> subprocess.CompletedProcess:
+def restic_stream_error(output: str, returncode: int) -> str:
+    messages = []
+    plain = []
+    for line in output.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        try:
+            value = json.loads(stripped)
+        except json.JSONDecodeError:
+            plain.append(stripped)
+            continue
+        if not isinstance(value, dict):
+            continue
+        message_type = value.get("message_type")
+        if message_type == "error":
+            error = value.get("error")
+            if isinstance(error, dict):
+                detail = str(error.get("message") or "").strip()
+            else:
+                detail = str(error or value.get("message") or "").strip()
+            item = str(value.get("item") or "").strip()
+            if detail and item:
+                messages.append(f"{detail} ({item})")
+            elif detail:
+                messages.append(detail)
+        elif message_type == "exit_error":
+            detail = str(value.get("message") or "").strip()
+            if detail:
+                messages.append(detail)
+    detail = messages[-1] if messages else (plain[-1] if plain else f"Restic wurde mit Fehlercode {returncode} beendet.")
+    if "no space left on device" in detail.lower():
+        return "Nicht genügend Speicherplatz für die Wiederherstellung."
+    return detail
+
+
+def restic_json_stream(bundle: Path, password: str, arguments: list[str], on_message, *, check: bool = True, env: dict | None = None) -> subprocess.CompletedProcess:
     repo = repository_path(bundle)
     with password_file(password) as password_path:
         args = ["restic", "-r", str(repo), "--password-file", str(password_path), *arguments]
-        process = subprocess.Popen(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1)
+        process = subprocess.Popen(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1, env=env)
         output = []
         assert process.stdout is not None
         for line in process.stdout:
@@ -579,7 +616,7 @@ def restic_json_stream(bundle: Path, password: str, arguments: list[str], on_mes
         returncode = process.wait()
         result = subprocess.CompletedProcess(args=args, returncode=returncode, stdout="".join(output), stderr=None)
         if check and returncode:
-            raise LiSaveError(result.stdout.strip() or f"Befehl fehlgeschlagen: {' '.join(args)}")
+            raise LiSaveError(restic_stream_error(result.stdout, returncode))
         return result
 
 
@@ -1034,6 +1071,43 @@ def latest_snapshot(bundle: Path, password: str) -> dict:
     return max(snapshots, key=lambda item: item.get("time", ""))
 
 
+def snapshot_restore_stats(bundle: Path, password: str, snapshot_id: str) -> tuple[int, int]:
+    result = restic(bundle, password, ["stats", "--mode", "restore-size", "--json", snapshot_id], timeout=None)
+    stats = None
+    for line in reversed(result.stdout.splitlines()):
+        try:
+            value = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(value, dict) and "total_size" in value:
+            stats = value
+            break
+    if stats is None:
+        raise LiSaveError("Der Speicherbedarf des Sicherungsstands konnte nicht ermittelt werden.")
+    total_size = int(stats.get("total_size") or 0)
+    total_files = int(stats.get("total_file_count") or 0)
+    if total_size <= 0:
+        raise LiSaveError("Der Sicherungsstand meldet keine wiederherstellbaren Daten.")
+    return total_size, total_files
+
+
+def prepare_restore_workspace(restore_size: int) -> tuple[Path, int, int]:
+    RESTORE_WORK_DIR.mkdir(parents=True, exist_ok=True)
+    for candidate in RESTORE_WORK_DIR.glob("restore-*"):
+        if candidate.is_dir():
+            shutil.rmtree(candidate, ignore_errors=True)
+    free = shutil.disk_usage(RESTORE_WORK_DIR).free
+    reserve = max(1024 ** 3, restore_size // 10)
+    required = restore_size * 2 + reserve
+    if free < required:
+        raise LiSaveError(
+            "Nicht genügend freier Speicherplatz für die sichere Wiederherstellung. "
+            f"Benötigt werden mindestens {required / (1024 ** 3):.1f} GB, "
+            f"verfügbar sind {free / (1024 ** 3):.1f} GB."
+        )
+    return RESTORE_WORK_DIR, required, free
+
+
 def restore_item_stats(source: Path) -> tuple[int, int]:
     if source.is_symlink():
         return 0, 1
@@ -1215,10 +1289,23 @@ def restore(target: Path, password: str, categories: dict | None = None, progres
         )
         restic(bundle, password, ["check"], timeout=None)
         snapshot = latest_snapshot(bundle, password)
-        with tempfile.TemporaryDirectory(prefix="lisave-restore-") as temporary:
+        snapshot_id = str(snapshot.get("id") or "")
+        if not snapshot_id:
+            raise LiSaveError("Der Sicherungsstand besitzt keine gültige Snapshot-ID.")
+        restore_size, restore_files = snapshot_restore_stats(bundle, password, snapshot_id)
+        workspace_parent, required_free, available_free = prepare_restore_workspace(restore_size)
+        emit_progress(
+            progress,
+            "Speicherplatz für die sichere Wiederherstellung wurde geprüft.",
+            phase="restore-snapshot", phase_index=3, phase_total=phase_total,
+            source=f"Snapshot {snapshot_id}", target=str(workspace_parent), fraction=0.0,
+            bytes_done=0, bytes_total=restore_size, files_done=0, files_total=restore_files or None,
+            current=f"Benötigt mindestens {required_free / (1024 ** 3):.1f} GB · verfügbar {available_free / (1024 ** 3):.1f} GB",
+        )
+        with tempfile.TemporaryDirectory(prefix="restore-", dir=workspace_parent) as temporary:
             restore_root = Path(temporary)
             restore_state = {
-                "bytes_done": 0, "bytes_total": 0, "files_done": 0, "files_total": 0,
+                "bytes_done": 0, "bytes_total": restore_size, "files_done": 0, "files_total": restore_files,
                 "speed_bps": 0.0, "seconds_remaining": None, "current": "",
             }
             emit_progress(
@@ -1263,10 +1350,12 @@ def restore(target: Path, password: str, categories: dict | None = None, progres
                     seconds_remaining=restore_state["seconds_remaining"],
                 )
 
+            restore_environment = os.environ.copy()
+            restore_environment["TMPDIR"] = str(workspace_parent)
             restic_json_stream(
                 bundle, password,
-                ["restore", str(snapshot["id"]), "--target", str(restore_root), "--json", "--verbose=2"],
-                on_restore_message,
+                ["restore", snapshot_id, "--target", str(restore_root), "--json", "--verbose=2"],
+                on_restore_message, env=restore_environment,
             )
             emit_progress(
                 progress,

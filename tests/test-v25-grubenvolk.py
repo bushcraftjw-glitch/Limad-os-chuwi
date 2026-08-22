@@ -171,8 +171,8 @@ desktop_core = (ROOTFS / "usr/local/bin/limad-desktop-core-system").read_text()
 if expected_favorites not in desktop_core:
     raise AssertionError("V25 initial Dock list missing GRUBENVOLK in desktop core")
 first_login = (ROOTFS / "usr/local/bin/limad-base1-first-login").read_text()
-if "de.limad.Grubenvolk.desktop" not in first_login:
-    raise AssertionError("V25 first-login Dock list missing GRUBENVOLK")
+if "favorite-apps" in first_login:
+    raise AssertionError("V36 first-login must not overwrite the user Dock list")
 if "required-user-apps-v25.done" not in (ROOTFS / "usr/local/bin/limad-required-user-apps").read_text():
     raise AssertionError("V25 required-user-apps state marker missing")
 
