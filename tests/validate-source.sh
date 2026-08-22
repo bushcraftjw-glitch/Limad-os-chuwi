@@ -7,8 +7,8 @@ source "$ROOT/config/build.env"
 [ "$UBUNTU_ISO_NAME" = "ubuntu-26.04-desktop-amd64.iso" ]
 [ "$UBUNTU_ISO_SHA256" = "487f87faaf547ea30e0aba4d5b53346292571256b25333a978db1692bcee9dd2" ]
 [ "$WHITESUR_REF" = "1b356fe48ad5d05fb2ca6be071efe6801df3ac72" ]
-[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V36-amd64.iso" ]
-[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v36" ]
+[ "$OUTPUT_ISO_NAME" = "LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V38-amd64.iso" ]
+[ "$RELEASE_TAG" = "base1-ubuntu2604-full-whitesur-v38" ]
 
 grep -Fq 'id: ubuntu-desktop' "$ROOT/config/autoinstall.yaml"
 if grep -Fq 'ubuntu-desktop-minimal' "$ROOT/config/autoinstall.yaml"; then
@@ -28,7 +28,11 @@ grep -Fq 'windowcontrols button.close' "$ROOT/build/rootfs/usr/share/limad/gtk4/
 grep -Fq 'url("limad-assets/close.svg")' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
 grep -Fq 'url("limad-assets/minimize.svg")' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
 grep -Fq 'url("limad-assets/maximize.svg")' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
-for asset in close.svg minimize.svg maximize.svg; do
+grep -Fq 'windowcontrols:hover button.close' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'url("limad-assets/close-hover.svg")' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'url("limad-assets/minimize-hover.svg")' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'url("limad-assets/maximize-hover.svg")' "$ROOT/build/rootfs/usr/share/limad/gtk4/gtk.css"
+for asset in close.svg minimize.svg maximize.svg close-hover.svg minimize-hover.svg maximize-hover.svg; do
     test -s "$ROOT/build/rootfs/usr/share/limad/gtk4/limad-assets/$asset"
 done
 if grep -Fq "rm -rf -- \"\${DEST:?}/assets\"" "$ROOT/build/rootfs/usr/local/bin/limad-sync-gtk4-theme"; then
@@ -85,6 +89,29 @@ grep -Fq 'limad-desktop-core-system' "$ROOT/tests/verify-built-iso.sh"
 grep -Fq 'always-center-icons=true' "$ROOT/tests/verify-built-iso.sh"
 grep -Fq 'limad-desktop-core-system' "$ROOT/.github/workflows/build-iso.yml"
 
+# V38 Anycubic native system integration.
+test -s "$ROOT/build/vendor/anycubic/anycubicslicernext_1.3.96_amd64.deb.part00"
+test -s "$ROOT/build/vendor/anycubic/anycubicslicernext_1.3.96_amd64.deb.part01"
+grep -Fxq 'ANYCUBIC_DEB_VERSION=1.3.96' "$ROOT/build/versions.env"
+grep -Fxq 'ANYCUBIC_BUILD_VERSION=1.3.9.4' "$ROOT/build/versions.env"
+grep -Fxq 'ANYCUBIC_SOURCE_SHA256=2c2883a9c624ab64e721a0211667852e0083d8794f7839c1d7932c9f712ed076' "$ROOT/build/versions.env"
+test -x "$ROOT/build/prepare-anycubic-payload.sh"
+test -x "$ROOT/build/prepare-anycubic-offline-repo.sh"
+test -x "$ROOT/build/rootfs/usr/local/bin/limad-anycubic-deps"
+test -x "$ROOT/build/rootfs/usr/bin/anycubicslicernext"
+test -s "$ROOT/build/rootfs/usr/share/applications/de.limad.AnycubicSlicerNext.desktop"
+test -s "$ROOT/build/rootfs/usr/share/metainfo/de.limad.AnycubicSlicerNext.metainfo.xml"
+grep -Fq 'Exec=/usr/bin/anycubicslicernext %F' "$ROOT/build/rootfs/usr/share/applications/de.limad.AnycubicSlicerNext.desktop"
+grep -Fq 'Icon=de.limad.AnycubicSlicerNext' "$ROOT/build/rootfs/usr/share/applications/de.limad.AnycubicSlicerNext.desktop"
+grep -Fq 'de.limad.AnycubicSlicerNext' "$ROOT/build/rootfs/usr/share/limad-updater/apps.json"
+grep -Fq 'prepare-anycubic-payload.sh' "$ROOT/build/prepare-payload.sh"
+grep -Fq 'prepare-anycubic-offline-repo.sh' "$ROOT/build/prepare-payload.sh"
+grep -Fq '/usr/local/bin/limad-anycubic-deps' "$ROOT/build/install-target.sh"
+grep -Fq 'run_stage Anycubic /usr/local/bin/limad-anycubic-deps' "$ROOT/build/preflight-target-install.sh"
+grep -Fq 'test-v38-anycubic-native.py' "$ROOT/.github/workflows/build-iso.yml"
+grep -Fq 'build/rootfs/usr/local/bin/limad-anycubic-deps' "$ROOT/.github/workflows/build-iso.yml"
+grep -Fq 'build/rootfs/usr/bin/anycubicslicernext' "$ROOT/.github/workflows/build-iso.yml"
+
 grep -Fq 'app-name: "LiMaD OS Installer"' "$ROOT/build/installer-whitelabel.yaml"
 grep -Fq 'accent-color: "#BB7FF0"' "$ROOT/build/installer-whitelabel.yaml"
 grep -Fq 'Willkommen bei LiMaD OS 3.0' "$ROOT/build/installer-slides/1/slide_de_DE.html"
@@ -94,8 +121,8 @@ grep -Fq 'scripts/casper-bottom/62limad-branding' "$ROOT/build/prepare-imac17-in
 
 grep -Fq 'iMac17,1' "$ROOT/tools/brand-grub.py"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$ROOT/tools/brand-grub.py"
-grep -Fq 'options radeon cik_support=1' "$ROOT/build/install-target.sh"
-grep -Fq 'options amdgpu cik_support=0' "$ROOT/build/install-target.sh"
+grep -Fq 'options radeon cik_support=0' "$ROOT/build/install-target.sh"
+grep -Fq 'options amdgpu cik_support=1 dc=0' "$ROOT/build/install-target.sh"
 grep -Fq 'BONAIRE_uvd.bin' "$ROOT/assets/firmware/SHA256SUMS.txt"
 
 grep -Fq "GRUB_ORIGINAL=\"\$CACHE/grub.original.cfg\"" "$ROOT/build/build-iso.sh"
@@ -191,6 +218,8 @@ python3 -B "$ROOT/tests/test-v32-lisave-progress.py"
 python3 -B "$ROOT/tests/test-v33-lisave-restore-progress.py"
 python3 -B "$ROOT/tests/test-v35-lisave-restore-storage.py"
 python3 -B "$ROOT/tests/test-v36-session-persistence.py"
+python3 -B "$ROOT/tests/test-v37-imac-titlebutton-hover.py"
+python3 -B "$ROOT/tests/test-v38-anycubic-native.py"
 python3 -B "$ROOT/tests/test-v26-updater-gtk4.py"
 
 grep -Fq "INSTALL_SOURCES_ORIGINAL=\"\$CACHE/install-sources.original.yaml\"" "$ROOT/build/build-iso.sh"

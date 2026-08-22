@@ -1,0 +1,9 @@
+libglu1-mesa
+zlib1g
+libdbus-1-3
+libgtk-3-bin
+libwayland-bin
+libsoup-2.4-1
+libwebkit2gtk-4.1-0
+libgstreamer-ocaml
+gstreamer1.0-libav

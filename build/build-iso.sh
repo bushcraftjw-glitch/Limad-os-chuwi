@@ -102,7 +102,7 @@ sha256sum "$OUTPUT" | tee "$OUTPUT.sha256"
 "$ROOT/tests/verify-built-iso.sh" "$OUTPUT"
 
 cat > "$OUT/BUILD-REPORT.txt" <<EOF_REPORT
-LiMaD OS 3.0 RC1 BASE1 DESIGN V36
+LiMaD OS 3.0 RC1 BASE1 DESIGN V38
 Base: Ubuntu 26.04 LTS Desktop FULL
 Official Ubuntu ISO: $UBUNTU_ISO_NAME
 Official Ubuntu SHA256: $UBUNTU_ISO_SHA256
@@ -114,8 +114,8 @@ WhiteSur commit: $WHITESUR_REF
 LiMaD icon theme: V3.2
 LiMaD wallpapers: 3 x 3840x2160, wallpaper 01 default
 Installer branding: Canonical whitelabel API, LiMaD OS Installer title, LiMaD images, German/English LiMaD slide
-Design V36: user Dock favorites persist across logins and Welcome dismissal persists; V35 LiSave storage fix retained
-iMac17,1: DMI-targeted Radeon CIK compatibility path; upstream Radeon Bonaire firmware embedded in live initrd and installed target
+Design V38: V37 iMac and GTK4 titlebutton fixes retained; Anycubic Slicer Next is restored as a native system app with an embedded Ubuntu 26.04 dependency repository
+iMac17,1 R9 M380: conservative live CIK path; installed PCI 1002:6640 / 106b:014b target switches to AMDGPU cik_support=1 dc=0; Bonaire firmware retained
 Firmware source: linux-firmware tag 20250509; firmware hashes embedded and verified
 Install source catalog: ubuntu-desktop only, Canonical catalog metadata preserved
 LiDrop: browser/local-device transfer enabled; AirDrop/OpenDrop/OWL/AWDL compatibility removed by design

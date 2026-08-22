@@ -4,7 +4,7 @@ SOURCE_DIR="/usr/share/limad/gtk4"
 DEST="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0"
 IMPORT='@import url("limad-titlebuttons.css");'
 [ -s "$SOURCE_DIR/gtk.css" ] || { echo "ERROR: LiMaD GTK4 stylesheet missing" >&2; exit 1; }
-for asset in close.svg minimize.svg maximize.svg; do
+for asset in close.svg minimize.svg maximize.svg close-hover.svg minimize-hover.svg maximize-hover.svg; do
     [ -s "$SOURCE_DIR/limad-assets/$asset" ] || { echo "ERROR: LiMaD GTK4 asset missing: $asset" >&2; exit 1; }
 done
 mkdir -p "$DEST/limad-assets"

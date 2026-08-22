@@ -14,13 +14,16 @@ chmod 0755 /usr/local/bin/limad-base1-first-login \
     /usr/local/bin/limad-gaming-deps \
     /usr/local/bin/limad-heroic-deps \
     /usr/local/bin/limad-grubenvolk-deps \
+    /usr/local/bin/limad-anycubic-deps \
     /usr/local/bin/limad-grubenvolk \
-    /usr/local/bin/liview
+    /usr/local/bin/liview \
+    /usr/bin/anycubicslicernext
 
 /usr/local/bin/limad-liview-deps
 /usr/local/bin/limad-gaming-deps
 /usr/local/bin/limad-heroic-deps
 /usr/local/bin/limad-grubenvolk-deps
+/usr/local/bin/limad-anycubic-deps
 
 if command -v update-mime-database >/dev/null 2>&1; then
     update-mime-database /usr/share/mime
@@ -40,14 +43,36 @@ if command -v gtk-update-icon-cache >/dev/null 2>&1; then
 fi
 
 IMAC_PRODUCT="$(cat /sys/class/dmi/id/product_name 2>/dev/null || true)"
-if [ "$IMAC_PRODUCT" = "iMac17,1" ] || [ -f /tmp/limad-imac17-1 ]; then
+IMAC_R9_M380=0
+for PCI_DEVICE in /sys/bus/pci/devices/*; do
+    [ -d "$PCI_DEVICE" ] || continue
+    [ "$(cat "$PCI_DEVICE/vendor" 2>/dev/null || true)" = "0x1002" ] || continue
+    [ "$(cat "$PCI_DEVICE/device" 2>/dev/null || true)" = "0x6640" ] || continue
+    [ "$(cat "$PCI_DEVICE/subsystem_vendor" 2>/dev/null || true)" = "0x106b" ] || continue
+    [ "$(cat "$PCI_DEVICE/subsystem_device" 2>/dev/null || true)" = "0x014b" ] || continue
+    IMAC_R9_M380=1
+    break
+done
+
+APPLY_IMAC_R9_M380_PROFILE=0
+if [ "$IMAC_PRODUCT" = "iMac17,1" ]; then
+    if [ "$IMAC_R9_M380" -eq 1 ]; then
+        APPLY_IMAC_R9_M380_PROFILE=1
+    fi
+fi
+if [ -f /tmp/limad-imac17-1 ]; then
+    APPLY_IMAC_R9_M380_PROFILE=1
+fi
+
+if [ "$APPLY_IMAC_R9_M380_PROFILE" -eq 1 ]; then
     mkdir -p /etc/modprobe.d
     cat > /etc/modprobe.d/90-limad-imac17-radeon.conf <<'MODPROBE'
 # LiMaD OS compatibility profile for Apple iMac17,1 / Radeon R9 M380 Mac Edition.
-options radeon cik_support=1
-options amdgpu cik_support=0
+# PCI 1002:6640, Apple subsystem 106b:014b.
+options radeon cik_support=0
+options amdgpu cik_support=1 dc=0
 MODPROBE
-    echo "iMac17,1 Radeon CIK compatibility profile: installed"
+    echo "iMac17,1 Radeon R9 M380 AMDGPU compatibility profile: installed"
 else
     rm -f /etc/modprobe.d/90-limad-imac17-radeon.conf
 fi
@@ -72,4 +97,4 @@ fi
 /usr/local/bin/limad-design-system || true
 
 printf '%s
-' "LiMaD OS BASE1 V26 LiView, gaming, GRUBENVOLK and Heroic integration complete." > /var/log/limad-base1-install.log
+' "LiMaD OS BASE1 V38 LiView, gaming, GRUBENVOLK, Heroic and Anycubic integration complete." > /var/log/limad-base1-install.log

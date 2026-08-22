@@ -1,8 +1,8 @@
-# LiMaD OS 3.0 RC1 BASE1 V36
+# LiMaD OS 3.0 RC1 BASE1 V38
 
 ## Technische Basis
 
-V36 enthält genau zwei Session-Persistenz-Fixes: Die LiMaD-Willkommen-App 1.0.1 speichert die Auswahl ‚Beim nächsten Start wieder anzeigen‘ nun sowohl bei ‚Los geht’s‘ als auch beim normalen Schließen des Fensters. Außerdem schreibt `limad-base1-first-login` keine `org.gnome.shell favorite-apps` mehr und bewertet eine benutzerdefinierte Dock-Liste nicht mehr als Setup-Fehler. Die LiMaD-Dockbelegung bleibt ausschließlich als dconf-Systemdefault für neue Benutzer erhalten; danach bleiben Reihenfolge, hinzugefügte und entfernte Favoriten unverändert. V35/LiSave 1.0.2 bleibt ansonsten unverändert.
+V38 baut auf V37 auf. Die bestätigten V37-Korrekturen für iMac17,1/Radeon R9 M380 und die GTK4-Traffic-Light-Hover-Symbole bleiben unverändert. Zusätzlich ist Anycubic Slicer Next wieder vollständig als native System-App integriert: der verifizierte Vendor-Payload wird beim Build rekonstruiert, in `/usr/lib/limad/apps/anycubic-slicer-next` installiert und zusammen mit einem vollständigen Ubuntu-26.04-Offline-Abhängigkeitsrepository geprüft. V36-Session-Persistenz und LiSave 1.0.2 bleiben unverändert.
 
 V35 baut auf V34 mit Ubuntu 26.04 FULL auf. Installationsquelle bleibt ausschließlich `ubuntu-desktop` FULL. Canonicals Kernel-, Treiber-, EFI-/Secure-Boot- und OEM-/Drittanbieter-Treiberlogik wird nicht ersetzt.
 
@@ -39,7 +39,7 @@ Der V22-Desktop-Core bleibt in V27 funktional unverändert; nur die bewusst gew�
 
 - Dock unten, kompakt und mittig; dconf-Default plus First-Login-Zweitpass
 - LiMaD Icon Theme V3.2 plus hicolor-Fallback für alle 18 LiMaD-Launcher
-- GTK4/libadwaita bleibt nativ; nur 12px Traffic-Light-SVGs werden auf die nativen Fensterknöpfe gelegt
+- GTK4/libadwaita bleibt nativ; 16px Traffic-Light-SVGs werden auf die nativen Fensterknöpfe gelegt und zeigen beim Hover wieder X, Vergrößerungs- und Minimierungssymbol
 - LiMaD-Menü als GNOME-50-Erweiterung oben links
 
 - WhiteSur GTK3 systemweit, gepinnt auf Commit `1b356fe48ad5d05fb2ca6be071efe6801df3ac72`
@@ -67,11 +67,12 @@ Die Whitelabel-Dateien werden beim Live-Boot über einen `casper-bottom`-Hook in
 
 ## Apple iMac17,1 / Radeon R9 M380 Mac Edition
 
-Der normale Ubuntu-Grafikpfad bleibt für alle anderen Geräte unverändert. Nur wenn GRUB per SMBIOS das Modell `iMac17,1` erkennt, ergänzt V22 beim Live-Boot:
+Der normale Ubuntu-Grafikpfad bleibt für alle anderen Geräte unverändert. Der Live-Installer behält für `iMac17,1` zunächst den konservativen bisherigen CIK-Radeon-Pfad. Im **installierten Zielsystem** schaltet V38 nur dann auf den neuen Pfad um, wenn zusätzlich exakt die Radeon R9 M380 Mac Edition mit PCI-ID `1002:6640` und Apple-Subsystem `106b:014b` gefunden wird:
 
-`radeon.cik_support=1 amdgpu.cik_support=0`
+`options radeon cik_support=0`
+`options amdgpu cik_support=1 dc=0`
 
-Damit wird für dieses CIK-Gerät gezielt der ältere Radeon-Treiberpfad gewählt. Zusätzlich enthält V22 die gepinnten Radeon-Bonaire-Firmwaredateien aus `linux-firmware` Tag `20250509` sowohl früh im Live-initramfs als auch im installierten Zielsystem. Nach der Installation wird dieselbe Treiberauswahl nur auf `iMac17,1` unter `/etc/modprobe.d/` persistent gesetzt und anschließend das Ziel-initramfs aktualisiert.
+Dieser Pfad wurde auf dem betroffenen iMac17,1 mit Kernel 7.0 verifiziert: OpenGL läuft hardwarebeschleunigt über `radeonsi`, Vulkan über `RADV BONAIRE`, und der eingebaute Bildschirm läuft stabil mit 3840×2160 bei rund 60 Hz. Die GNOME-Auflösung bzw. Skalierung wird nicht hart vorgegeben. Die gepinnten Radeon-Bonaire-Firmwaredateien aus `linux-firmware` Tag `20250509` bleiben im Live-initramfs und im Zielsystem enthalten.
 
 Der ursprüngliche Canonical-initramfs-Inhalt bleibt erhalten und wird hinter einem kleinen unkomprimierten CPIO-Präfix weiterverwendet.
 
@@ -85,11 +86,11 @@ Repository: `bushcraftjw-glitch/Limad-os-chuwi`
 
 Release-Tag:
 
-`base1-ubuntu2604-full-whitesur-v36`
+`base1-ubuntu2604-full-whitesur-v38`
 
 ISO:
 
-`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V36-amd64.iso`
+`LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V38-amd64.iso`
 
 
 

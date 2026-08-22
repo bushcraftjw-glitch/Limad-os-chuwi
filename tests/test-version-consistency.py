@@ -2,9 +2,9 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = 'V36'
-tag = 'base1-ubuntu2604-full-whitesur-v36'
-iso = 'LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V36-amd64.iso'
+VERSION = 'V38'
+tag = 'base1-ubuntu2604-full-whitesur-v38'
+iso = 'LiMaD-OS-3.0-RC1-BASE1-UBUNTU-26.04-FULL-WHITESUR-V38-amd64.iso'
 
 pairs = [
     (ROOT / 'VERSION', VERSION),
@@ -29,7 +29,7 @@ release_files = [
 ]
 for path in release_files:
     text = path.read_text()
-    if any(marker in text for marker in ('base1-ubuntu2604-full-whitesur-v23', 'WHITESUR-V23-amd64.iso', 'base1-ubuntu2604-full-whitesur-v24', 'WHITESUR-V24-amd64.iso', 'base1-ubuntu2604-full-whitesur-v26', 'WHITESUR-V26-amd64.iso', 'base1-ubuntu2604-full-whitesur-v27', 'WHITESUR-V27-amd64.iso', 'base1-ubuntu2604-full-whitesur-v28', 'WHITESUR-V28-amd64.iso', 'base1-ubuntu2604-full-whitesur-v29', 'WHITESUR-V29-amd64.iso', 'base1-ubuntu2604-full-whitesur-v30', 'WHITESUR-V30-amd64.iso', 'base1-ubuntu2604-full-whitesur-v31', 'WHITESUR-V31-amd64.iso', 'base1-ubuntu2604-full-whitesur-v32', 'WHITESUR-V32-amd64.iso', 'base1-ubuntu2604-full-whitesur-v33', 'WHITESUR-V33-amd64.iso', 'base1-ubuntu2604-full-whitesur-v34', 'WHITESUR-V34-amd64.iso', 'base1-ubuntu2604-full-whitesur-v35', 'WHITESUR-V35-amd64.iso')):
+    if any(marker in text for marker in ('base1-ubuntu2604-full-whitesur-v23', 'WHITESUR-V23-amd64.iso', 'base1-ubuntu2604-full-whitesur-v24', 'WHITESUR-V24-amd64.iso', 'base1-ubuntu2604-full-whitesur-v26', 'WHITESUR-V26-amd64.iso', 'base1-ubuntu2604-full-whitesur-v27', 'WHITESUR-V27-amd64.iso', 'base1-ubuntu2604-full-whitesur-v28', 'WHITESUR-V28-amd64.iso', 'base1-ubuntu2604-full-whitesur-v29', 'WHITESUR-V29-amd64.iso', 'base1-ubuntu2604-full-whitesur-v30', 'WHITESUR-V30-amd64.iso', 'base1-ubuntu2604-full-whitesur-v31', 'WHITESUR-V31-amd64.iso', 'base1-ubuntu2604-full-whitesur-v32', 'WHITESUR-V32-amd64.iso', 'base1-ubuntu2604-full-whitesur-v33', 'WHITESUR-V33-amd64.iso', 'base1-ubuntu2604-full-whitesur-v34', 'WHITESUR-V34-amd64.iso', 'base1-ubuntu2604-full-whitesur-v35', 'WHITESUR-V35-amd64.iso', 'base1-ubuntu2604-full-whitesur-v36', 'WHITESUR-V36-amd64.iso', 'base1-ubuntu2604-full-whitesur-v37', 'WHITESUR-V37-amd64.iso')):
         raise AssertionError(f'stale release marker in {path.relative_to(ROOT)}')
 
 print('VERSION CONSISTENCY TEST: PASS')

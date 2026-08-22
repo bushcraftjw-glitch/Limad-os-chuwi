@@ -21,6 +21,9 @@ windowcontrols > button.maximize {
 windowcontrols button.close, headerbar windowcontrols button.close, windowcontrols > button.close { background-image: url("limad-assets/close.svg"); }
 windowcontrols button.minimize, headerbar windowcontrols button.minimize, windowcontrols > button.minimize { background-image: url("limad-assets/minimize.svg"); }
 windowcontrols button.maximize, headerbar windowcontrols button.maximize, windowcontrols > button.maximize { background-image: url("limad-assets/maximize.svg"); }
+windowcontrols:hover button.close, headerbar windowcontrols:hover button.close, windowcontrols:hover > button.close { background-image: url("limad-assets/close-hover.svg"); }
+windowcontrols:hover button.minimize, headerbar windowcontrols:hover button.minimize, windowcontrols:hover > button.minimize { background-image: url("limad-assets/minimize-hover.svg"); }
+windowcontrols:hover button.maximize, headerbar windowcontrols:hover button.maximize, windowcontrols:hover > button.maximize { background-image: url("limad-assets/maximize-hover.svg"); }
 windowcontrols button.close image,
 windowcontrols button.minimize image,
 windowcontrols button.maximize image,

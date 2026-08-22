@@ -1,0 +1,129 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DESTINATION="${1:-$ROOT/.cache/anycubic-offline-repo}"
+PACKAGE_FILE="$ROOT/build/anycubic-packages.txt"
+APT_ROOT="$ROOT/.cache/anycubic-apt"
+KEYRING="/usr/share/keyrings/ubuntu-archive-keyring.gpg"
+TARGET_STATUS="${LIMAD_TARGET_DPKG_STATUS:-$ROOT/.cache/ubuntu-target-state/dpkg-status}"
+
+for command in apt-get dpkg-deb dpkg-query dpkg-scanpackages gzip sha256sum; do
+    if ! command -v "$command" >/dev/null 2>&1; then
+        echo "ERROR: Required Anycubic offline-repo command missing: $command" >&2
+        exit 1
+    fi
+done
+if [ ! -r "$KEYRING" ]; then
+    echo "ERROR: Ubuntu archive keyring missing: $KEYRING" >&2
+    exit 1
+fi
+if [ ! -r "$TARGET_STATUS" ]; then
+    echo "ERROR: Ubuntu desktop target dpkg status missing: $TARGET_STATUS" >&2
+    exit 1
+fi
+
+mapfile -t PACKAGES < <(grep -Ev '^[[:space:]]*(#|$)' "$PACKAGE_FILE")
+if [ "${#PACKAGES[@]}" -eq 0 ]; then
+    echo "ERROR: Anycubic package list is empty." >&2
+    exit 1
+fi
+
+rm -rf "$APT_ROOT" "$DESTINATION"
+mkdir -p \
+    "$APT_ROOT/etc/apt" \
+    "$APT_ROOT/var/lib/apt/lists/partial" \
+    "$APT_ROOT/var/lib/dpkg" \
+    "$APT_ROOT/var/cache/apt/archives/partial" \
+    "$DESTINATION"
+install -m 0644 "$TARGET_STATUS" "$APT_ROOT/var/lib/dpkg/status"
+
+target_package_installed() {
+    local requested="$1"
+    local base="${requested%%:*}"
+    local requested_arch=""
+    local package
+    local architecture
+    local status
+
+    if [[ "$requested" == *:* ]]; then
+        requested_arch="${requested##*:}"
+    fi
+
+    while IFS=$'\t' read -r package architecture status; do
+        [ "$package" = "$base" ] || continue
+        [ "$status" = "install ok installed" ] || continue
+        if [ -z "$requested_arch" ] || [ "$architecture" = "$requested_arch" ] || [ "$architecture" = "all" ]; then
+            return 0
+        fi
+    done < <(dpkg-query --admindir="$APT_ROOT/var/lib/dpkg" -W -f="\${Package}\t\${Architecture}\t\${Status}\n" "$base" 2>/dev/null || true)
+
+    return 1
+}
+
+cat > "$APT_ROOT/etc/apt/sources.list" <<EOF_SOURCES
+deb [arch=amd64 signed-by=$KEYRING] http://archive.ubuntu.com/ubuntu resolute main restricted universe multiverse
+deb [arch=amd64 signed-by=$KEYRING] http://archive.ubuntu.com/ubuntu resolute-updates main restricted universe multiverse
+deb [arch=amd64 signed-by=$KEYRING] http://security.ubuntu.com/ubuntu resolute-security main restricted universe multiverse
+EOF_SOURCES
+
+APT_OPTIONS=(
+    -o "Dir::Etc::sourcelist=$APT_ROOT/etc/apt/sources.list"
+    -o "Dir::Etc::sourceparts=-"
+    -o "Dir::State=$APT_ROOT/var/lib/apt"
+    -o "Dir::State::status=$APT_ROOT/var/lib/dpkg/status"
+    -o "Dir::State::lists=$APT_ROOT/var/lib/apt/lists"
+    -o "Dir::Cache=$APT_ROOT/var/cache/apt"
+    -o "Dir::Cache::archives=$APT_ROOT/var/cache/apt/archives"
+    -o "APT::Architecture=amd64"
+    -o "APT::Architectures=amd64"
+    -o "Acquire::Languages=none"
+    -o "APT::Get::AllowUnauthenticated=false"
+)
+
+apt-get "${APT_OPTIONS[@]}" update
+DEBIAN_FRONTEND=noninteractive apt-get \
+    "${APT_OPTIONS[@]}" \
+    --download-only \
+    --no-install-recommends \
+    --yes \
+    install "${PACKAGES[@]}"
+
+find "$APT_ROOT/var/cache/apt/archives" -maxdepth 1 -type f -name '*.deb' -exec cp -a {} "$DESTINATION/" \;
+shopt -s nullglob
+DEB_FILES=("$DESTINATION"/*.deb)
+shopt -u nullglob
+for package in "${PACKAGES[@]}"; do
+    found=0
+    for deb in "${DEB_FILES[@]}"; do
+        if [ "$(dpkg-deb -f "$deb" Package)" = "${package%%:*}" ]; then
+            found=1
+            break
+        fi
+    done
+    if [ "$found" -ne 1 ] && ! target_package_installed "$package"; then
+        echo "ERROR: Requested Anycubic package is neither installed in the Ubuntu target nor present in the offline repository: $package" >&2
+        exit 1
+    fi
+done
+
+(
+    cd "$DESTINATION"
+    SCAN_LOG="$(mktemp)"
+    if ! dpkg-scanpackages --multiversion . /dev/null > Packages 2>"$SCAN_LOG"; then
+        cat "$SCAN_LOG" >&2
+        rm -f "$SCAN_LOG"
+        exit 1
+    fi
+    rm -f "$SCAN_LOG"
+    gzip -9c Packages > Packages.gz
+    printf '%s\n' "${PACKAGES[@]}" > REQUESTED-PACKAGES.txt
+    shopt -s nullglob
+    CHECKSUM_FILES=(./*.deb Packages Packages.gz REQUESTED-PACKAGES.txt)
+    shopt -u nullglob
+    sha256sum "${CHECKSUM_FILES[@]}" > SHA256SUMS.txt
+    sha256sum -c SHA256SUMS.txt >/dev/null
+)
+
+rm -rf "$APT_ROOT"
+echo "Anycubic offline repository: PASS"

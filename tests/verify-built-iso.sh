@@ -25,6 +25,9 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/backgrounds/l
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/icons/LiMaD/index.theme "$TMP/index.theme" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/gtk4/gtk.css "$TMP/gtk4.css" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/gtk4/limad-assets/close.svg "$TMP/close.svg" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/gtk4/limad-assets/close-hover.svg "$TMP/close-hover.svg" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/gtk4/limad-assets/minimize-hover.svg "$TMP/minimize-hover.svg" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/gtk4/limad-assets/maximize-hover.svg "$TMP/maximize-hover.svg" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-design-system "$TMP/design-system" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-desktop-core-system "$TMP/desktop-core-system" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-required-user-apps "$TMP/required-user-apps" >/dev/null 2>&1
@@ -70,6 +73,15 @@ xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/applications/
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/icons/hicolor/256x256/apps/de.limad.Grubenvolk.png "$TMP/grubenvolk-icon.png" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/grubenvolk/Packages.gz "$TMP/grubenvolk-Packages.gz" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/grubenvolk/SHA256SUMS.txt "$TMP/grubenvolk-SHA256SUMS.txt" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/bin/anycubicslicernext "$TMP/anycubicslicernext" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/local/bin/limad-anycubic-deps "$TMP/limad-anycubic-deps" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/lib/limad/apps/anycubic-slicer-next/PACKAGE-VERSION "$TMP/anycubic-package-version" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/lib/limad/apps/anycubic-slicer-next/BUILD-VERSION "$TMP/anycubic-build-version" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/lib/limad/apps/anycubic-slicer-next/SOURCE-SHA256 "$TMP/anycubic-source-sha256" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/applications/de.limad.AnycubicSlicerNext.desktop "$TMP/anycubic.desktop" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-anycubic/REQUIRED-PACKAGES.txt "$TMP/anycubic-packages.txt" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/anycubic/Packages.gz "$TMP/anycubic-Packages.gz" >/dev/null 2>&1
+xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad/offline/anycubic/SHA256SUMS.txt "$TMP/anycubic-SHA256SUMS.txt" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-notes/app.py "$TMP/linotes-app.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-windows/installer.py "$TMP/windows-installer.py" >/dev/null 2>&1
 xorriso -osirrox on -indev "$ISO" -extract /limad/rootfs/usr/share/limad-windows/VERSION "$TMP/windows-version" >/dev/null 2>&1
@@ -116,7 +128,7 @@ grep -Fq 'LiMaD OS' "$TMP/grub.cfg"
 grep -Fq 'iMac17,1' "$TMP/grub.cfg"
 grep -Fq 'radeon.cik_support=1 amdgpu.cik_support=0' "$TMP/grub.cfg"
 grep -Fq 'smbios --type 1 --get-string 5 --set limad_system_product' "$TMP/grub.cfg"
-EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v36"'
+EXPECTED_BUILD_MARKER='BUILD="base1-ubuntu2604-full-whitesur-v38"'
 if ! grep -Fxq "$EXPECTED_BUILD_MARKER" "$TMP/limad-release"; then
     echo "ERROR: Built ISO release marker mismatch." >&2
     echo "Expected: $EXPECTED_BUILD_MARKER" >&2
@@ -148,7 +160,14 @@ grep -Fq 'min-height: 16px;' "$TMP/gtk4.css"
 grep -Fq 'padding: 4px 1px;' "$TMP/gtk4.css"
 grep -Fq 'background-size: 16px 16px;' "$TMP/gtk4.css"
 grep -Fq 'url("limad-assets/close.svg")' "$TMP/gtk4.css"
+grep -Fq 'windowcontrols:hover button.close' "$TMP/gtk4.css"
+grep -Fq 'url("limad-assets/close-hover.svg")' "$TMP/gtk4.css"
+grep -Fq 'url("limad-assets/minimize-hover.svg")' "$TMP/gtk4.css"
+grep -Fq 'url("limad-assets/maximize-hover.svg")' "$TMP/gtk4.css"
 test -s "$TMP/close.svg"
+test -s "$TMP/close-hover.svg"
+test -s "$TMP/minimize-hover.svg"
+test -s "$TMP/maximize-hover.svg"
 test -s "$TMP/hicolor-study.png"
 grep -Fq '"shell-version": ["50"]' "$TMP/lilink-metadata.json"
 grep -Fq '"shell-version": ["50"]' "$TMP/lidrop-metadata.json"
@@ -246,6 +265,19 @@ if grep -Eq 'https?://' "$TMP/grubenvolk-index.html"; then
     echo 'ERROR: GRUBENVOLK payload unexpectedly references remote web assets' >&2
     exit 1
 fi
+grep -Fq 'de.limad.AnycubicSlicerNext' "$TMP/updater-apps.json"
+[ "$(cat "$TMP/anycubic-package-version")" = "1.3.96" ]
+[ "$(cat "$TMP/anycubic-build-version")" = "1.3.9.4" ]
+[ "$(cat "$TMP/anycubic-source-sha256")" = "2c2883a9c624ab64e721a0211667852e0083d8794f7839c1d7932c9f712ed076" ]
+grep -Fq '/usr/lib/limad/apps/anycubic-slicer-next' "$TMP/anycubicslicernext"
+grep -Fq '/usr/share/limad/offline/anycubic' "$TMP/limad-anycubic-deps"
+grep -Fq 'Exec=/usr/bin/anycubicslicernext %F' "$TMP/anycubic.desktop"
+test -s "$TMP/anycubic-Packages.gz"
+test -s "$TMP/anycubic-SHA256SUMS.txt"
+for package in libglu1-mesa zlib1g libdbus-1-3 libgtk-3-bin libwayland-bin libsoup-2.4-1 libwebkit2gtk-4.1-0 libgstreamer-ocaml gstreamer1.0-libav; do
+    grep -Fxq "$package" "$TMP/anycubic-packages.txt"
+done
+grep -Fq '/usr/local/bin/limad-anycubic-deps' "$TMP/install-target.sh"
 for package in steam-installer steam-devices lutris protontricks wine wine32:i386 winetricks gamemode mangohud gamescope vulkan-tools mesa-vulkan-drivers:i386 libvulkan1:i386 libglx-mesa0:i386; do
     grep -Fxq "$package" "$TMP/gaming-packages.txt"
 done
@@ -280,8 +312,8 @@ grep -Fq "'de.limad.Mail.desktop'" "$TMP/desktop-core-system"
 grep -Fq "'de.limad.Drop.desktop'" "$TMP/desktop-core-system"
 grep -Fq "'de.limad.Link.desktop'" "$TMP/desktop-core-system"
 grep -Fq 'iMac17,1' "$TMP/install-target.sh"
-grep -Fq 'options radeon cik_support=1' "$TMP/install-target.sh"
-grep -Fq 'options amdgpu cik_support=0' "$TMP/install-target.sh"
+grep -Fq 'options radeon cik_support=0' "$TMP/install-target.sh"
+grep -Fq 'options amdgpu cik_support=1 dc=0' "$TMP/install-target.sh"
 echo "ISO VALIDATION: LiMusic/LiView/gaming/Heroic/GRUBENVOLK PASS"
 CURRENT_STAGE="initrd firmware and wallpaper"
 

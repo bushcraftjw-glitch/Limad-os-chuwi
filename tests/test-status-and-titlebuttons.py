@@ -15,6 +15,10 @@ for token in (
     'url("limad-assets/close.svg")',
     'url("limad-assets/minimize.svg")',
     'url("limad-assets/maximize.svg")',
+    'windowcontrols:hover button.close',
+    'url("limad-assets/close-hover.svg")',
+    'url("limad-assets/minimize-hover.svg")',
+    'url("limad-assets/maximize-hover.svg")',
     'border-spacing: 6px',
     'padding: 0 10px',
     'min-width: 16px',
@@ -35,7 +39,7 @@ for token in ('limad-titlebuttons.css', '@import url("limad-titlebuttons.css");'
     if token not in sync:
         raise SystemExit(f'ERROR: non-destructive GTK4 import missing: {token}')
 
-for asset in ('close.svg', 'minimize.svg', 'maximize.svg'):
+for asset in ('close.svg', 'minimize.svg', 'maximize.svg', 'close-hover.svg', 'minimize-hover.svg', 'maximize-hover.svg'):
     path = GTK4 / 'limad-assets' / asset
     if not path.is_file() or path.stat().st_size < 100:
         raise SystemExit(f'ERROR: GTK4 traffic-light asset missing: {asset}')

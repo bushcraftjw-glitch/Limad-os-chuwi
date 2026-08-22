@@ -14,7 +14,7 @@ changed = 0
 linux_changed = 0
 pattern = re.compile(r"^(\s*(?:menuentry|submenu)\s+)(['\"])(.*?)(\2)(.*)$")
 
-compat_block = '''# LiMaD OS iMac17,1 compatibility: only this DMI model uses the legacy CIK radeon path.\nset limad_hw_quirks=""\ninsmod smbios\nsmbios --type 1 --get-string 5 --set limad_system_product\nif [ "$limad_system_product" = "iMac17,1" ]; then\n    set limad_hw_quirks="radeon.cik_support=1 amdgpu.cik_support=0"\nfi\n\n'''
+compat_block = '''# LiMaD OS iMac17,1 live-boot compatibility: keep the conservative legacy CIK path in the installer; the installed R9 M380 target is PCI-scoped in install-target.sh.\nset limad_hw_quirks=""\ninsmod smbios\nsmbios --type 1 --get-string 5 --set limad_system_product\nif [ "$limad_system_product" = "iMac17,1" ]; then\n    set limad_hw_quirks="radeon.cik_support=1 amdgpu.cik_support=0"\nfi\n\n'''
 
 for line in text.splitlines(keepends=True):
     raw = line.rstrip("\r\n")

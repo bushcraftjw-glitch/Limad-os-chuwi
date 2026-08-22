@@ -21,6 +21,9 @@ for path in ROOT.rglob('*'):
         continue
     if rel.parts[:5] == ('build', 'rootfs', 'usr', 'local', 'bin') and (path.name.startswith('limad-') or path.name == 'liview'):
         SHELL_FILES.append(path)
+        continue
+    if rel == Path('build/rootfs/usr/bin/anycubicslicernext'):
+        SHELL_FILES.append(path)
 
 # A single-quoted fixed-string grep containing a shell expansion is the exact
 # pattern that repeatedly triggered SC2016 in our validation scripts.

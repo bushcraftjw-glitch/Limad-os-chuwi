@@ -16,6 +16,9 @@ required=(
     "$ROOTFS/usr/share/limad/gtk4/limad-assets/close.svg"
     "$ROOTFS/usr/share/limad/gtk4/limad-assets/minimize.svg"
     "$ROOTFS/usr/share/limad/gtk4/limad-assets/maximize.svg"
+    "$ROOTFS/usr/share/limad/gtk4/limad-assets/close-hover.svg"
+    "$ROOTFS/usr/share/limad/gtk4/limad-assets/minimize-hover.svg"
+    "$ROOTFS/usr/share/limad/gtk4/limad-assets/maximize-hover.svg"
     "$ROOTFS/usr/share/gnome-shell/extensions/lilink@limad.local/metadata.json"
     "$ROOTFS/usr/share/gnome-shell/extensions/lilink@limad.local/extension.js"
     "$ROOTFS/usr/share/gnome-shell/extensions/lilink@limad.local/lilink.svg"
@@ -99,6 +102,15 @@ required=(
     "$ROOTFS/usr/share/applications/de.limad.Grubenvolk.desktop"
     "$ROOTFS/usr/share/limad/offline/grubenvolk/Packages.gz"
     "$ROOTFS/usr/share/limad/offline/grubenvolk/SHA256SUMS.txt"
+    "$ROOTFS/usr/bin/anycubicslicernext"
+    "$ROOTFS/usr/local/bin/limad-anycubic-deps"
+    "$ROOTFS/usr/lib/limad/apps/anycubic-slicer-next/bin/AnycubicSlicerNext"
+    "$ROOTFS/usr/lib/limad/apps/anycubic-slicer-next/resources/build-version.txt"
+    "$ROOTFS/usr/share/applications/de.limad.AnycubicSlicerNext.desktop"
+    "$ROOTFS/usr/share/metainfo/de.limad.AnycubicSlicerNext.metainfo.xml"
+    "$ROOTFS/usr/share/limad-anycubic/REQUIRED-PACKAGES.txt"
+    "$ROOTFS/usr/share/limad/offline/anycubic/Packages.gz"
+    "$ROOTFS/usr/share/limad/offline/anycubic/SHA256SUMS.txt"
     "$ROOTFS/etc/limad-release"
 )
 
@@ -110,6 +122,7 @@ for path in "${required[@]}"; do
 done
 
 applications=(
+    de.limad.AnycubicSlicerNext.desktop
     de.limad.Cut.desktop
     de.limad.Drop.desktop
     de.limad.Grubenvolk.desktop
@@ -151,6 +164,10 @@ grep -Fq 'windowcontrols button.close' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
 grep -Fq 'url("limad-assets/close.svg")' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
 grep -Fq 'url("limad-assets/minimize.svg")' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
 grep -Fq 'url("limad-assets/maximize.svg")' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'windowcontrols:hover button.close' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'url("limad-assets/close-hover.svg")' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'url("limad-assets/minimize-hover.svg")' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
+grep -Fq 'url("limad-assets/maximize-hover.svg")' "$ROOTFS/usr/share/limad/gtk4/gtk.css"
 for uuid in lilink@limad.local lidrop@limad.local; do
     grep -Fq '"shell-version": ["50"]' "$ROOTFS/usr/share/gnome-shell/extensions/$uuid/metadata.json"
     grep -Fq 'Main.panel.addToStatusArea(this.uuid, this._indicator);' "$ROOTFS/usr/share/gnome-shell/extensions/$uuid/extension.js"
@@ -238,10 +255,10 @@ grep -Fq 'com.github.wwmm.easyeffects' "$ROOTFS/usr/local/bin/limad-required-use
 grep -Fq 'net.davidotek.pupgui2' "$ROOTFS/usr/local/bin/limad-required-user-apps"
 grep -Fq 'de.limad.LiMusic' "$ROOTFS/usr/share/limad-updater/apps.json"
 [ "$(cat "$ROOTFS/usr/share/limusic/VERSION")" = "0.3.27" ]
-grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v36"' "$ROOTFS/etc/limad-release"
+grep -Fq 'BUILD="base1-ubuntu2604-full-whitesur-v38"' "$ROOTFS/etc/limad-release"
 grep -Fq 'iMac17,1' "$PAYLOAD/install-target.sh"
-grep -Fq 'options radeon cik_support=1' "$PAYLOAD/install-target.sh"
-grep -Fq 'options amdgpu cik_support=0' "$PAYLOAD/install-target.sh"
+grep -Fq 'options radeon cik_support=0' "$PAYLOAD/install-target.sh"
+grep -Fq 'options amdgpu cik_support=1 dc=0' "$PAYLOAD/install-target.sh"
 
 
 [ "$(cat "$ROOTFS/usr/share/liview/VERSION")" = "1.1.1" ]
@@ -295,7 +312,10 @@ grep -Fq 'Exec=/usr/local/bin/limad-grubenvolk' "$ROOTFS/usr/share/applications/
 grep -Fq 'Exec=/usr/local/bin/limad-updater --app de.limad.Grubenvolk' "$ROOTFS/usr/share/applications/de.limad.Grubenvolk.desktop"
 grep -Fq 'de.limad.Grubenvolk' "$ROOTFS/usr/share/limad-updater/apps.json"
 grep -Fq 'de.limad.Grubenvolk.desktop' "$ROOTFS/usr/local/bin/limad-desktop-core-system"
-grep -Fq 'de.limad.Grubenvolk.desktop' "$ROOTFS/usr/local/bin/limad-base1-first-login"
+if grep -Fq 'favorite-apps' "$ROOTFS/usr/local/bin/limad-base1-first-login"; then
+    echo "ERROR: first-login must not write or validate user Dock favorites" >&2
+    exit 1
+fi
 for package in python3 python3-gi gir1.2-gtk-4.0 gir1.2-webkit-6.0; do
     grep -Fxq "$package" "$ROOTFS/usr/share/limad-grubenvolk/REQUIRED-PACKAGES.txt"
 done
@@ -308,5 +328,25 @@ shopt -u nullglob
     sha256sum -c SHA256SUMS.txt >/dev/null
 )
 grep -Fq '/usr/share/limad/offline/grubenvolk' "$ROOTFS/usr/local/bin/limad-grubenvolk-deps"
+
+[ "$(cat "$ROOTFS/usr/lib/limad/apps/anycubic-slicer-next/PACKAGE-VERSION")" = "1.3.96" ]
+[ "$(cat "$ROOTFS/usr/lib/limad/apps/anycubic-slicer-next/BUILD-VERSION")" = "1.3.9.4" ]
+[ "$(cat "$ROOTFS/usr/lib/limad/apps/anycubic-slicer-next/SOURCE-SHA256")" = "2c2883a9c624ab64e721a0211667852e0083d8794f7839c1d7932c9f712ed076" ]
+grep -Fq 'Exec=/usr/bin/anycubicslicernext %F' "$ROOTFS/usr/share/applications/de.limad.AnycubicSlicerNext.desktop"
+grep -Fq 'de.limad.AnycubicSlicerNext' "$ROOTFS/usr/share/limad-updater/apps.json"
+grep -Fq '/usr/lib/limad/apps/anycubic-slicer-next' "$ROOTFS/usr/bin/anycubicslicernext"
+grep -Fq '/usr/share/limad/offline/anycubic' "$ROOTFS/usr/local/bin/limad-anycubic-deps"
+shopt -s nullglob
+ANYCUBIC_DEBS=("$ROOTFS/usr/share/limad/offline/anycubic"/*.deb)
+shopt -u nullglob
+[ "${#ANYCUBIC_DEBS[@]}" -gt 0 ]
+(
+    cd "$ROOTFS/usr/share/limad/offline/anycubic"
+    sha256sum -c SHA256SUMS.txt >/dev/null
+)
+for package in libglu1-mesa zlib1g libdbus-1-3 libgtk-3-bin libwayland-bin libsoup-2.4-1 libwebkit2gtk-4.1-0 libgstreamer-ocaml gstreamer1.0-libav; do
+    grep -Fxq "$package" "$ROOTFS/usr/share/limad-anycubic/REQUIRED-PACKAGES.txt"
+done
+grep -Fq '/usr/local/bin/limad-anycubic-deps' "$PAYLOAD/install-target.sh"
 
 echo "PAYLOAD VALIDATION: PASS"
